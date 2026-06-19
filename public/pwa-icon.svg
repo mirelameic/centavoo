@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7c4dff"/>
+      <stop offset="1" stop-color="#5f3dc4"/>
+    </linearGradient>
+    <radialGradient id="coin" cx="0.5" cy="0.38" r="0.72">
+      <stop offset="0" stop-color="#FFE066"/>
+      <stop offset="0.7" stop-color="#FFC93C"/>
+      <stop offset="1" stop-color="#F59F00"/>
+    </radialGradient>
+  </defs>
+
+  <!-- brand background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- flight path / contrail -->
+  <path d="M92 396 Q200 372 250 312" fill="none" stroke="#ffffff" stroke-opacity="0.45"
+        stroke-width="12" stroke-linecap="round" stroke-dasharray="2 26"/>
+
+  <!-- gold coin (money) -->
+  <circle cx="262" cy="266" r="124" fill="url(#coin)"/>
+  <circle cx="262" cy="266" r="100" fill="none" stroke="#fff3bf" stroke-opacity="0.75" stroke-width="6"/>
+
+  <!-- paper plane (travel) embossed on the coin -->
+  <polygon points="356,266 196,210 268,266" fill="#6741d9"/>
+  <polygon points="356,266 196,322 268,266" fill="#4b2fa6"/>
+  <polyline points="196,210 268,266 196,322" fill="none" stroke="#b197fc"
+            stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>
