@@ -145,6 +145,7 @@ def main():
               "AO", "AS", "AW", "BA", "BE", "BI", "BM", "BQ"]
     nextcol = lambda c: U.get_column_letter(U.column_index_from_string(c) + 1)
     itinerary = []
+    cities = {}  # date 'YYYY-MM-DD' -> city (stored on the trip)
     unmatched_colors = defaultdict(float)
 
     for s in starts:
@@ -158,6 +159,8 @@ def main():
         # Departure day ("Ida / ..."): the spending happened in SP (the origin).
         if loc and loc.lower().startswith("ida"):
             city = "SP"
+        if date and city:
+            cities[date] = city
         if date:
             itinerary.append(f"{m.group(1)}/{m.group(2)} {city or ''}".strip())
 
@@ -228,8 +231,7 @@ def main():
     for cid, name, _, _ in CATEGORIES:
         if by_cat.get(cid):
             print(f"   {name:22s} {by_cat[cid]:>9.2f}")
-    cities = sorted({t["city"] for t in transactions if t["city"]})
-    print(f"Cities: {', '.join(cities)}")
+    print(f"Cities: {', '.join(sorted(set(cities.values())))}")
     if unmatched_colors:
         print("⚠️  Unmapped colors (check):")
         for rgb, tot in unmatched_colors.items():
@@ -245,13 +247,14 @@ def main():
         "endDate": f"{YEAR}-06-03",
         "currency": "BRL",
         "notes": "Imported from spreadsheet. Itinerary: " + " · ".join(itinerary),
+        "cities": cities,
         "createdAt": NOW,
     }
     payload = {
-        "version": 3,
+        "version": 4,
         "generatedFrom": "gastos-europa.xlsx",
         "categories": [
-            {"id": i, "name": n, "color": c, "icon": e, "sortOrder": idx}
+            {"id": i, "tripId": TRIP_ID, "name": n, "color": c, "icon": e, "sortOrder": idx}
             for idx, (i, n, c, e) in enumerate(CATEGORIES)
         ],
         "rules": rules,

@@ -12,11 +12,14 @@ export interface Trip {
   endDate?: string | null;
   currency: string;          // 'BRL'
   notes?: string;
+  cities?: Record<string, string>; // date 'YYYY-MM-DD' -> city (a day = a city)
+  cityList?: string[];             // curated list of cities, used as options per day
   createdAt: string;
 }
 
 export interface Category {
   id: string;
+  tripId: string;            // categories are per-trip
   name: string;
   color: string;             // hex, e.g. '#FF9900'
   icon?: string;             // emoji

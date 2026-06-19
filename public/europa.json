@@ -1,9 +1,10 @@
 {
-  "version": 3,
+  "version": 4,
   "generatedFrom": "gastos-europa.xlsx",
   "categories": [
     {
       "id": "cat_hospedagem",
+      "tripId": "trip_europa_2025",
       "name": "Hospedagem",
       "color": "#0CA678",
       "icon": "🏨",
@@ -11,6 +12,7 @@
     },
     {
       "id": "cat_passagem",
+      "tripId": "trip_europa_2025",
       "name": "Passagem",
       "color": "#4263EB",
       "icon": "✈️",
@@ -18,6 +20,7 @@
     },
     {
       "id": "cat_transporte",
+      "tripId": "trip_europa_2025",
       "name": "Transporte",
       "color": "#FF9900",
       "icon": "🚕",
@@ -25,6 +28,7 @@
     },
     {
       "id": "cat_alimentacao",
+      "tripId": "trip_europa_2025",
       "name": "Alimentação",
       "color": "#9900FF",
       "icon": "🍽️",
@@ -32,6 +36,7 @@
     },
     {
       "id": "cat_compras",
+      "tripId": "trip_europa_2025",
       "name": "Compras",
       "color": "#4A86E8",
       "icon": "🛍️",
@@ -39,6 +44,7 @@
     },
     {
       "id": "cat_brindes",
+      "tripId": "trip_europa_2025",
       "name": "Brindes",
       "color": "#00B5C7",
       "icon": "🎁",
@@ -46,6 +52,7 @@
     },
     {
       "id": "cat_turismo",
+      "tripId": "trip_europa_2025",
       "name": "Turismo",
       "color": "#E6B800",
       "icon": "🎟️",
@@ -53,6 +60,7 @@
     },
     {
       "id": "cat_genericos",
+      "tripId": "trip_europa_2025",
       "name": "Genéricos de viagem",
       "color": "#FF0000",
       "icon": "🧳",
@@ -60,6 +68,7 @@
     },
     {
       "id": "cat_cannabis",
+      "tripId": "trip_europa_2025",
       "name": "Cannabis",
       "color": "#00C000",
       "icon": "🌿",
@@ -67,6 +76,7 @@
     },
     {
       "id": "cat_outros",
+      "tripId": "trip_europa_2025",
       "name": "Outros",
       "color": "#FF00FF",
       "icon": "🔖",
@@ -424,7 +434,27 @@
       "endDate": "2026-06-03",
       "currency": "BRL",
       "notes": "Imported from spreadsheet. Itinerary: 17/05 SP · 18/05 Barcelona · 19/05 Barcelona · 20/05 Atenas · 21/05 Atenas · 22/05 Atenas · 23/05 Santorini · 24/05 Santorini · 25/05 Santorini · 26/05 Santorini · 27/05 Santorini · 28/05 Amsterdam · 29/05 Amsterdam · 30/05 Amsterdam · 31/05 Barcelona · 01/06 Barcelona · 02/06 Barcelona · 03/06 SP",
-      "createdAt": "2026-06-19T11:35:17"
+      "cities": {
+        "2026-05-17": "SP",
+        "2026-05-18": "Barcelona",
+        "2026-05-19": "Barcelona",
+        "2026-05-20": "Atenas",
+        "2026-05-21": "Atenas",
+        "2026-05-22": "Atenas",
+        "2026-05-23": "Santorini",
+        "2026-05-24": "Santorini",
+        "2026-05-25": "Santorini",
+        "2026-05-26": "Santorini",
+        "2026-05-27": "Santorini",
+        "2026-05-28": "Amsterdam",
+        "2026-05-29": "Amsterdam",
+        "2026-05-30": "Amsterdam",
+        "2026-05-31": "Barcelona",
+        "2026-06-01": "Barcelona",
+        "2026-06-02": "Barcelona",
+        "2026-06-03": "SP"
+      },
+      "createdAt": "2026-06-19T18:58:51"
     }
   ],
   "transactions": [
@@ -441,7 +471,7 @@
       "splitCount": 4,
       "city": null,
       "rawText": "Airbnb Barcelona",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0002",
@@ -456,7 +486,7 @@
       "splitCount": 4,
       "city": null,
       "rawText": "Airbnb Athenas",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0003",
@@ -471,7 +501,7 @@
       "splitCount": 4,
       "city": null,
       "rawText": "Airbnb Santorini",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0004",
@@ -486,7 +516,7 @@
       "splitCount": 2,
       "city": null,
       "rawText": "Hostel Amsterdam",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0005",
@@ -501,7 +531,7 @@
       "splitCount": 2,
       "city": null,
       "rawText": "Airbnb Barcelona",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0006",
@@ -516,7 +546,7 @@
       "splitCount": 1,
       "city": null,
       "rawText": "Ida/Volta Barcelona",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0007",
@@ -531,7 +561,7 @@
       "splitCount": 1,
       "city": null,
       "rawText": "Ida Athenas",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0008",
@@ -546,7 +576,7 @@
       "splitCount": 1,
       "city": null,
       "rawText": "Ida Santorini",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0009",
@@ -561,7 +591,7 @@
       "splitCount": 1,
       "city": null,
       "rawText": "Ida Amsterdam",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0010",
@@ -576,7 +606,7 @@
       "splitCount": 1,
       "city": null,
       "rawText": "Ida Barcelona",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0011",
@@ -591,7 +621,7 @@
       "splitCount": 1,
       "city": null,
       "rawText": "estorno nu",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0012",
@@ -606,7 +636,7 @@
       "splitCount": 1,
       "city": null,
       "rawText": "bagagem",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0013",
@@ -621,7 +651,7 @@
       "splitCount": 1,
       "city": null,
       "rawText": "van gogh museum",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0014",
@@ -636,7 +666,7 @@
       "splitCount": 1,
       "city": null,
       "rawText": "assentos avião",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0015",
@@ -651,7 +681,7 @@
       "splitCount": 1,
       "city": null,
       "rawText": "coisas viagem ml",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0016",
@@ -666,7 +696,7 @@
       "splitCount": 1,
       "city": null,
       "rawText": "coisas viagem ml",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0017",
@@ -681,7 +711,7 @@
       "splitCount": 1,
       "city": "SP",
       "rawText": "Uber",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0018",
@@ -696,7 +726,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "Uber",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0019",
@@ -711,7 +741,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "Uniqlo",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0020",
@@ -726,7 +756,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "Canaletas",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0021",
@@ -741,7 +771,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "Sweet Oil Coffee Shop",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0022",
@@ -756,7 +786,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "La Masia",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0023",
@@ -771,7 +801,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "Taxa Turismo BCN",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0024",
@@ -786,7 +816,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "Uber Eats",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0025",
@@ -801,7 +831,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "Mercado",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0026",
@@ -816,7 +846,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "Uber",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0027",
@@ -831,7 +861,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "Poster Gaudí",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0028",
@@ -846,7 +876,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "Uber",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0029",
@@ -861,7 +891,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "Mercado",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0030",
@@ -876,7 +906,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "Zara",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0031",
@@ -891,7 +921,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "Park Güell",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0032",
@@ -906,7 +936,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "Qess Kaffe",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0033",
@@ -921,7 +951,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "Assento Avião",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0034",
@@ -936,7 +966,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "Brisa de Mar",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0035",
@@ -951,7 +981,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF Brisa de Mar",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0036",
@@ -966,7 +996,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF Canaletas",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0037",
@@ -981,7 +1011,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF Canoah Barcelona",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0038",
@@ -996,7 +1026,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF Uniqlo",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0039",
@@ -1011,7 +1041,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF Green Grass",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0040",
@@ -1026,7 +1056,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF La Masia",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0041",
@@ -1041,7 +1071,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Veganaki",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0042",
@@ -1056,7 +1086,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Ímã",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0043",
@@ -1071,7 +1101,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Ímã",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0044",
@@ -1086,7 +1116,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "THC Experience",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0045",
@@ -1101,7 +1131,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Comida Aeroporto",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0046",
@@ -1116,7 +1146,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Chocolate Aeroporto",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0047",
@@ -1131,7 +1161,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Mercado",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0048",
@@ -1146,7 +1176,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Assento Avião",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0049",
@@ -1161,7 +1191,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Poster Gaudí",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0050",
@@ -1176,7 +1206,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Uber",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0051",
@@ -1191,7 +1221,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Park Güell",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0052",
@@ -1206,7 +1236,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Zara",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0053",
@@ -1221,7 +1251,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Mercado",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0054",
@@ -1236,7 +1266,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Qess Kaffe",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0055",
@@ -1251,7 +1281,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Uber",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0056",
@@ -1266,7 +1296,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Brindes Grécia",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0057",
@@ -1281,7 +1311,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Brindes Grécia",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0058",
@@ -1296,7 +1326,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Veganaki",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0059",
@@ -1311,7 +1341,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF THC Experience",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0060",
@@ -1326,7 +1356,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Uber Eats",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0061",
@@ -1341,7 +1371,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Uber",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0062",
@@ -1356,7 +1386,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Uber",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0063",
@@ -1371,7 +1401,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Chocolate Aeroporto",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0064",
@@ -1386,7 +1416,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Ímã",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0065",
@@ -1401,7 +1431,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Uber",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0066",
@@ -1416,7 +1446,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Ímã",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0067",
@@ -1431,7 +1461,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Veganaki",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0068",
@@ -1446,7 +1476,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Cookoomela",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0069",
@@ -1461,7 +1491,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Uber",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0070",
@@ -1476,7 +1506,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Cookoomela",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0071",
@@ -1491,7 +1521,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Banca",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0072",
@@ -1506,7 +1536,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Assento Avião",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0073",
@@ -1521,7 +1551,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Panathenaic Stadium",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0074",
@@ -1536,7 +1566,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "THC Experience",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0075",
@@ -1551,7 +1581,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Banca",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0076",
@@ -1566,7 +1596,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "Mercado",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0077",
@@ -1581,7 +1611,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "O Thanasis",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0078",
@@ -1596,7 +1626,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Veganaki",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0079",
@@ -1611,7 +1641,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Acropolis Kiosk",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0080",
@@ -1626,7 +1656,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Uber Trip Help",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0081",
@@ -1641,7 +1671,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Ímã",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0082",
@@ -1656,7 +1686,7 @@
       "splitCount": 1,
       "city": "Atenas",
       "rawText": "IOF Comida Aeroporto",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0083",
@@ -1671,7 +1701,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Mercado",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0084",
@@ -1686,7 +1716,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Skunk Brothers",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0085",
@@ -1701,7 +1731,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Banca",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0086",
@@ -1716,7 +1746,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Mercado",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0087",
@@ -1731,7 +1761,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Vales Coffee",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0088",
@@ -1746,7 +1776,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Neck Pillow",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0089",
@@ -1761,7 +1791,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Uber",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0090",
@@ -1776,7 +1806,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Brindes Grécia",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0091",
@@ -1791,7 +1821,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Veganaki",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0092",
@@ -1806,7 +1836,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Banca",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0093",
@@ -1821,7 +1851,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF THC Experience",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0094",
@@ -1836,7 +1866,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Panathenaic Stadium",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0095",
@@ -1851,7 +1881,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF O Thanasis",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0096",
@@ -1866,7 +1896,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Mercado",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0097",
@@ -1881,7 +1911,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Nostimies Coffee",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0098",
@@ -1896,7 +1926,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Aquarius",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0099",
@@ -1911,7 +1941,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Óculos de Sol",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0100",
@@ -1926,7 +1956,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Veganaki",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0101",
@@ -1941,7 +1971,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Banca",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0102",
@@ -1956,7 +1986,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Uber",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0103",
@@ -1971,7 +2001,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Assento Avião",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0104",
@@ -1986,7 +2016,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Ímã",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0105",
@@ -2001,7 +2031,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Cookoomela",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0106",
@@ -2016,7 +2046,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Cookoomela",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0107",
@@ -2031,7 +2061,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Mercado",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0108",
@@ -2046,7 +2076,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Skiza",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0109",
@@ -2061,7 +2091,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Mercado",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0110",
@@ -2076,7 +2106,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Greek Yogurt",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0111",
@@ -2091,7 +2121,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Banca",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0112",
@@ -2106,7 +2136,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Aquarius",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0113",
@@ -2121,7 +2151,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Óculos de Sol",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0114",
@@ -2136,7 +2166,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Theofanis Gkiokas",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0115",
@@ -2151,7 +2181,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Mercado",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0116",
@@ -2166,7 +2196,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Mercado",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0117",
@@ -2181,7 +2211,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Neck Pillow",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0118",
@@ -2196,7 +2226,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Vales Coffee",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0119",
@@ -2211,7 +2241,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "eSIM viagem 5GB",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0120",
@@ -2226,7 +2256,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Mercado",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0121",
@@ -2241,7 +2271,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Figo",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0122",
@@ -2256,7 +2286,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Nostimies Coffee",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0123",
@@ -2271,7 +2301,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Skunk Brothers",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0124",
@@ -2286,7 +2316,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Farmácia",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0125",
@@ -2301,7 +2331,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Brindes Santorini",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0126",
@@ -2316,7 +2346,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "Jewels 4u",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0127",
@@ -2331,7 +2361,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Greek Yogurt",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0128",
@@ -2346,7 +2376,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Mercado",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0129",
@@ -2361,7 +2391,7 @@
       "splitCount": 1,
       "city": "Santorini",
       "rawText": "IOF Skiza",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0130",
@@ -2376,7 +2406,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "Farmácia",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0131",
@@ -2391,7 +2421,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "Coffeeshop Bagheera",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0132",
@@ -2406,7 +2436,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "Vans",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0133",
@@ -2421,7 +2451,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "Brindes Amsterdam",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0134",
@@ -2436,7 +2466,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "Coffee",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0135",
@@ -2451,7 +2481,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF Figo",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0136",
@@ -2466,7 +2496,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF Mercado",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0137",
@@ -2481,7 +2511,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF Farmácia",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0138",
@@ -2496,7 +2526,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF Brindes Santorini",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0139",
@@ -2511,7 +2541,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF Vans",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0140",
@@ -2526,7 +2556,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF Farmácia",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0141",
@@ -2541,7 +2571,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "Mercado",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0142",
@@ -2556,7 +2586,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "coffee",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0143",
@@ -2571,7 +2601,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "kailash parbat",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0144",
@@ -2586,7 +2616,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "Brindes Van Gogh",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0145",
@@ -2601,7 +2631,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "coffee",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0146",
@@ -2616,7 +2646,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "Lanche Avião",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0147",
@@ -2631,7 +2661,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "galaxy buds 4 pro",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0148",
@@ -2646,7 +2676,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF jewels 4u",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0149",
@@ -2661,7 +2691,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF coffee",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0150",
@@ -2676,7 +2706,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF brindes amsterdam",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0151",
@@ -2691,7 +2721,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF kailash parbat",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0152",
@@ -2706,7 +2736,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF coffee",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0153",
@@ -2721,7 +2751,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF brindes van gogh",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0154",
@@ -2736,7 +2766,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "snacks",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0155",
@@ -2751,7 +2781,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "snacks",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0156",
@@ -2766,7 +2796,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "thc gummy",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0157",
@@ -2781,7 +2811,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "isqueiros",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0158",
@@ -2796,7 +2826,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "soupenzo",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0159",
@@ -2811,7 +2841,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "uniqlo",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0160",
@@ -2826,7 +2856,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "cinzeiro",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0161",
@@ -2841,7 +2871,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "laundry",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0162",
@@ -2856,7 +2886,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "coffeeshop",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0163",
@@ -2871,7 +2901,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "laundry",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0164",
@@ -2886,7 +2916,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "de deli",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0165",
@@ -2901,7 +2931,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "coffee",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0166",
@@ -2916,7 +2946,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF coffeshop bagheera",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0167",
@@ -2931,7 +2961,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF mercado",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0168",
@@ -2946,7 +2976,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF lanche avião",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0169",
@@ -2961,7 +2991,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF coffee",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0170",
@@ -2976,7 +3006,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF de deli",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0171",
@@ -2991,7 +3021,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF coffeeshop",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0172",
@@ -3006,7 +3036,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF soupenzo",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0173",
@@ -3021,7 +3051,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF uniqlo",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0174",
@@ -3036,7 +3066,7 @@
       "splitCount": 1,
       "city": "Amsterdam",
       "rawText": "IOF thc gummy",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0175",
@@ -3051,7 +3081,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "frutas",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0176",
@@ -3066,7 +3096,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "água",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0177",
@@ -3081,7 +3111,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "suco",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0178",
@@ -3096,7 +3126,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "farmácia",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0179",
@@ -3111,7 +3141,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "pizza",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0180",
@@ -3126,7 +3156,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "uber",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0181",
@@ -3141,7 +3171,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "snacks",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0182",
@@ -3156,7 +3186,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF snacks",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0183",
@@ -3171,7 +3201,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF snacks",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0184",
@@ -3186,7 +3216,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF laundry",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0185",
@@ -3201,7 +3231,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF laundry",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0186",
@@ -3216,7 +3246,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF cinzeiro",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0187",
@@ -3231,7 +3261,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF isqueiros",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0188",
@@ -3246,7 +3276,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF snacks",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0189",
@@ -3261,7 +3291,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF pizza",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0190",
@@ -3276,7 +3306,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF uber",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0191",
@@ -3291,7 +3321,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF água",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0192",
@@ -3306,7 +3336,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "food point",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0193",
@@ -3321,7 +3351,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "uniqlo",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0194",
@@ -3336,7 +3366,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "low boqueria",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0195",
@@ -3351,7 +3381,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "alehop",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0196",
@@ -3366,7 +3396,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "coffee",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0197",
@@ -3381,7 +3411,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "assento avião",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0198",
@@ -3396,7 +3426,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF frutas",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0199",
@@ -3411,7 +3441,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF suco",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0200",
@@ -3426,7 +3456,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF farmácia",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0201",
@@ -3441,7 +3471,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF coffee",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0202",
@@ -3456,7 +3486,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF uniqlo",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0203",
@@ -3471,7 +3501,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF low boqueria",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0204",
@@ -3486,7 +3516,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "comida aeroporto",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0205",
@@ -3501,7 +3531,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "sucre cremat",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0206",
@@ -3516,7 +3546,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "vegetalia",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0207",
@@ -3531,7 +3561,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "imã",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0208",
@@ -3546,7 +3576,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "coffee",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0209",
@@ -3561,7 +3591,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF alehop",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0210",
@@ -3576,7 +3606,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF food point",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0211",
@@ -3591,7 +3621,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF imã",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0212",
@@ -3606,7 +3636,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF coffee",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0213",
@@ -3621,7 +3651,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF vegetalia",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0214",
@@ -3636,7 +3666,7 @@
       "splitCount": 1,
       "city": "Barcelona",
       "rawText": "IOF assento avião",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0215",
@@ -3651,7 +3681,7 @@
       "splitCount": 1,
       "city": "SP",
       "rawText": "Uber",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0216",
@@ -3666,7 +3696,7 @@
       "splitCount": 1,
       "city": "SP",
       "rawText": "IOF comida aeroporto",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     },
     {
       "id": "tx_0217",
@@ -3681,7 +3711,7 @@
       "splitCount": 1,
       "city": "SP",
       "rawText": "IOF sucre cremat",
-      "createdAt": "2026-06-19T11:35:17"
+      "createdAt": "2026-06-19T18:58:51"
     }
   ]
 }

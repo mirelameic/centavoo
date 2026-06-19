@@ -59,7 +59,7 @@ node scripts/smoke.mjs        # loads the app, checks KPIs, saves screenshots to
 ## Roadmap
 
 - [x] **M1** — foundation + Europa imported + dashboards (summary, by day, by city, before×during).
-- [ ] **M2** — add/edit transactions and categories; JSON backup export/import.
+- [x] **M2** — add/edit/delete transactions; manage categories; JSON backup export/import.
 - [ ] **M3** — import by pasting the bill text (parser + review + auto-category).
 - [ ] **M4** — compare trips.
 - [ ] **M5** — bill photo with in-browser OCR (Tesseract.js).

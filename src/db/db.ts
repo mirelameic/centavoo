@@ -17,6 +17,10 @@ export class TravelDB extends Dexie {
       transactions: 'id, tripId, period, categoryId, date, city, [tripId+period]',
       rules: '++id, keyword, categoryId',
     });
+    // v2: categories became per-trip.
+    this.version(2).stores({
+      categories: 'id, tripId, sortOrder, [tripId+sortOrder]',
+    });
   }
 }
 
