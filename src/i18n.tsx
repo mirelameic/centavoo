@@ -109,6 +109,11 @@ const pt: Dict = {
   'sec.topBefore': 'Maiores gastos · antes',
   'sec.topDuring': 'Maiores gastos · durante',
   'trip.edit': 'Editar viagem',
+  'trip.delete': 'Excluir viagem',
+  'trip.deleteConfirm':
+    'Excluir esta viagem permanentemente? Todas as transações e categorias dela serão apagadas. Não dá pra desfazer.',
+  'city.filter': 'Filtrar por categoria',
+  'city.filterPlaceholder': 'todas as categorias',
   'sec.split': 'Você dividiu × sua parte',
   'col.days': 'Dias',
   'col.total': 'Total',
@@ -221,6 +226,11 @@ const en: Dict = {
   'sec.topBefore': 'Top spends · before',
   'sec.topDuring': 'Top spends · during',
   'trip.edit': 'Edit trip',
+  'trip.delete': 'Delete trip',
+  'trip.deleteConfirm':
+    'Delete this trip permanently? All its transactions and categories will be erased. This cannot be undone.',
+  'city.filter': 'Filter by category',
+  'city.filterPlaceholder': 'all categories',
   'sec.split': 'Shared vs your share',
   'col.days': 'Days',
   'col.total': 'Total',

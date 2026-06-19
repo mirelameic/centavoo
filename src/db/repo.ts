@@ -46,6 +46,17 @@ export async function createTrip(
 
 export const updateTrip = (id: string, patch: Partial<Trip>) => db.trips.update(id, patch);
 
+// Permanently delete a trip and everything that belongs to it.
+export async function deleteTrip(id: string) {
+  await db.transaction('rw', [db.trips, db.transactions, db.categories, db.rules], async () => {
+    const catIds = (await db.categories.where('tripId').equals(id).primaryKeys()) as string[];
+    if (catIds.length) await db.rules.where('categoryId').anyOf(catIds).delete();
+    await db.transactions.where('tripId').equals(id).delete();
+    await db.categories.where('tripId').equals(id).delete();
+    await db.trips.delete(id);
+  });
+}
+
 export async function addTransaction(
   t: Omit<Transaction, 'id' | 'createdAt'>,
 ): Promise<string> {
@@ -330,6 +341,58 @@ export function computeStats(
     maxDaily,
     split,
   };
+}
+
+// Expenses by city, optionally restricted to a set of category ids. Used by the
+// "City summary" so the user can ask "how much per city, only on food/shopping".
+export function cityBreakdown(
+  txs: Transaction[],
+  cats: Category[],
+  cities: Record<string, string>,
+  allowed?: Set<string>,
+) {
+  const catById = new Map(cats.map((c) => [c.id, c]));
+  const cityMap = new Map<string, number>();
+  const cityDays = new Map<string, Set<string>>();
+  const cityCat = new Map<string, Map<string, number>>();
+  for (const t of txs) {
+    const c = cost(t);
+    if (c <= 0) continue;
+    if (allowed && (!t.categoryId || !allowed.has(t.categoryId))) continue;
+    const cy = (t.date ? cities[t.date] : undefined) || undefined;
+    if (!cy) continue;
+    cityMap.set(cy, (cityMap.get(cy) ?? 0) + c);
+    if (t.date) {
+      let s = cityDays.get(cy);
+      if (!s) cityDays.set(cy, (s = new Set()));
+      s.add(t.date);
+    }
+    const cn = (t.categoryId && catById.get(t.categoryId)?.name) || '—';
+    let cc = cityCat.get(cy);
+    if (!cc) cityCat.set(cy, (cc = new Map()));
+    cc.set(cn, (cc.get(cn) ?? 0) + c);
+  }
+  const byCity = [...cityMap.entries()]
+    .sort(([, a], [, b]) => b - a)
+    .map(([city, amount], i) => ({
+      city,
+      amount: round(amount),
+      color: CITY_PALETTE[i % CITY_PALETTE.length],
+    }));
+  const cityTable = byCity.map((cc) => {
+    const dys = cityDays.get(cc.city)?.size ?? 0;
+    const cm = cityCat.get(cc.city);
+    const topCategory =
+      cm && cm.size ? [...cm.entries()].sort(([, a], [, b]) => b - a)[0][0] : '—';
+    return {
+      city: cc.city,
+      days: dys,
+      total: cc.amount,
+      avgPerDay: dys ? round(cc.amount / dys) : cc.amount,
+      topCategory,
+    };
+  });
+  return { byCity, cityTable };
 }
 
 const round = (n: number) => Math.round(n * 100) / 100;

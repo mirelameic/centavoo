@@ -21,6 +21,7 @@ import {
   ActionIcon,
   Checkbox,
   Select,
+  MultiSelect,
   TagsInput,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -29,6 +30,7 @@ import { IconArrowLeft, IconPlus, IconPencil, IconTrash, IconCategory } from '@t
 import { db } from '../db/db';
 import {
   computeStats,
+  cityBreakdown,
   cost,
   setTripCity,
   updateTrip,
@@ -196,6 +198,7 @@ export function Trip() {
     if (window.confirm(t('tx.deleteConfirm'))) await deleteTransaction(tx.id);
   };
 
+  const [cityCatFilter, setCityCatFilter] = useState<string[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const toggleSel = (txId: string) =>
     setSelected((s) => {
@@ -240,7 +243,14 @@ export function Trip() {
   const rangeDays = trip.startDate && trip.endDate ? dateRange(trip.startDate, trip.endDate) : [];
   const tripDays = [...new Set([...rangeDays, ...txDates])].sort();
   const donut = stats.byCategory.map((c) => ({ name: c.name, value: c.amount, color: c.color }));
-  const cityDonut = stats.byCity.map((c) => ({ name: c.city, value: c.amount, color: c.color }));
+  // City summary, restricted to the chosen categories (empty = all).
+  const cityBd = cityBreakdown(
+    txs ?? [],
+    cats ?? [],
+    cities,
+    cityCatFilter.length ? new Set(cityCatFilter) : undefined,
+  );
+  const cityDonut = cityBd.byCity.map((c) => ({ name: c.city, value: c.amount, color: c.color }));
 
   const dayKeys = new Set<string>();
   stats.dayData.forEach((r) => Object.keys(r).forEach((k) => k !== 'date' && dayKeys.add(k)));
@@ -412,6 +422,15 @@ export function Trip() {
         {/* ============ CIDADES ============ */}
         <Tabs.Panel value="cities">
           <Card withBorder padding="lg">
+            <MultiSelect
+              label={t('city.filter')}
+              placeholder={cityCatFilter.length ? undefined : t('city.filterPlaceholder')}
+              data={(cats ?? []).map((c) => ({ value: c.id, label: c.name }))}
+              value={cityCatFilter}
+              onChange={setCityCatFilter}
+              clearable
+              mb="md"
+            />
             {cityDonut.length ? (
               <>
                 <Section first>{t('sec.byCity')}</Section>
@@ -425,7 +444,7 @@ export function Trip() {
                     valueFormatter={(v) => money(v, cur)}
                   />
                   <Stack gap={6} miw={220}>
-                    {stats.byCity.map((c) => (
+                    {cityBd.byCity.map((c) => (
                       <Group key={c.city} justify="space-between">
                         <Group gap={8}><Dot color={c.color} /><Text size="sm">{c.city}</Text></Group>
                         <Text size="sm" fw={600}>{money(c.amount, cur)}</Text>
@@ -446,7 +465,7 @@ export function Trip() {
                     </Table.Tr>
                   </Table.Thead>
                   <Table.Tbody>
-                    {stats.cityTable.map((c) => (
+                    {cityBd.cityTable.map((c) => (
                       <Table.Tr key={c.city}>
                         <Table.Td>{c.city}</Table.Td>
                         <Table.Td ta="right">{c.days}</Table.Td>

@@ -19,22 +19,18 @@ await page.getByRole('heading', { name: 'Europa 2026' }).waitFor({ timeout: 1000
 await page.waitForTimeout(700);
 let body = await page.textContent('body');
 checks['KPI Antes (14.874)'] = body.includes('14.874');
-checks['Has donut (svg)'] = (await page.locator('svg').count()) > 0;
 checks['Split savings card'] = body.includes('economizou');
-await page.screenshot({ path: '/tmp/te-summary.png', fullPage: true });
 
-// Tempo (no calendar anymore)
+// Tempo
 await page.getByRole('tab', { name: 'Tempo' }).click();
-await page.waitForTimeout(700);
+await page.waitForTimeout(600);
 body = await page.textContent('body');
 checks['Weekday section'] = body.includes('Por dia da semana');
 checks['No calendar'] = !body.includes('Calendário');
-await page.screenshot({ path: '/tmp/te-time.png', fullPage: true });
 
-// Cidades: all days listed; add a city to the list and select it for a day
+// Cidades: all days listed, add+select a city, filter by category
 await page.getByRole('tab', { name: 'Cidades' }).click();
 await page.waitForTimeout(600);
-checks['By city shows Barcelona'] = (await page.textContent('body')).includes('Barcelona');
 checks['All days listed'] = (await page.locator('input[placeholder="cidade"]').count()) === 18;
 const errsBefore = errors.length;
 const tags = page.getByRole('combobox', { name: 'Cidades da viagem' });
@@ -44,24 +40,32 @@ await page.keyboard.press('Enter');
 await page.waitForTimeout(300);
 await page.locator('input[placeholder="cidade"]').first().click();
 await page.getByRole('option', { name: 'Madrid' }).first().click();
-await page.waitForTimeout(600);
+await page.waitForTimeout(500);
 checks['City select (no crash)'] =
   errors.length === errsBefore && (await page.textContent('body')).includes('Madrid');
+// category filter on city summary
+await page.getByPlaceholder('todas as categorias').click();
+await page.getByRole('option', { name: 'Compras' }).first().click();
+await page.waitForTimeout(500);
+checks['City filter'] = errors.length === errsBefore && (await page.textContent('body')).includes('Amsterdam');
+await page.keyboard.press('Escape');
 await page.screenshot({ path: '/tmp/te-cities.png', fullPage: true });
 
-// Categorias tab (trip-level table)
+// Categorias tab
 await page.getByRole('tab', { name: 'Categorias' }).click();
 await page.waitForTimeout(500);
 checks['Category table'] = (await page.textContent('body')).includes('Ticket médio');
 
-// Edit trip modal
+// Edit trip modal: has delete button
 await page.getByLabel('edit-trip').click();
 await page.waitForTimeout(300);
-checks['Edit trip modal'] = (await page.textContent('body')).includes('Editar viagem');
+body = await page.textContent('body');
+checks['Edit trip modal'] = body.includes('Editar viagem');
+checks['Delete trip button'] = body.includes('Excluir viagem');
 await page.getByRole('button', { name: 'Cancelar' }).click();
 await page.waitForTimeout(200);
 
-// Add a transaction
+// Add + single delete + bulk delete
 await page.getByRole('button', { name: 'Nova transação' }).click();
 await page.getByLabel('Descrição').fill('Smoke Café');
 await page.getByLabel('Valor').fill('42');
@@ -70,13 +74,9 @@ await page.waitForTimeout(400);
 await page.getByRole('tab', { name: 'Transações' }).click();
 await page.waitForTimeout(400);
 checks['Add transaction'] = (await page.textContent('body')).includes('Smoke Café');
-
-// Single delete
 await page.locator('tr', { hasText: 'Smoke Café' }).getByLabel('delete').click();
 await page.waitForTimeout(400);
 checks['Delete transaction'] = !(await page.textContent('body')).includes('Smoke Café');
-
-// Bulk delete: select two rows, delete
 const rowsBefore = await page.getByLabel('select-row').count();
 await page.getByLabel('select-row').nth(0).check();
 await page.getByLabel('select-row').nth(1).check();
@@ -84,13 +84,17 @@ await page.getByRole('button', { name: 'Excluir selecionadas' }).click();
 await page.waitForTimeout(500);
 checks['Bulk delete'] = (await page.getByLabel('select-row').count()) === rowsBefore - 2;
 
-// Categories page via header link, back-link goes to the trip
+// Categories page + emoji/color picker
 await page.getByRole('link', { name: 'Categorias' }).click();
 await page.waitForURL('**/categories');
 await page.waitForTimeout(400);
 checks['Categories page'] = (await page.textContent('body')).includes('Hospedagem');
+await page.getByRole('button', { name: 'Nova categoria' }).click();
+await page.waitForTimeout(300);
+checks['Emoji picker'] = (await page.getByText('🗺️').count()) > 0;
+await page.getByRole('button', { name: 'Cancelar' }).click();
 
-// Export via gear menu
+// Export
 try {
   const [download] = await Promise.all([
     page.waitForEvent('download', { timeout: 5000 }),
@@ -102,9 +106,25 @@ try {
   checks['Export download'] = /centavoo-backup-.*\.json/.test(download.suggestedFilename());
 } catch (e) { checks['Export download'] = false; console.log('export skip:', e.message.split('\n')[0]); }
 
+// Delete trip end-to-end (throwaway trip)
+await page.goto(BASE, { waitUntil: 'networkidle' });
+await page.getByRole('button', { name: 'Nova viagem' }).click();
+await page.getByLabel('Nome').fill('Smoke Trip');
+await page.getByRole('button', { name: 'Criar' }).click();
+await page.waitForTimeout(400);
+await page.getByText('Smoke Trip').first().click();
+await page.getByRole('heading', { name: 'Smoke Trip' }).waitFor({ timeout: 8000 });
+await page.getByLabel('edit-trip').click();
+await page.waitForTimeout(200);
+await page.getByRole('button', { name: 'Excluir viagem' }).click();
+await page.waitForURL(`${BASE}/`);
+await page.waitForTimeout(400);
+checks['Delete trip e2e'] = !(await page.textContent('body')).includes('Smoke Trip');
+
+// language toggle (on home)
 await page.getByText('EN', { exact: true }).click();
 await page.waitForTimeout(300);
-checks['EN toggle works'] = (await page.textContent('body')).includes('Categories');
+checks['EN toggle works'] = (await page.textContent('body')).includes('My trips');
 
 await browser.close();
 

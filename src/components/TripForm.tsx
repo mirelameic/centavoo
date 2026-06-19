@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Modal, Stack, TextInput, Group, Button } from '@mantine/core';
+import { useNavigate } from 'react-router-dom';
+import { Modal, Stack, TextInput, Group, Button, Divider } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
+import { IconTrash } from '@tabler/icons-react';
 import type { Trip } from '../db/schema';
-import { updateTrip } from '../db/repo';
+import { updateTrip, deleteTrip } from '../db/repo';
 import { useI18n } from '../i18n';
 
 function toISO(d: unknown): string | null {
@@ -25,6 +27,7 @@ export function TripForm({
   trip: Trip;
 }) {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [destination, setDestination] = useState('');
   const [range, setRange] = useState<[unknown, unknown]>([null, null]);
@@ -45,6 +48,14 @@ export function TripForm({
       endDate: toISO(range[1]),
     });
     onClose();
+  }
+
+  async function handleDelete() {
+    if (window.confirm(t('trip.deleteConfirm'))) {
+      await deleteTrip(trip.id);
+      onClose();
+      navigate('/');
+    }
   }
 
   return (
@@ -75,6 +86,15 @@ export function TripForm({
           <Button variant="default" onClick={onClose}>{t('common.cancel')}</Button>
           <Button onClick={handleSave} disabled={!name.trim()}>{t('common.save')}</Button>
         </Group>
+        <Divider my="xs" />
+        <Button
+          variant="light"
+          color="red"
+          leftSection={<IconTrash size={16} />}
+          onClick={handleDelete}
+        >
+          {t('trip.delete')}
+        </Button>
       </Stack>
     </Modal>
   );

@@ -12,22 +12,32 @@ import {
   ActionIcon,
   Modal,
   TextInput,
-  ColorInput,
+  ColorSwatch,
+  SimpleGrid,
+  UnstyledButton,
   Box,
   Anchor,
   Center,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconPlus, IconPencil, IconTrash, IconArrowLeft } from '@tabler/icons-react';
+import { IconPlus, IconPencil, IconTrash, IconArrowLeft, IconCheck } from '@tabler/icons-react';
 import { db } from '../db/db';
 import { addCategory, updateCategory, deleteCategory } from '../db/repo';
 import type { Category } from '../db/schema';
 import { useI18n } from '../i18n';
 
-const SWATCHES = [
-  '#FF9900', '#9900FF', '#4A86E8', '#00B5C7', '#E6B800',
-  '#FF0000', '#00C000', '#FF00FF', '#0CA678', '#4263EB',
+// Fixed, curated palette and emoji set (no arbitrary values).
+const COLOR_OPTIONS = [
+  '#FF9900', '#FA5252', '#E64980', '#BE4BDB', '#7950F2', '#4263EB',
+  '#4A86E8', '#15AABF', '#0CA678', '#40C057', '#82C91E', '#E6B800',
+  '#FF00FF', '#F08C00', '#868E96', '#212529',
 ];
+const EMOJI_OPTIONS = [
+  '✈️', '🏨', '🏠', '🚕', '🚆', '🚌', '🚲', '⛽',
+  '🍽️', '☕', '🍷', '🍦', '🛍️', '🎁', '🎟️', '🏛️',
+  '🧳', '🎒', '🏖️', '⛰️', '🗺️', '📱', '💊', '🌿',
+];
+const DEFAULT_COLOR = '#4263EB';
 
 export function Categories() {
   const { t } = useI18n();
@@ -40,13 +50,13 @@ export function Categories() {
   const [opened, { open, close }] = useDisclosure(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [name, setName] = useState('');
-  const [color, setColor] = useState('#4263EB');
+  const [color, setColor] = useState(DEFAULT_COLOR);
   const [icon, setIcon] = useState('');
 
   useEffect(() => {
     if (!opened) return;
     setName(editing?.name ?? '');
-    setColor(editing?.color ?? '#4263EB');
+    setColor(editing?.color ?? DEFAULT_COLOR);
     setIcon(editing?.icon ?? '');
   }, [opened, editing]);
 
@@ -111,20 +121,48 @@ export function Categories() {
             data-autofocus
             required
           />
-          <ColorInput
-            label={t('cat.color')}
-            format="hex"
-            swatches={SWATCHES}
-            value={color}
-            onChange={setColor}
-          />
-          <TextInput
-            label={t('cat.emoji')}
-            placeholder="🏨"
-            maxLength={4}
-            value={icon}
-            onChange={(e) => setIcon(e.currentTarget.value)}
-          />
+          <div>
+            <Text size="sm" fw={500} mb={6}>{t('cat.color')}</Text>
+            <Group gap="xs">
+              {COLOR_OPTIONS.map((c) => (
+                <ColorSwatch
+                  key={c}
+                  color={c}
+                  size={28}
+                  component="button"
+                  type="button"
+                  onClick={() => setColor(c)}
+                  style={{ cursor: 'pointer', color: '#fff' }}
+                >
+                  {color === c && <IconCheck size={16} />}
+                </ColorSwatch>
+              ))}
+            </Group>
+          </div>
+          <div>
+            <Text size="sm" fw={500} mb={6}>{t('cat.emoji')}</Text>
+            <SimpleGrid cols={8} spacing={6}>
+              {EMOJI_OPTIONS.map((em) => (
+                <UnstyledButton
+                  key={em}
+                  onClick={() => setIcon(icon === em ? '' : em)}
+                  style={{
+                    fontSize: 20,
+                    textAlign: 'center',
+                    padding: 4,
+                    borderRadius: 8,
+                    border:
+                      icon === em
+                        ? '2px solid var(--mantine-color-grape-5)'
+                        : '1px solid var(--mantine-color-gray-3)',
+                    background: icon === em ? 'var(--mantine-color-grape-0)' : 'transparent',
+                  }}
+                >
+                  {em}
+                </UnstyledButton>
+              ))}
+            </SimpleGrid>
+          </div>
           <Group justify="flex-end">
             <Button variant="default" onClick={close}>{t('common.cancel')}</Button>
             <Button onClick={handleSave} disabled={!name.trim()}>{t('common.save')}</Button>
