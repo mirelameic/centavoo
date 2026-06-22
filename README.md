@@ -1,32 +1,36 @@
 # Centavoo
 
-Personal PWA to record and analyze travel expenses per trip. Each trip stores its
-transactions split by **period** (before / during), **category**, and **city**,
-with charts and — soon — import from a bill screenshot.
+Personal PWA to record and analyze travel expenses per trip.
+
+Each trip stores its transactions split by **period** (before / during), **category**, and **city**, with charts and other analysis.
 
 - **Stack:** Vite + React + TypeScript · Mantine (UI + charts) · Dexie (IndexedDB) · PWA.
 - **Local-first:** data lives on your device (the browser). Works offline.
-- **Languages:** UI in Portuguese or English (toggle in the header). Default: Portuguese.
-- The **Europa 2025** trip is preloaded, imported from `gastos-europa.xlsx`.
 
 ## Develop
 
 ```bash
 npm install
-npm run dev          # opens http://localhost:5173
+npm run dev          # opens http://localhost:5173 — Ctrl+C to stop
+```
+
+The dev server runs only while that terminal is open (your data lives in the
+browser's IndexedDB, so stopping the server never loses anything).
+
+Kill a server left running in the background (e.g. a stray one on :5173):
+
+```bash
+lsof -ti:5173 | xargs kill
 ```
 
 ## Production build / install on your phone
 
-A PWA needs HTTPS to install (localhost is the exception). Local build:
+A PWA needs HTTPS to install (localhost is the exception). For a faster,
+production-like local run (with the PWA service worker active):
 
 ```bash
 npm run build && npm run preview   # serves the build at http://localhost:4173
 ```
-
-To install on **Android** (becomes a real app, with an icon):
-1. Deploy for free (Vercel/Netlify) — `vercel.json` already sets the SPA fallback.
-2. Open the HTTPS URL in Chrome on the phone → menu → **Install app**.
 
 ## Regenerate the Europa seed
 
@@ -38,8 +42,6 @@ python3 -m venv scripts/.venv
 scripts/.venv/bin/pip install openpyxl
 scripts/.venv/bin/python scripts/seed_europa.py   # writes public/europa.json
 ```
-
-The script validates totals against the sheet (during 10,754.85 / −311.29; before 14,874.43).
 
 ## Smoke test (headless)
 
@@ -56,10 +58,3 @@ node scripts/smoke.mjs        # loads the app, checks KPIs, saves screenshots to
 - `src/pages/` — screens (Trips, Trip, …).
 - `scripts/seed_europa.py` — generates `public/europa.json` from the xlsx.
 
-## Roadmap
-
-- [x] **M1** — foundation + Europa imported + dashboards (summary, by day, by city, before×during).
-- [x] **M2** — add/edit/delete transactions; manage categories; JSON backup export/import.
-- [ ] **M3** — import by pasting the bill text (parser + review + auto-category).
-- [ ] **M4** — compare trips.
-- [ ] **M5** — bill photo with in-browser OCR (Tesseract.js).
