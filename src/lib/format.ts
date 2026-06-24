@@ -1,5 +1,7 @@
-// Formatting helpers (currency and dates). Locale defaults to pt-BR but can be
-// overridden — the i18n layer passes the locale that matches the current language.
+// Formatting and date helpers. Locale defaults to pt-BR but can be overridden —
+// the i18n layer passes the locale that matches the current language.
+
+const pad2 = (n: number) => String(n).padStart(2, '0');
 
 export function money(n: number, currency = 'BRL', locale = 'pt-BR'): string {
   return n.toLocaleString(locale, { style: 'currency', currency });
@@ -13,16 +15,22 @@ export function fmtDate(d?: string | null, locale = 'pt-BR'): string {
   });
 }
 
-export function dayMonth(d?: string | null): string {
-  if (!d) return '—';
-  const [, m, day] = d.split('-');
-  return `${day}/${m}`;
+// Normalizes a value to a local 'YYYY-MM-DD' string. Accepts the strings or Date
+// objects that Mantine's date inputs may yield across versions. Uses local date
+// parts (not toISOString, which would shift across the UTC boundary).
+export function toISO(d: unknown): string | null {
+  if (!d) return null;
+  if (typeof d === 'string') return d.slice(0, 10);
+  if (d instanceof Date) return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  return null;
 }
 
-// Inclusive number of days between two 'YYYY-MM-DD' dates.
-export function daysBetween(start?: string | null, end?: string | null): number {
-  if (!start || !end) return 0;
-  const a = new Date(start + 'T00:00:00').getTime();
-  const b = new Date(end + 'T00:00:00').getTime();
-  return Math.round((b - a) / 86_400_000) + 1;
+// Inclusive list of 'YYYY-MM-DD' dates between start and end.
+export function dateRange(start: string, end: string): string[] {
+  const out: string[] = [];
+  const e = new Date(end + 'T00:00:00');
+  for (let d = new Date(start + 'T00:00:00'); d <= e; d.setDate(d.getDate() + 1)) {
+    out.push(`${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`);
+  }
+  return out;
 }

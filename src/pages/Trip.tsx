@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
@@ -16,164 +16,29 @@ import {
   Center,
   Loader,
   ScrollArea,
-  Box,
   Button,
   ActionIcon,
   Checkbox,
-  Select,
   MultiSelect,
-  TagsInput,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { DonutChart, BarChart } from '@mantine/charts';
 import { IconArrowLeft, IconPlus, IconPencil, IconTrash, IconCategory } from '@tabler/icons-react';
 import { db } from '../db/db';
-import {
-  computeStats,
-  cityBreakdown,
-  cost,
-  setTripCity,
-  updateTrip,
-  deleteTransaction,
-  deleteTransactions,
-} from '../db/repo';
-import type { Transaction, Category } from '../db/schema';
+import { computeStats, cityBreakdown, cost } from '../db/stats';
+import { deleteTransaction, deleteTransactions } from '../db/repo';
+import type { Transaction } from '../db/schema';
+import { dateRange } from '../lib/format';
+import { PERIOD_COLORS } from '../lib/constants';
 import { TransactionForm } from '../components/TransactionForm';
 import { TripForm } from '../components/TripForm';
+import { Dot, Kpi, Section } from '../components/trip/primitives';
+import { TopTable } from '../components/trip/TopTable';
+import { CityEditor } from '../components/trip/CityEditor';
 import { useI18n } from '../i18n';
-
-function Kpi({ label, value, color }: { label: string; value: string; color?: string }) {
-  return (
-    <Card withBorder padding="md">
-      <Text size="xs" c="dimmed" tt="uppercase" fw={600}>{label}</Text>
-      <Text size="xl" fw={700} c={color}>{value}</Text>
-    </Card>
-  );
-}
-
-function Dot({ color }: { color: string }) {
-  return (
-    <Box
-      component="span"
-      w={10}
-      h={10}
-      style={{ background: color, borderRadius: 3, display: 'inline-block' }}
-    />
-  );
-}
-
-// Section heading inside a tab (each tab groups a few related views).
-function Section({ children, first }: { children: ReactNode; first?: boolean }) {
-  return (
-    <Text fw={600} size="sm" c="dimmed" mt={first ? 0 : 'xl'} mb="xs">
-      {children}
-    </Text>
-  );
-}
-
-// Compact "top spends" table (description · category · city · date · amount).
-function TopTable({
-  items,
-  catById,
-  cities,
-  cur,
-}: {
-  items: Transaction[];
-  catById: Map<string, Category>;
-  cities: Record<string, string>;
-  cur: string;
-}) {
-  const { money, date } = useI18n();
-  return (
-    <Table>
-      <Table.Tbody>
-        {items.map((tx) => {
-          const c = tx.categoryId ? catById.get(tx.categoryId) : undefined;
-          return (
-            <Table.Tr key={tx.id}>
-              <Table.Td>
-                {tx.description}
-                {tx.splitCount > 1 && <Text span size="xs" c="dimmed"> (÷{tx.splitCount})</Text>}
-              </Table.Td>
-              <Table.Td>
-                {c ? (
-                  <Group gap={6} wrap="nowrap"><Dot color={c.color} /><Text size="sm">{c.name}</Text></Group>
-                ) : '—'}
-              </Table.Td>
-              <Table.Td><Text size="sm" c="dimmed">{(tx.date && cities[tx.date]) || '—'}</Text></Table.Td>
-              <Table.Td><Text size="sm" c="dimmed">{date(tx.date)}</Text></Table.Td>
-              <Table.Td ta="right" fw={600}>{money(cost(tx), cur)}</Table.Td>
-            </Table.Tr>
-          );
-        })}
-      </Table.Tbody>
-    </Table>
-  );
-}
-
-const PERIOD_COLORS = { antes: '#4c6ef5', durante: '#cc5de8' };
 
 // Left-align the built-in (interactive) chart legend — Mantine defaults it to flex-end.
 const leftLegend = { legend: { justifyContent: 'flex-start' as const } };
-
-// Editable city per day. First you list the trip's cities (TagsInput), then pick
-// one per day from a dropdown. Stored on the trip (a day = a city); days flow
-// top-to-bottom in date order via CSS columns.
-function CityEditor({
-  tripId,
-  days,
-  cities,
-  cityList,
-}: {
-  tripId: string;
-  days: string[];
-  cities: Record<string, string>;
-  cityList?: string[];
-}) {
-  const { t, date } = useI18n();
-  const distinct = [...new Set(Object.values(cities).filter(Boolean))].sort();
-  const listValue = cityList ?? distinct;
-  const options = [...new Set([...listValue, ...distinct])].sort();
-  return (
-    <Stack gap="sm">
-      <TagsInput
-        label={t('city.list')}
-        placeholder={t('city.listPlaceholder')}
-        value={listValue}
-        onChange={(vals) => updateTrip(tripId, { cityList: vals })}
-        clearable
-      />
-      <Box style={{ columnWidth: 240, columnGap: 16 }}>
-        {days.map((d) => (
-          <Group key={d} gap="xs" wrap="nowrap" style={{ breakInside: 'avoid', marginBottom: 8 }}>
-            <Text size="sm" c="dimmed" w={56}>{date(d)}</Text>
-            <Select
-              size="xs"
-              placeholder={t('city.placeholder')}
-              data={options}
-              value={cities[d] ?? null}
-              onChange={(v) => setTripCity(tripId, d, v ?? '')}
-              searchable
-              clearable
-              style={{ flex: 1 }}
-            />
-          </Group>
-        ))}
-      </Box>
-    </Stack>
-  );
-}
-
-// Inclusive list of 'YYYY-MM-DD' dates between start and end.
-function dateRange(start: string, end: string): string[] {
-  const out: string[] = [];
-  const p = (n: number) => String(n).padStart(2, '0');
-  const e = new Date(end + 'T00:00:00');
-  for (let d = new Date(start + 'T00:00:00'); d <= e; d.setDate(d.getDate() + 1)) {
-    out.push(`${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`);
-  }
-  return out;
-}
 
 export function Trip() {
   const { t, money, date, locale } = useI18n();
@@ -325,7 +190,7 @@ export function Trip() {
           <Tabs.Tab value="tx">{t('tab.transactions')}</Tabs.Tab>
         </Tabs.List>
 
-        {/* ============ RESUMO ============ */}
+        {/* Summary */}
         <Tabs.Panel value="summary">
           <Card withBorder padding="lg">
             <Group align="flex-start" justify="center" gap="xl" wrap="wrap">
@@ -383,7 +248,7 @@ export function Trip() {
           </Card>
         </Tabs.Panel>
 
-        {/* ============ TEMPO ============ */}
+        {/* Time */}
         <Tabs.Panel value="time">
           <Card withBorder padding="lg">
             <Section first>{t('sec.byDay')}</Section>
@@ -419,7 +284,7 @@ export function Trip() {
           </Card>
         </Tabs.Panel>
 
-        {/* ============ CIDADES ============ */}
+        {/* Cities */}
         <Tabs.Panel value="cities">
           <Card withBorder padding="lg">
             <MultiSelect
@@ -490,7 +355,7 @@ export function Trip() {
           </Card>
         </Tabs.Panel>
 
-        {/* ============ CATEGORIAS ============ */}
+        {/* Categories */}
         <Tabs.Panel value="cats">
           <Card withBorder padding="lg">
             <Section first>{t('sec.catTable')}</Section>
@@ -523,8 +388,8 @@ export function Trip() {
               data={stats.beforeDuringData}
               dataKey="category"
               series={[
-                { name: 'antes', label: t('chart.before'), color: PERIOD_COLORS.antes },
-                { name: 'durante', label: t('chart.during'), color: PERIOD_COLORS.durante },
+                { name: 'before', label: t('chart.before'), color: PERIOD_COLORS.before },
+                { name: 'during', label: t('chart.during'), color: PERIOD_COLORS.during },
               ]}
               valueFormatter={(v) => money(v, cur)}
               yAxisProps={{ width: 88 }}
@@ -535,7 +400,7 @@ export function Trip() {
           </Card>
         </Tabs.Panel>
 
-        {/* ============ TRANSAÇÕES ============ */}
+        {/* Transactions */}
         <Tabs.Panel value="tx">
           <Card withBorder padding={0}>
             {selected.size > 0 && (

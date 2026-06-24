@@ -16,7 +16,7 @@ import { notifications } from '@mantine/notifications';
 import { IconPlane, IconSettings, IconDownload, IconUpload } from '@tabler/icons-react';
 import { ensureSeeded } from './db/seed';
 import { exportBackup, importBackup } from './db/backup';
-import { useI18n } from './i18n';
+import { useI18n, LANGUAGES, type Lang } from './i18n';
 
 export function App() {
   const { t, lang, setLang } = useI18n();
@@ -60,11 +60,8 @@ export function App() {
             <SegmentedControl
               size="xs"
               value={lang}
-              onChange={(v) => setLang(v as 'pt' | 'en')}
-              data={[
-                { label: 'PT', value: 'pt' },
-                { label: 'EN', value: 'en' },
-              ]}
+              onChange={(v) => setLang(v as Lang)}
+              data={LANGUAGES.map((l) => ({ label: l.label, value: l.code }))}
             />
             <Menu position="bottom-end" shadow="md" width={200}>
               <Menu.Target>

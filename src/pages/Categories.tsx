@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
@@ -24,19 +24,9 @@ import { IconPlus, IconPencil, IconTrash, IconArrowLeft, IconCheck } from '@tabl
 import { db } from '../db/db';
 import { addCategory, updateCategory, deleteCategory } from '../db/repo';
 import type { Category } from '../db/schema';
+import { COLOR_OPTIONS, EMOJI_OPTIONS } from '../lib/constants';
 import { useI18n } from '../i18n';
 
-// Fixed, curated palette and emoji set (no arbitrary values).
-const COLOR_OPTIONS = [
-  '#FF9900', '#FA5252', '#E64980', '#BE4BDB', '#7950F2', '#4263EB',
-  '#4A86E8', '#15AABF', '#0CA678', '#40C057', '#82C91E', '#E6B800',
-  '#FF00FF', '#F08C00', '#868E96', '#212529',
-];
-const EMOJI_OPTIONS = [
-  '✈️', '🏨', '🏠', '🚕', '🚆', '🚌', '🚲', '⛽',
-  '🍽️', '☕', '🍷', '🍦', '🛍️', '🎁', '🎟️', '🏛️',
-  '🧳', '🎒', '🏖️', '⛰️', '🗺️', '📱', '💊', '🌿',
-];
 const DEFAULT_COLOR = '#4263EB';
 
 export function Categories() {
@@ -49,27 +39,8 @@ export function Categories() {
 
   const [opened, { open, close }] = useDisclosure(false);
   const [editing, setEditing] = useState<Category | null>(null);
-  const [name, setName] = useState('');
-  const [color, setColor] = useState(DEFAULT_COLOR);
-  const [icon, setIcon] = useState('');
-
-  useEffect(() => {
-    if (!opened) return;
-    setName(editing?.name ?? '');
-    setColor(editing?.color ?? DEFAULT_COLOR);
-    setIcon(editing?.icon ?? '');
-  }, [opened, editing]);
-
   const openAdd = () => { setEditing(null); open(); };
   const openEdit = (c: Category) => { setEditing(c); open(); };
-
-  async function handleSave() {
-    if (!name.trim()) return;
-    const patch = { name: name.trim(), color, icon: icon.trim() || undefined };
-    if (editing) await updateCategory(editing.id, patch);
-    else await addCategory({ ...patch, tripId: id });
-    close();
-  }
 
   async function handleDelete(c: Category) {
     if (window.confirm(t('cat.deleteConfirm'))) await deleteCategory(c.id);
@@ -112,63 +83,98 @@ export function Categories() {
         ))}
       </Stack>
 
-      <Modal opened={opened} onClose={close} title={editing ? t('common.edit') : t('cat.new')} centered>
-        <Stack>
-          <TextInput
-            label={t('form.name')}
-            value={name}
-            onChange={(e) => setName(e.currentTarget.value)}
-            data-autofocus
-            required
-          />
-          <div>
-            <Text size="sm" fw={500} mb={6}>{t('cat.color')}</Text>
-            <Group gap="xs">
-              {COLOR_OPTIONS.map((c) => (
-                <ColorSwatch
-                  key={c}
-                  color={c}
-                  size={28}
-                  component="button"
-                  type="button"
-                  onClick={() => setColor(c)}
-                  style={{ cursor: 'pointer', color: '#fff' }}
-                >
-                  {color === c && <IconCheck size={16} />}
-                </ColorSwatch>
-              ))}
-            </Group>
-          </div>
-          <div>
-            <Text size="sm" fw={500} mb={6}>{t('cat.emoji')}</Text>
-            <SimpleGrid cols={8} spacing={6}>
-              {EMOJI_OPTIONS.map((em) => (
-                <UnstyledButton
-                  key={em}
-                  onClick={() => setIcon(icon === em ? '' : em)}
-                  style={{
-                    fontSize: 20,
-                    textAlign: 'center',
-                    padding: 4,
-                    borderRadius: 8,
-                    border:
-                      icon === em
-                        ? '2px solid var(--mantine-color-grape-5)'
-                        : '1px solid var(--mantine-color-gray-3)',
-                    background: icon === em ? 'var(--mantine-color-grape-0)' : 'transparent',
-                  }}
-                >
-                  {em}
-                </UnstyledButton>
-              ))}
-            </SimpleGrid>
-          </div>
-          <Group justify="flex-end">
-            <Button variant="default" onClick={close}>{t('common.cancel')}</Button>
-            <Button onClick={handleSave} disabled={!name.trim()}>{t('common.save')}</Button>
-          </Group>
-        </Stack>
-      </Modal>
+      <CategoryModal opened={opened} onClose={close} tripId={id} editing={editing} />
     </Container>
+  );
+}
+
+interface ModalProps {
+  opened: boolean;
+  onClose: () => void;
+  tripId: string;
+  editing: Category | null;
+}
+
+// The fields remount (via `key`) whenever the modal opens or the edited category
+// changes, so state is initialized straight from props — no reset effect needed.
+function CategoryModal({ opened, onClose, tripId, editing }: ModalProps) {
+  const { t } = useI18n();
+  return (
+    <Modal opened={opened} onClose={onClose} title={editing ? t('common.edit') : t('cat.new')} centered>
+      {opened && <Fields key={editing?.id ?? 'new'} tripId={tripId} editing={editing} onClose={onClose} />}
+    </Modal>
+  );
+}
+
+function Fields({ tripId, editing, onClose }: Omit<ModalProps, 'opened'>) {
+  const { t } = useI18n();
+  const [name, setName] = useState(editing?.name ?? '');
+  const [color, setColor] = useState(editing?.color ?? DEFAULT_COLOR);
+  const [icon, setIcon] = useState(editing?.icon ?? '');
+
+  async function handleSave() {
+    if (!name.trim()) return;
+    const patch = { name: name.trim(), color, icon: icon.trim() || undefined };
+    if (editing) await updateCategory(editing.id, patch);
+    else await addCategory({ ...patch, tripId });
+    onClose();
+  }
+
+  return (
+    <Stack>
+      <TextInput
+        label={t('form.name')}
+        value={name}
+        onChange={(e) => setName(e.currentTarget.value)}
+        data-autofocus
+        required
+      />
+      <div>
+        <Text size="sm" fw={500} mb={6}>{t('cat.color')}</Text>
+        <Group gap="xs">
+          {COLOR_OPTIONS.map((c) => (
+            <ColorSwatch
+              key={c}
+              color={c}
+              size={28}
+              component="button"
+              type="button"
+              onClick={() => setColor(c)}
+              style={{ cursor: 'pointer', color: '#fff' }}
+            >
+              {color === c && <IconCheck size={16} />}
+            </ColorSwatch>
+          ))}
+        </Group>
+      </div>
+      <div>
+        <Text size="sm" fw={500} mb={6}>{t('cat.emoji')}</Text>
+        <SimpleGrid cols={8} spacing={6}>
+          {EMOJI_OPTIONS.map((em) => (
+            <UnstyledButton
+              key={em}
+              onClick={() => setIcon(icon === em ? '' : em)}
+              style={{
+                fontSize: 20,
+                textAlign: 'center',
+                padding: 4,
+                borderRadius: 8,
+                border:
+                  icon === em
+                    ? '2px solid var(--mantine-color-grape-5)'
+                    : '1px solid var(--mantine-color-gray-3)',
+                background: icon === em ? 'var(--mantine-color-grape-0)' : 'transparent',
+              }}
+            >
+              {em}
+            </UnstyledButton>
+          ))}
+        </SimpleGrid>
+      </div>
+      <Group justify="flex-end">
+        <Button variant="default" onClick={onClose}>{t('common.cancel')}</Button>
+        <Button onClick={handleSave} disabled={!name.trim()}>{t('common.save')}</Button>
+      </Group>
+    </Stack>
   );
 }

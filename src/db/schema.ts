@@ -4,6 +4,9 @@
 export type Period = 'BEFORE' | 'DURING';
 export type Kind = 'EXPENSE' | 'REFUND' | 'IOF_REFUND';
 
+// Maps a day ('YYYY-MM-DD') to the city visited that day. Stored on the trip.
+export type CityMap = Record<string, string>;
+
 export interface Trip {
   id: string;
   name: string;
@@ -12,7 +15,7 @@ export interface Trip {
   endDate?: string | null;
   currency: string;          // 'BRL'
   notes?: string;
-  cities?: Record<string, string>; // date 'YYYY-MM-DD' -> city (a day = a city)
+  cities?: CityMap;                // a day = a city
   cityList?: string[];             // curated list of cities, used as options per day
   createdAt: string;
 }

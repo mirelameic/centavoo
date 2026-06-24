@@ -26,14 +26,12 @@ async function applySeed(data: SeedFile): Promise<void> {
     await db.trips.bulkPut(data.trips);
     await db.transactions.bulkPut(data.transactions);
     await db.rules.clear();
-    await db.rules.bulkAdd(data.rules.map(({ id: _id, ...r }) => r));
+    // Drop the seed's `id` so Dexie assigns fresh auto-increment keys.
+    await db.rules.bulkAdd(
+      data.rules.map((r) => ({ keyword: r.keyword, categoryId: r.categoryId, priority: r.priority })),
+    );
   });
   localStorage.setItem(SEED_VERSION_KEY, String(data.version));
-}
-
-// Manual re-import of the Europa data.
-export async function importEuropa(): Promise<void> {
-  await applySeed(await fetchSeed());
 }
 
 // Seeds on first run (empty DB) and re-applies when the seed file version bumps,

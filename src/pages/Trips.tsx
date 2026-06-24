@@ -19,15 +19,10 @@ import { DatePickerInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
 import { IconPlus, IconMapPin } from '@tabler/icons-react';
 import { db } from '../db/db';
-import { cost, createTrip } from '../db/repo';
+import { createTrip } from '../db/repo';
+import { cost } from '../db/stats';
+import { toISO } from '../lib/format';
 import { useI18n } from '../i18n';
-
-function toISO(d: unknown): string | null {
-  if (!d) return null;
-  if (typeof d === 'string') return d.slice(0, 10);
-  if (d instanceof Date) return d.toISOString().slice(0, 10);
-  return null;
-}
 
 export function Trips() {
   const { t, money, date } = useI18n();

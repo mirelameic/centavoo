@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Modal,
   Stack,
@@ -14,65 +14,47 @@ import { DatePickerInput } from '@mantine/dates';
 import type { Category, CategoryRule, Kind, Period, Transaction, Trip } from '../db/schema';
 import { addTransaction, updateTransaction } from '../db/repo';
 import { suggestCategory } from '../lib/categorize';
+import { toISO } from '../lib/format';
 import { useI18n } from '../i18n';
 
-// Normalizes a DatePickerInput value (string in Mantine v8+, Date in older) to 'YYYY-MM-DD'.
-function toISO(d: unknown): string | null {
-  if (!d) return null;
-  if (typeof d === 'string') return d.slice(0, 10);
-  if (d instanceof Date) {
-    const p = (n: number) => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-  }
-  return null;
-}
-
-export function TransactionForm({
-  opened,
-  onClose,
-  trip,
-  categories,
-  rules,
-  editing,
-}: {
+interface Props {
   opened: boolean;
   onClose: () => void;
   trip: Trip;
   categories: Category[];
   rules: CategoryRule[];
   editing?: Transaction | null;
-}) {
+}
+
+// The fields remount (via `key`) whenever the modal opens or the edited row
+// changes, so state is initialized straight from props — no reset effect needed.
+export function TransactionForm({ opened, onClose, editing, ...rest }: Props) {
+  const { t } = useI18n();
+  return (
+    <Modal opened={opened} onClose={onClose} title={editing ? t('tx.edit') : t('tx.new')} centered>
+      {opened && <Fields key={editing?.id ?? 'new'} editing={editing} onClose={onClose} {...rest} />}
+    </Modal>
+  );
+}
+
+function Fields({
+  onClose,
+  trip,
+  categories,
+  rules,
+  editing,
+}: Omit<Props, 'opened'>) {
   const { t } = useI18n();
 
-  const [period, setPeriod] = useState<Period>('DURING');
-  const [date, setDate] = useState<string | null>(null);
-  const [description, setDescription] = useState('');
-  const [amount, setAmount] = useState<number | string>('');
-  const [type, setType] = useState<Kind>('EXPENSE');
-  const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [splitCount, setSplitCount] = useState<number | string>(1);
-
-  // (Re)initialize whenever the modal opens or the edited transaction changes.
-  useEffect(() => {
-    if (!opened) return;
-    if (editing) {
-      setPeriod(editing.period);
-      setDate(editing.date ?? null);
-      setDescription(editing.description);
-      setAmount(Math.abs(editing.amount));
-      setType(editing.kind);
-      setCategoryId(editing.categoryId ?? null);
-      setSplitCount(editing.splitCount || 1);
-    } else {
-      setPeriod('DURING');
-      setDate(trip.startDate ?? null);
-      setDescription('');
-      setAmount('');
-      setType('EXPENSE');
-      setCategoryId(null);
-      setSplitCount(1);
-    }
-  }, [opened, editing, trip.startDate]);
+  const [period, setPeriod] = useState<Period>(editing?.period ?? 'DURING');
+  const [date, setDate] = useState<string | null>(
+    editing ? editing.date ?? null : trip.startDate ?? null,
+  );
+  const [description, setDescription] = useState(editing?.description ?? '');
+  const [amount, setAmount] = useState<number | string>(editing ? Math.abs(editing.amount) : '');
+  const [type, setType] = useState<Kind>(editing?.kind ?? 'EXPENSE');
+  const [categoryId, setCategoryId] = useState<string | null>(editing?.categoryId ?? null);
+  const [splitCount, setSplitCount] = useState<number | string>(editing?.splitCount || 1);
 
   const colorById = new Map(categories.map((c) => [c.id, c.color] as const));
   const catData = categories.map((c) => ({ value: c.id, label: c.name }));
@@ -112,87 +94,85 @@ export function TransactionForm({
   }
 
   return (
-    <Modal opened={opened} onClose={onClose} title={editing ? t('tx.edit') : t('tx.new')} centered>
-      <Stack>
-        <SegmentedControl
-          fullWidth
-          value={period}
-          onChange={(v) => setPeriod(v as Period)}
-          data={[
-            { label: t('period.before'), value: 'BEFORE' },
-            { label: t('period.during'), value: 'DURING' },
-          ]}
-        />
-        <DatePickerInput
-          label={t('table.date')}
-          placeholder="—"
-          value={date as never}
-          onChange={(v) => setDate(toISO(v))}
-          clearable
-        />
-        <TextInput
-          label={t('table.description')}
-          value={description}
-          onChange={(e) => setDescription(e.currentTarget.value)}
-          onBlur={suggestFromDescription}
-          data-autofocus
+    <Stack>
+      <SegmentedControl
+        fullWidth
+        value={period}
+        onChange={(v) => setPeriod(v as Period)}
+        data={[
+          { label: t('period.before'), value: 'BEFORE' },
+          { label: t('period.during'), value: 'DURING' },
+        ]}
+      />
+      <DatePickerInput
+        label={t('table.date')}
+        placeholder="—"
+        value={date as never}
+        onChange={(v) => setDate(toISO(v))}
+        clearable
+      />
+      <TextInput
+        label={t('table.description')}
+        value={description}
+        onChange={(e) => setDescription(e.currentTarget.value)}
+        onBlur={suggestFromDescription}
+        data-autofocus
+        required
+      />
+      <Group grow>
+        <NumberInput
+          label={t('table.amount')}
+          prefix={`${trip.currency === 'BRL' ? 'R$ ' : ''}`}
+          decimalScale={2}
+          min={0}
+          value={amount}
+          onChange={setAmount}
           required
         />
-        <Group grow>
-          <NumberInput
-            label={t('table.amount')}
-            prefix={`${trip.currency === 'BRL' ? 'R$ ' : ''}`}
-            decimalScale={2}
-            min={0}
-            value={amount}
-            onChange={setAmount}
-            required
-          />
-          <NumberInput
-            label={t('field.split')}
-            min={1}
-            step={1}
-            value={splitCount}
-            onChange={setSplitCount}
-          />
-        </Group>
-        <Select
-          label={t('field.type')}
-          data={[
-            { value: 'EXPENSE', label: t('type.expense') },
-            { value: 'REFUND', label: t('type.refund') },
-            { value: 'IOF_REFUND', label: t('type.iof') },
-          ]}
-          value={type}
-          onChange={(v) => setType((v as Kind) ?? 'EXPENSE')}
-          allowDeselect={false}
+        <NumberInput
+          label={t('field.split')}
+          min={1}
+          step={1}
+          value={splitCount}
+          onChange={setSplitCount}
         />
-        {type !== 'IOF_REFUND' && (
-          <Select
-            label={t('table.category')}
-            placeholder="—"
-            data={catData}
-            value={categoryId}
-            onChange={setCategoryId}
-            searchable
-            clearable
-            renderOption={({ option }) => (
-              <Group gap={8}>
-                <Box
-                  w={12}
-                  h={12}
-                  style={{ background: colorById.get(option.value), borderRadius: 3 }}
-                />
-                {option.label}
-              </Group>
-            )}
-          />
-        )}
-        <Group justify="flex-end" mt="xs">
-          <Button variant="default" onClick={onClose}>{t('common.cancel')}</Button>
-          <Button onClick={handleSave} disabled={!valid}>{t('common.save')}</Button>
-        </Group>
-      </Stack>
-    </Modal>
+      </Group>
+      <Select
+        label={t('field.type')}
+        data={[
+          { value: 'EXPENSE', label: t('type.expense') },
+          { value: 'REFUND', label: t('type.refund') },
+          { value: 'IOF_REFUND', label: t('type.iof') },
+        ]}
+        value={type}
+        onChange={(v) => setType((v as Kind) ?? 'EXPENSE')}
+        allowDeselect={false}
+      />
+      {type !== 'IOF_REFUND' && (
+        <Select
+          label={t('table.category')}
+          placeholder="—"
+          data={catData}
+          value={categoryId}
+          onChange={setCategoryId}
+          searchable
+          clearable
+          renderOption={({ option }) => (
+            <Group gap={8}>
+              <Box
+                w={12}
+                h={12}
+                style={{ background: colorById.get(option.value), borderRadius: 3 }}
+              />
+              {option.label}
+            </Group>
+          )}
+        />
+      )}
+      <Group justify="flex-end" mt="xs">
+        <Button variant="default" onClick={onClose}>{t('common.cancel')}</Button>
+        <Button onClick={handleSave} disabled={!valid}>{t('common.save')}</Button>
+      </Group>
+    </Stack>
   );
 }
