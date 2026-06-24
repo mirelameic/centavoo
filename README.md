@@ -4,7 +4,7 @@ Personal PWA to record and analyze travel expenses per trip.
 
 Each trip stores its transactions split by **period** (before / during), **category**, and **city**, with charts and other analysis.
 
-- **Stack:** Vite + React + TypeScript · Mantine (UI + charts) · Dexie (IndexedDB) · PWA.
+- **Stack:** Vite + React + TypeScript · Mantine (UI + charts) · Dexie (IndexedDB) · react-i18next · PWA.
 - **Local-first:** data lives on your device (the browser). Works offline.
 
 ## Develop
@@ -52,9 +52,10 @@ node scripts/smoke.mjs        # loads the app, checks KPIs, saves screenshots to
 
 ## Structure
 
-- `src/db/` — model (`schema.ts`), Dexie database (`db.ts`), aggregations (`repo.ts`), seed.
-- `src/lib/` — formatting, auto-categorization, and (future) import parsers.
-- `src/i18n.tsx` — translations (pt/en) and locale-aware formatting.
-- `src/pages/` — screens (Trips, Trip, …).
+- `src/db/` — model (`schema.ts`), Dexie database (`db.ts`), CRUD (`repo.ts`), aggregations/analytics (`stats.ts`), seed and backup.
+- `src/lib/` — formatting/date helpers, auto-categorization, and shared constants.
+- `src/components/` — forms (`TransactionForm`, `TripForm`) and Trip dashboard pieces (`trip/`).
+- `src/i18n/` — translations (`locales/pt.ts`, `locales/en.ts`) via react-i18next, with locale-aware money/date helpers. To add a language, add a locale file and one entry in `config.ts`.
+- `src/pages/` — screens (Trips, Trip, Categories).
 - `scripts/seed_europa.py` — generates `public/europa.json` from the xlsx.
 
