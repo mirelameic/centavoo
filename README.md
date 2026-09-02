@@ -53,8 +53,8 @@ node scripts/smoke.mjs        # loads the app, checks KPIs, saves screenshots to
 ## Structure
 
 - `src/db/` — model (`schema.ts`), Dexie database (`db.ts`), CRUD (`repo.ts`), aggregations/analytics (`stats.ts`), seed and backup.
-- `src/lib/` — formatting/date helpers, auto-categorization, and shared constants.
-- `src/components/` — `Logo` (app mark), forms (`TransactionForm`, `TripForm`, and the `TripIdentityFields` they share), and Trip dashboard pieces (`trip/`: `primitives.tsx` for small shared bits like `CategoryChip`/`Kpi`/`Section`, plus `TopTable`, `CityEditor`).
+- `src/lib/` — formatting/date helpers, auto-categorization, statement-table parsing (`parseTable.ts`, used by the transaction importer), and shared constants.
+- `src/components/` — `Logo` (app mark), forms (`TransactionForm`, `TripForm`, and the `TripIdentityFields` they share), `ImportTransactions` (paste/upload a statement, map columns, review, then bulk-insert), and Trip dashboard pieces (`trip/`: `primitives.tsx` for small shared bits like `CategoryChip`/`Kpi`/`Section`, plus `TopTable`, `CityEditor`).
 - `src/i18n/` — translations (`locales/pt.ts`, `locales/en.ts`) via react-i18next, with locale-aware money/date helpers. To add a language, add a locale file and one entry in `config.ts`.
 - `src/pages/` — screens (Trips, Trip, Categories).
 - `scripts/seed_europa.py` — generates `public/europa.json` from the xlsx.

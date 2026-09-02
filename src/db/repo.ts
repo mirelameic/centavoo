@@ -75,6 +75,17 @@ export const deleteTransaction = (id: string) => db.transactions.delete(id);
 
 export const deleteTransactions = (ids: string[]) => db.transactions.bulkDelete(ids);
 
+// Inserts many transactions at once (statement import) — same shape as
+// addTransaction, batched into a single Dexie call.
+export async function bulkAddTransactions(
+  rows: Omit<Transaction, 'id' | 'createdAt'>[],
+): Promise<string[]> {
+  const createdAt = new Date().toISOString();
+  const withIds = rows.map((r) => ({ ...r, id: `tx_${crypto.randomUUID()}`, createdAt }));
+  await db.transactions.bulkAdd(withIds);
+  return withIds.map((r) => r.id);
+}
+
 // ---- categories --------------------------------------------------------------
 export async function addCategory(
   data: Omit<Category, 'id' | 'sortOrder'> & { sortOrder?: number },

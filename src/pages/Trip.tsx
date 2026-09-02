@@ -23,7 +23,14 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { DonutChart, BarChart } from '@mantine/charts';
-import { IconArrowLeft, IconPlus, IconPencil, IconTrash, IconCategory } from '@tabler/icons-react';
+import {
+  IconArrowLeft,
+  IconPlus,
+  IconPencil,
+  IconTrash,
+  IconCategory,
+  IconFileImport,
+} from '@tabler/icons-react';
 import { db } from '../db/db';
 import { computeStats, cityBreakdown, cost } from '../db/stats';
 import { deleteTransaction, deleteTransactions } from '../db/repo';
@@ -32,6 +39,7 @@ import { dateRange } from '../lib/format';
 import { PERIOD_COLORS } from '../lib/constants';
 import { TransactionForm } from '../components/TransactionForm';
 import { TripForm } from '../components/TripForm';
+import { ImportTransactions } from '../components/ImportTransactions';
 import { CategoryChip, Kpi, Section, SplitTag } from '../components/trip/primitives';
 import { TopTable } from '../components/trip/TopTable';
 import { CityEditor } from '../components/trip/CityEditor';
@@ -56,6 +64,7 @@ export function Trip() {
 
   const [formOpened, { open: openForm, close: closeForm }] = useDisclosure(false);
   const [tripFormOpened, { open: openTripForm, close: closeTripForm }] = useDisclosure(false);
+  const [importOpened, { open: openImport, close: closeImport }] = useDisclosure(false);
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
   const openAdd = () => { setEditingTx(null); openForm(); };
   const openEdit = (tx: Transaction) => { setEditingTx(tx); openForm(); };
@@ -167,6 +176,9 @@ export function Trip() {
             renderRoot={(props) => <Link to={`/trip/${trip.id}/categories`} {...props} />}
           >
             {t('menu.categories')}
+          </Button>
+          <Button variant="default" leftSection={<IconFileImport size={18} />} onClick={openImport}>
+            {t('import.button')}
           </Button>
           <Button leftSection={<IconPlus size={18} />} onClick={openAdd}>{t('tx.new')}</Button>
         </Group>
@@ -510,6 +522,13 @@ export function Trip() {
         editing={editingTx}
       />
       <TripForm opened={tripFormOpened} onClose={closeTripForm} trip={trip} />
+      <ImportTransactions
+        opened={importOpened}
+        onClose={closeImport}
+        trip={trip}
+        categories={cats ?? []}
+        rules={rules}
+      />
     </Container>
   );
 }
