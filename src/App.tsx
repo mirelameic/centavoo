@@ -11,17 +11,28 @@ import {
   Menu,
   ActionIcon,
   FileButton,
+  useMantineColorScheme,
+  useComputedColorScheme,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconPlane, IconSettings, IconDownload, IconUpload } from '@tabler/icons-react';
+import {
+  IconSettings,
+  IconDownload,
+  IconUpload,
+  IconSun,
+  IconMoon,
+} from '@tabler/icons-react';
 import { ensureSeeded } from './db/seed';
 import { exportBackup, importBackup } from './db/backup';
 import { useI18n, LANGUAGES, type Lang } from './i18n';
+import { Logo } from './components/Logo';
 
 export function App() {
   const { t, lang, setLang } = useI18n();
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { setColorScheme } = useMantineColorScheme();
+  const colorScheme = useComputedColorScheme('light');
 
   useEffect(() => {
     ensureSeeded()
@@ -53,8 +64,17 @@ export function App() {
             renderRoot={(props) => <Link to="/" {...props} />}
             style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
           >
-            <IconPlane size={22} />
-            <Text fw={700}>{t('app.title')}</Text>
+            <Logo size={26} />
+            <Text
+              fw={700}
+              tt="uppercase"
+              style={{
+                fontFamily: "'Unbounded', -apple-system, sans-serif",
+                letterSpacing: '0.02em',
+              }}
+            >
+              {t('app.title')}
+            </Text>
           </Group>
           <Group gap="xs">
             <SegmentedControl
@@ -63,6 +83,14 @@ export function App() {
               onChange={(v) => setLang(v as Lang)}
               data={LANGUAGES.map((l) => ({ label: l.label, value: l.code }))}
             />
+            <ActionIcon
+              variant="default"
+              size="lg"
+              aria-label="toggle-color-scheme"
+              onClick={() => setColorScheme(colorScheme === 'dark' ? 'light' : 'dark')}
+            >
+              {colorScheme === 'dark' ? <IconSun size={18} /> : <IconMoon size={18} />}
+            </ActionIcon>
             <Menu position="bottom-end" shadow="md" width={200}>
               <Menu.Target>
                 <ActionIcon variant="subtle" color="gray" aria-label="menu">

@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Modal, Stack, TextInput, Group, Button, Divider } from '@mantine/core';
-import { DatePickerInput } from '@mantine/dates';
+import { Modal, Stack, Group, Button, Divider } from '@mantine/core';
 import { IconTrash } from '@tabler/icons-react';
 import type { Trip } from '../db/schema';
 import { updateTrip, deleteTrip } from '../db/repo';
 import { toISO } from '../lib/format';
 import { useI18n } from '../i18n';
+import { TripIdentityFields } from './TripFields';
 
 interface Props {
   opened: boolean;
@@ -56,26 +56,13 @@ function Fields({ trip, onClose }: Omit<Props, 'opened'>) {
 
   return (
     <Stack>
-      <TextInput
-        label={t('form.name')}
-        value={name}
-        onChange={(e) => setName(e.currentTarget.value)}
-        data-autofocus
-        required
-      />
-      <TextInput
-        label={t('form.destination')}
-        placeholder={t('form.destPlaceholder')}
-        value={destination}
-        onChange={(e) => setDestination(e.currentTarget.value)}
-      />
-      <DatePickerInput
-        type="range"
-        label={t('form.dates')}
-        placeholder={t('form.datesPlaceholder')}
-        value={range as never}
-        onChange={(v) => setRange(v as [unknown, unknown])}
-        clearable
+      <TripIdentityFields
+        name={name}
+        onNameChange={setName}
+        destination={destination}
+        onDestinationChange={setDestination}
+        range={range}
+        onRangeChange={setRange}
       />
       <Group justify="flex-end">
         <Button variant="default" onClick={onClose}>{t('common.cancel')}</Button>

@@ -161,9 +161,9 @@ function Fields({ tripId, editing, onClose }: Omit<ModalProps, 'opened'>) {
                 borderRadius: 8,
                 border:
                   icon === em
-                    ? '2px solid var(--mantine-color-grape-5)'
+                    ? '2px solid var(--mantine-color-orange-5)'
                     : '1px solid var(--mantine-color-gray-3)',
-                background: icon === em ? 'var(--mantine-color-grape-0)' : 'transparent',
+                background: icon === em ? 'var(--mantine-color-orange-0)' : 'transparent',
               }}
             >
               {em}

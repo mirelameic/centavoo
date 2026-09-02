@@ -14,8 +14,8 @@ export default defineConfig({
         short_name: 'Centavoo',
         description: 'Travel expense & budget tracker.',
         lang: 'pt-BR',
-        theme_color: '#7048e8',
-        background_color: '#ffffff',
+        theme_color: '#e8590c',
+        background_color: '#131211',
         display: 'standalone',
         start_url: '/',
         icons: [

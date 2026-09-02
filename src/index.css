@@ -9,3 +9,36 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Warm ambient background, like a softly-lit room glowing behind glass panels.
+   Base tones are neutral/warm grays (R >= G >= B) — never blue-leaning, so the
+   glass panels below (which let this show through) don't read as purple. */
+[data-mantine-color-scheme='dark'] body {
+  background:
+    radial-gradient(1100px 600px at 12% -10%, rgba(255, 158, 68, 0.14), transparent 60%),
+    radial-gradient(900px 520px at 92% 5%, rgba(255, 190, 110, 0.08), transparent 55%),
+    #131211;
+}
+
+[data-mantine-color-scheme='light'] body {
+  background:
+    radial-gradient(1100px 600px at 12% -10%, rgba(255, 158, 68, 0.16), transparent 60%),
+    radial-gradient(900px 520px at 92% 5%, rgba(255, 200, 120, 0.14), transparent 55%),
+    #f7f2ec;
+}
+
+/* Frosted-glass panels used by Card and the app header. */
+.glass-panel {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+[data-mantine-color-scheme='dark'] .glass-panel {
+  background-color: rgba(36, 34, 32, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-mantine-color-scheme='light'] .glass-panel {
+  background-color: rgba(255, 255, 255, 0.62) !important;
+  border-color: rgba(20, 15, 10, 0.07) !important;
+}

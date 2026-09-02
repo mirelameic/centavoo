@@ -12,10 +12,8 @@ import {
   Button,
   Badge,
   Modal,
-  TextInput,
   Center,
 } from '@mantine/core';
-import { DatePickerInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
 import { IconPlus, IconMapPin } from '@tabler/icons-react';
 import { db } from '../db/db';
@@ -23,6 +21,7 @@ import { createTrip } from '../db/repo';
 import { cost } from '../db/stats';
 import { toISO } from '../lib/format';
 import { useI18n } from '../i18n';
+import { TripIdentityFields } from '../components/TripFields';
 
 export function Trips() {
   const { t, money, date } = useI18n();
@@ -96,7 +95,7 @@ export function Trips() {
                 {date(tr.startDate)} – {date(tr.endDate)}
               </Text>
               <Group justify="space-between" mt="sm">
-                <Badge variant="light" color="grape">{t('trips.netSpend')}</Badge>
+                <Badge variant="light" color="orange">{t('trips.netSpend')}</Badge>
                 <Text fw={700}>{money(netByTrip.get(tr.id) ?? 0, tr.currency)}</Text>
               </Group>
             </Stack>
@@ -106,27 +105,13 @@ export function Trips() {
 
       <Modal opened={opened} onClose={close} title={t('trips.new')} centered>
         <Stack>
-          <TextInput
-            label={t('form.name')}
-            placeholder={t('form.namePlaceholder')}
-            value={name}
-            onChange={(e) => setName(e.currentTarget.value)}
-            data-autofocus
-            required
-          />
-          <TextInput
-            label={t('form.destination')}
-            placeholder={t('form.destPlaceholder')}
-            value={destination}
-            onChange={(e) => setDestination(e.currentTarget.value)}
-          />
-          <DatePickerInput
-            type="range"
-            label={t('form.dates')}
-            placeholder={t('form.datesPlaceholder')}
-            value={range as never}
-            onChange={(v) => setRange(v as [unknown, unknown])}
-            clearable
+          <TripIdentityFields
+            name={name}
+            onNameChange={setName}
+            destination={destination}
+            onDestinationChange={setDestination}
+            range={range}
+            onRangeChange={setRange}
           />
           <Group justify="flex-end">
             <Button variant="default" onClick={close}>{t('common.cancel')}</Button>

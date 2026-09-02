@@ -32,7 +32,7 @@ import { dateRange } from '../lib/format';
 import { PERIOD_COLORS } from '../lib/constants';
 import { TransactionForm } from '../components/TransactionForm';
 import { TripForm } from '../components/TripForm';
-import { Dot, Kpi, Section } from '../components/trip/primitives';
+import { CategoryChip, Kpi, Section, SplitTag } from '../components/trip/primitives';
 import { TopTable } from '../components/trip/TopTable';
 import { CityEditor } from '../components/trip/CityEditor';
 import { useI18n } from '../i18n';
@@ -206,7 +206,7 @@ export function Trip() {
               <Stack gap={6} miw={240}>
                 {stats.byCategory.map((c) => (
                   <Group key={c.name} justify="space-between">
-                    <Group gap={8}><Dot color={c.color} /><Text size="sm">{c.name}</Text></Group>
+                    <CategoryChip color={c.color} name={c.name} gap={8} />
                     <Text size="sm" fw={600}>{money(c.amount, cur)}</Text>
                   </Group>
                 ))}
@@ -274,7 +274,7 @@ export function Trip() {
               h={280}
               data={weekdayData}
               dataKey="day"
-              series={[{ name: 'amount', color: 'grape.5', label: t('table.amount') }]}
+              series={[{ name: 'amount', color: 'orange.5', label: t('table.amount') }]}
               valueFormatter={(v) => money(v, cur)}
               barProps={{ radius: 8 }}
               gridAxis="none"
@@ -311,7 +311,7 @@ export function Trip() {
                   <Stack gap={6} miw={220}>
                     {cityBd.byCity.map((c) => (
                       <Group key={c.city} justify="space-between">
-                        <Group gap={8}><Dot color={c.color} /><Text size="sm">{c.city}</Text></Group>
+                        <CategoryChip color={c.color} name={c.city} gap={8} />
                         <Text size="sm" fw={600}>{money(c.amount, cur)}</Text>
                       </Group>
                     ))}
@@ -372,7 +372,7 @@ export function Trip() {
               <Table.Tbody>
                 {stats.categoryTable.map((c) => (
                   <Table.Tr key={c.name}>
-                    <Table.Td><Group gap={6} wrap="nowrap"><Dot color={c.color} /><Text size="sm">{c.name}</Text></Group></Table.Td>
+                    <Table.Td><CategoryChip color={c.color} name={c.name} /></Table.Td>
                     <Table.Td ta="right">{money(c.total, cur)}</Table.Td>
                     <Table.Td ta="right"><Text size="sm" c="dimmed">{c.pct}%</Text></Table.Td>
                     <Table.Td ta="right">{c.count}</Table.Td>
@@ -447,7 +447,7 @@ export function Trip() {
                     const c = cost(tx);
                     const cat = tx.categoryId ? catById.get(tx.categoryId) : undefined;
                     return (
-                      <Table.Tr key={tx.id} bg={selected.has(tx.id) ? 'var(--mantine-color-grape-0)' : undefined}>
+                      <Table.Tr key={tx.id} bg={selected.has(tx.id) ? 'var(--mantine-color-orange-0)' : undefined}>
                         <Table.Td>
                           <Checkbox
                             aria-label="select-row"
@@ -458,15 +458,13 @@ export function Trip() {
                         <Table.Td>{date(tx.date)}</Table.Td>
                         <Table.Td>
                           {tx.description}
-                          {tx.splitCount > 1 && (
-                            <Text span size="xs" c="dimmed"> (÷{tx.splitCount})</Text>
-                          )}
+                          <SplitTag count={tx.splitCount} />
                         </Table.Td>
                         <Table.Td>
                           {tx.kind === 'IOF_REFUND' ? (
                             <Badge variant="light" color="gray" size="sm">IOF</Badge>
                           ) : cat ? (
-                            <Group gap={6} wrap="nowrap"><Dot color={cat.color} /><Text size="sm">{cat.name}</Text></Group>
+                            <CategoryChip color={cat.color} name={cat.name} />
                           ) : (
                             <Text size="sm" c="dimmed">—</Text>
                           )}
