@@ -20,6 +20,7 @@ import { IconUpload, IconAlertCircle } from '@tabler/icons-react';
 import type { Category, CategoryRule, Kind, Period, Trip } from '../db/schema';
 import { bulkAddTransactions } from '../db/repo';
 import { suggestCategory } from '../lib/categorize';
+import { CategoryIcon } from '../lib/categoryIcons';
 import {
   splitRows,
   parseAmount,
@@ -182,7 +183,15 @@ function Flow({ onClose, trip, categories, rules }: Omit<Props, 'opened'>) {
     }
   }
 
+  const catById = new Map(categories.map((c) => [c.id, c] as const));
   const catData = categories.map((c) => ({ value: c.id, label: c.name }));
+  const catRenderOption = ({ option }: { option: { value: string; label: string } }) => (
+    <Group gap={8} wrap="nowrap">
+      <Box w={12} h={12} style={{ background: catById.get(option.value)?.color, borderRadius: 3 }} />
+      <CategoryIcon name={catById.get(option.value)?.icon} size={14} />
+      {option.label}
+    </Group>
+  );
   const roleOptions = [
     { value: 'ignore', label: t('import.colIgnore') },
     { value: 'date', label: t('import.colDate') },
@@ -317,6 +326,7 @@ function Flow({ onClose, trip, categories, rules }: Omit<Props, 'opened'>) {
                     value={r.categoryId}
                     onChange={(v) => setCategoryOverrides((prev) => new Map(prev).set(i, v))}
                     disabled={!!r.error}
+                    renderOption={catRenderOption}
                     clearable
                   />
                 </Table.Td>

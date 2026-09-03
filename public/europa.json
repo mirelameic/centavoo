@@ -1,85 +1,85 @@
 {
-  "version": 4,
+  "version": 6,
   "generatedFrom": "gastos-europa.xlsx",
   "categories": [
     {
       "id": "cat_hospedagem",
       "tripId": "trip_europa_2025",
       "name": "Hospedagem",
-      "color": "#0CA678",
-      "icon": "🏨",
+      "color": "#0E8C6B",
+      "icon": "bed",
       "sortOrder": 0
     },
     {
       "id": "cat_passagem",
       "tripId": "trip_europa_2025",
       "name": "Passagem",
-      "color": "#4263EB",
-      "icon": "✈️",
+      "color": "#B8860B",
+      "icon": "plane",
       "sortOrder": 1
     },
     {
       "id": "cat_transporte",
       "tripId": "trip_europa_2025",
       "name": "Transporte",
-      "color": "#FF9900",
-      "icon": "🚕",
+      "color": "#C2540D",
+      "icon": "car",
       "sortOrder": 2
     },
     {
       "id": "cat_alimentacao",
       "tripId": "trip_europa_2025",
       "name": "Alimentação",
-      "color": "#9900FF",
-      "icon": "🍽️",
+      "color": "#C1352E",
+      "icon": "food",
       "sortOrder": 3
     },
     {
       "id": "cat_compras",
       "tripId": "trip_europa_2025",
       "name": "Compras",
-      "color": "#4A86E8",
-      "icon": "🛍️",
+      "color": "#B23368",
+      "icon": "shopping",
       "sortOrder": 4
     },
     {
       "id": "cat_brindes",
       "tripId": "trip_europa_2025",
       "name": "Brindes",
-      "color": "#00B5C7",
-      "icon": "🎁",
+      "color": "#7D1F44",
+      "icon": "gift",
       "sortOrder": 5
     },
     {
       "id": "cat_turismo",
       "tripId": "trip_europa_2025",
       "name": "Turismo",
-      "color": "#E6B800",
-      "icon": "🎟️",
+      "color": "#8A7220",
+      "icon": "ticket",
       "sortOrder": 6
     },
     {
       "id": "cat_genericos",
       "tripId": "trip_europa_2025",
       "name": "Genéricos de viagem",
-      "color": "#FF0000",
-      "icon": "🧳",
+      "color": "#7A4A2A",
+      "icon": "luggage",
       "sortOrder": 7
     },
     {
       "id": "cat_cannabis",
       "tripId": "trip_europa_2025",
       "name": "Cannabis",
-      "color": "#00C000",
-      "icon": "🌿",
+      "color": "#3D8B4C",
+      "icon": "leaf",
       "sortOrder": 8
     },
     {
       "id": "cat_outros",
       "tripId": "trip_europa_2025",
       "name": "Outros",
-      "color": "#FF00FF",
-      "icon": "🔖",
+      "color": "#5C5650",
+      "icon": "bookmark",
       "sortOrder": 9
     }
   ],

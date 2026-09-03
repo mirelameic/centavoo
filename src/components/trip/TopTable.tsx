@@ -28,7 +28,7 @@ export function TopTable({
                 {tx.description}
                 <SplitTag count={tx.splitCount} />
               </Table.Td>
-              <Table.Td>{c ? <CategoryChip color={c.color} name={c.name} /> : '—'}</Table.Td>
+              <Table.Td>{c ? <CategoryChip color={c.color} name={c.name} icon={c.icon} /> : '—'}</Table.Td>
               <Table.Td><Text size="sm" c="dimmed">{(tx.date && cities[tx.date]) || '—'}</Text></Table.Td>
               <Table.Td><Text size="sm" c="dimmed">{date(tx.date)}</Text></Table.Td>
               <Table.Td ta="right" fw={600}>{money(cost(tx), cur)}</Table.Td>

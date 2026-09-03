@@ -20,7 +20,11 @@ import {
   ActionIcon,
   Checkbox,
   MultiSelect,
+  Box,
+  SegmentedControl,
+  Pill,
 } from '@mantine/core';
+import { DatePickerInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
 import { DonutChart, BarChart } from '@mantine/charts';
 import {
@@ -30,23 +34,60 @@ import {
   IconTrash,
   IconCategory,
   IconFileImport,
+  IconChevronUp,
+  IconChevronDown,
+  IconSelector,
 } from '@tabler/icons-react';
 import { db } from '../db/db';
 import { computeStats, cityBreakdown, cost } from '../db/stats';
 import { deleteTransaction, deleteTransactions } from '../db/repo';
-import type { Transaction } from '../db/schema';
-import { dateRange } from '../lib/format';
+import type { Period, Transaction } from '../db/schema';
+import { dateRange, toISO } from '../lib/format';
 import { PERIOD_COLORS } from '../lib/constants';
 import { TransactionForm } from '../components/TransactionForm';
 import { TripForm } from '../components/TripForm';
 import { ImportTransactions } from '../components/ImportTransactions';
 import { CategoryChip, Kpi, Section, SplitTag } from '../components/trip/primitives';
+import { CategoryIcon } from '../lib/categoryIcons';
 import { TopTable } from '../components/trip/TopTable';
 import { CityEditor } from '../components/trip/CityEditor';
 import { useI18n } from '../i18n';
 
 // Left-align the built-in (interactive) chart legend — Mantine defaults it to flex-end.
 const leftLegend = { legend: { justifyContent: 'flex-start' as const } };
+
+type TxSortField = 'date' | 'category' | 'city' | 'period' | 'amount';
+
+function SortableTh<F extends string>({
+  field,
+  label,
+  sortField,
+  sortDir,
+  onSort,
+  align = 'left',
+}: {
+  field: F;
+  label: string;
+  sortField: F | null;
+  sortDir: 'asc' | 'desc';
+  onSort: (field: F) => void;
+  align?: 'left' | 'right';
+}) {
+  const active = sortField === field;
+  const Icon = active ? (sortDir === 'asc' ? IconChevronUp : IconChevronDown) : IconSelector;
+  return (
+    <Table.Th
+      ta={align}
+      onClick={() => onSort(field)}
+      style={{ cursor: 'pointer', userSelect: 'none' }}
+    >
+      <Group gap={4} wrap="nowrap" justify={align === 'right' ? 'flex-end' : 'flex-start'}>
+        {label}
+        <Icon size={14} style={{ opacity: active ? 1 : 0.45, flexShrink: 0 }} />
+      </Group>
+    </Table.Th>
+  );
+}
 
 export function Trip() {
   const { t, money, date, locale } = useI18n();
@@ -73,6 +114,28 @@ export function Trip() {
   };
 
   const [cityCatFilter, setCityCatFilter] = useState<string[]>([]);
+  const [txCatFilter, setTxCatFilter] = useState<string[]>([]);
+  const [txCityFilter, setTxCityFilter] = useState<string[]>([]);
+  const [txPeriodFilter, setTxPeriodFilter] = useState<'ALL' | Period>('ALL');
+  const [txDateMode, setTxDateMode] = useState<'day' | 'range'>('range');
+  const [txDate, setTxDate] = useState<string | null>(null);
+  const [txDateRange, setTxDateRange] = useState<[string | null, string | null]>([null, null]);
+  const [txSortField, setTxSortField] = useState<TxSortField | null>(null);
+  const [txSortDir, setTxSortDir] = useState<'asc' | 'desc'>('asc');
+  const txFiltersActive =
+    txCatFilter.length > 0 ||
+    txCityFilter.length > 0 ||
+    txPeriodFilter !== 'ALL' ||
+    txDate !== null ||
+    txDateRange[0] !== null ||
+    txDateRange[1] !== null;
+  const clearTxFilters = () => {
+    setTxCatFilter([]);
+    setTxCityFilter([]);
+    setTxPeriodFilter('ALL');
+    setTxDate(null);
+    setTxDateRange([null, null]);
+  };
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const toggleSel = (txId: string) =>
     setSelected((s) => {
@@ -148,10 +211,52 @@ export function Trip() {
   const topBefore = topBy('BEFORE');
   const topDuring = topBy('DURING');
 
-  const sortedTx = [...(txs ?? [])].sort((a, b) => {
-    if (a.period !== b.period) return a.period === 'BEFORE' ? -1 : 1;
-    return (a.date ?? '').localeCompare(b.date ?? '');
-  });
+  const txCityOptions = [...new Set([...(trip.cityList ?? []), ...Object.values(cities)])]
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+  const txCityOf = (tx: Transaction) => (tx.date && cities[tx.date]) || '';
+  const txSortCompare: Record<TxSortField, (a: Transaction, b: Transaction) => number> = {
+    date: (a, b) => (a.date ?? '').localeCompare(b.date ?? ''),
+    category: (a, b) =>
+      (catById.get(a.categoryId ?? '')?.name ?? '').localeCompare(catById.get(b.categoryId ?? '')?.name ?? ''),
+    city: (a, b) => txCityOf(a).localeCompare(txCityOf(b)),
+    period: (a, b) => (a.period === b.period ? 0 : a.period === 'BEFORE' ? -1 : 1),
+    amount: (a, b) => cost(a) - cost(b),
+  };
+  // 3-state cycle per column: unsorted -> asc -> desc -> unsorted (back to default order).
+  const toggleTxSort = (field: TxSortField) => {
+    if (txSortField !== field) {
+      setTxSortField(field);
+      setTxSortDir('asc');
+    } else if (txSortDir === 'asc') {
+      setTxSortDir('desc');
+    } else {
+      setTxSortField(null);
+    }
+  };
+  const filteredTx = (txs ?? [])
+    .filter((tx) => {
+      if (txPeriodFilter !== 'ALL' && tx.period !== txPeriodFilter) return false;
+      if (txCatFilter.length && !(tx.categoryId && txCatFilter.includes(tx.categoryId))) return false;
+      const txCity = tx.date ? cities[tx.date] : undefined;
+      if (txCityFilter.length && !(txCity && txCityFilter.includes(txCity))) return false;
+      if (txDateMode === 'day') {
+        if (txDate && tx.date !== txDate) return false;
+      } else {
+        if (txDateRange[0] && (!tx.date || tx.date < txDateRange[0])) return false;
+        if (txDateRange[1] && (!tx.date || tx.date > txDateRange[1])) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (txSortField) {
+        const dir = txSortDir === 'asc' ? 1 : -1;
+        const primary = txSortCompare[txSortField](a, b) * dir;
+        if (primary !== 0) return primary;
+      }
+      if (a.period !== b.period) return a.period === 'BEFORE' ? -1 : 1;
+      return (a.date ?? '').localeCompare(b.date ?? '');
+    });
 
   return (
     <Container size="lg" px={0}>
@@ -218,7 +323,7 @@ export function Trip() {
               <Stack gap={6} miw={240}>
                 {stats.byCategory.map((c) => (
                   <Group key={c.name} justify="space-between">
-                    <CategoryChip color={c.color} name={c.name} gap={8} />
+                    <CategoryChip color={c.color} name={c.name} icon={c.icon} gap={8} />
                     <Text size="sm" fw={600}>{money(c.amount, cur)}</Text>
                   </Group>
                 ))}
@@ -276,6 +381,7 @@ export function Trip() {
                 withLegend
                 legendProps={{ verticalAlign: 'bottom' }}
                 styles={leftLegend}
+                barProps={{ radius: [4, 4, 0, 0] }}
               />
             ) : (
               <Text c="dimmed">{t('chart.noDated')}</Text>
@@ -283,12 +389,13 @@ export function Trip() {
 
             <Section>{t('sec.weekday')}</Section>
             <BarChart
-              h={280}
+              h={200}
               data={weekdayData}
               dataKey="day"
               series={[{ name: 'amount', color: 'orange.5', label: t('table.amount') }]}
               valueFormatter={(v) => money(v, cur)}
-              barProps={{ radius: 8 }}
+              barProps={{ radius: [6, 6, 0, 0] }}
+              barChartProps={{ barCategoryGap: '12%' }}
               gridAxis="none"
               withYAxis={false}
               withBarValueLabel
@@ -307,6 +414,15 @@ export function Trip() {
               onChange={setCityCatFilter}
               clearable
               mb="md"
+              renderOption={({ option }) => {
+                const c = catById.get(option.value);
+                return (
+                  <Group gap={6} wrap="nowrap">
+                    {c && <CategoryIcon name={c.icon} size={14} />}
+                    {option.label}
+                  </Group>
+                );
+              }}
             />
             {cityDonut.length ? (
               <>
@@ -384,7 +500,7 @@ export function Trip() {
               <Table.Tbody>
                 {stats.categoryTable.map((c) => (
                   <Table.Tr key={c.name}>
-                    <Table.Td><CategoryChip color={c.color} name={c.name} /></Table.Td>
+                    <Table.Td><CategoryChip color={c.color} name={c.name} icon={c.icon} /></Table.Td>
                     <Table.Td ta="right">{money(c.total, cur)}</Table.Td>
                     <Table.Td ta="right"><Text size="sm" c="dimmed">{c.pct}%</Text></Table.Td>
                     <Table.Td ta="right">{c.count}</Table.Td>
@@ -405,6 +521,7 @@ export function Trip() {
               ]}
               valueFormatter={(v) => money(v, cur)}
               yAxisProps={{ width: 88 }}
+              barProps={{ radius: 4 }}
               withLegend
               legendProps={{ verticalAlign: 'bottom' }}
               styles={leftLegend}
@@ -415,6 +532,118 @@ export function Trip() {
         {/* Transactions */}
         <Tabs.Panel value="tx">
           <Card withBorder padding={0}>
+            <Box px="md" pt="md">
+              <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="sm" mb="xs">
+                <div>
+                  <Text size="sm" fw={500} mb={4}>{t('tx.filterDate')}</Text>
+                  <Group gap={6} wrap="nowrap" align="flex-start">
+                    <Box style={{ flex: 1, minWidth: 0 }}>
+                      {txDateMode === 'day' ? (
+                        <DatePickerInput
+                          valueFormat="DD/MM/YYYY"
+                          placeholder={t('tx.filterDatePlaceholder')}
+                          value={txDate as never}
+                          onChange={(v) => setTxDate(toISO(v))}
+                          clearable
+                        />
+                      ) : (
+                        <DatePickerInput
+                          type="range"
+                          valueFormat="DD/MM/YY"
+                          placeholder={t('tx.filterDatePlaceholder')}
+                          value={txDateRange as never}
+                          onChange={(v) => setTxDateRange([toISO(v[0]), toISO(v[1])])}
+                          clearable
+                        />
+                      )}
+                    </Box>
+                    <SegmentedControl
+                      size="xs"
+                      value={txDateMode}
+                      onChange={(v) => setTxDateMode(v as 'day' | 'range')}
+                      data={[
+                        { label: t('tx.dateModeDay'), value: 'day' },
+                        { label: t('tx.dateModeRange'), value: 'range' },
+                      ]}
+                    />
+                  </Group>
+                </div>
+                <MultiSelect
+                  label={t('tx.filterCategory')}
+                  placeholder={txCatFilter.length ? undefined : t('tx.filterCategoryPlaceholder')}
+                  data={(cats ?? []).map((c) => ({ value: c.id, label: c.name }))}
+                  value={txCatFilter}
+                  onChange={setTxCatFilter}
+                  clearable
+                  renderPill={({ option, onRemove }) => {
+                    const idx = txCatFilter.indexOf(String(option.value));
+                    if (idx > 1) {
+                      return idx === 2 ? (
+                        <Pill key="more" size="sm">{`+${txCatFilter.length - 2}`}</Pill>
+                      ) : null;
+                    }
+                    return (
+                      <Pill key={String(option.value)} size="sm" withRemoveButton onRemove={onRemove}>
+                        {option.label}
+                      </Pill>
+                    );
+                  }}
+                  renderOption={({ option }) => {
+                    const c = catById.get(option.value);
+                    return (
+                      <Group gap={6} wrap="nowrap">
+                        {c && <CategoryIcon name={c.icon} size={14} />}
+                        {option.label}
+                      </Group>
+                    );
+                  }}
+                />
+                <MultiSelect
+                  label={t('tx.filterCity')}
+                  placeholder={txCityFilter.length ? undefined : t('tx.filterCityPlaceholder')}
+                  data={txCityOptions}
+                  value={txCityFilter}
+                  onChange={setTxCityFilter}
+                  clearable
+                  renderPill={({ option, onRemove }) => {
+                    const idx = txCityFilter.indexOf(String(option.value));
+                    if (idx > 1) {
+                      return idx === 2 ? (
+                        <Pill key="more" size="sm">{`+${txCityFilter.length - 2}`}</Pill>
+                      ) : null;
+                    }
+                    return (
+                      <Pill key={String(option.value)} size="sm" withRemoveButton onRemove={onRemove}>
+                        {option.label}
+                      </Pill>
+                    );
+                  }}
+                />
+                <div>
+                  <Text size="sm" fw={500} mb={4}>{t('tx.filterPeriod')}</Text>
+                  <SegmentedControl
+                    fullWidth
+                    value={txPeriodFilter}
+                    onChange={(v) => setTxPeriodFilter(v as 'ALL' | Period)}
+                    data={[
+                      { label: t('tx.periodAll'), value: 'ALL' },
+                      { label: t('period.before'), value: 'BEFORE' },
+                      { label: t('period.during'), value: 'DURING' },
+                    ]}
+                  />
+                </div>
+              </SimpleGrid>
+              <Group justify="space-between" mb="md">
+                <Text size="sm" c="dimmed">
+                  {filteredTx.length} {t('tx.filterResultsN')}
+                </Text>
+                {txFiltersActive && (
+                  <Button size="xs" variant="subtle" onClick={clearTxFilters}>
+                    {t('tx.clearFilters')}
+                  </Button>
+                )}
+              </Group>
+            </Box>
             {selected.size > 0 && (
               <Group justify="space-between" px="md" py="xs">
                 <Text size="sm" fw={600}>{selected.size} {t('tx.selectedN')}</Text>
@@ -436,30 +665,30 @@ export function Trip() {
                     <Table.Th w={36}>
                       <Checkbox
                         aria-label="select-all"
-                        checked={sortedTx.length > 0 && selected.size === sortedTx.length}
-                        indeterminate={selected.size > 0 && selected.size < sortedTx.length}
+                        checked={filteredTx.length > 0 && selected.size === filteredTx.length}
+                        indeterminate={selected.size > 0 && selected.size < filteredTx.length}
                         onChange={(e) =>
                           setSelected(
-                            e.currentTarget.checked ? new Set(sortedTx.map((x) => x.id)) : new Set(),
+                            e.currentTarget.checked ? new Set(filteredTx.map((x) => x.id)) : new Set(),
                           )
                         }
                       />
                     </Table.Th>
-                    <Table.Th>{t('table.date')}</Table.Th>
+                    <SortableTh field="date" label={t('table.date')} sortField={txSortField} sortDir={txSortDir} onSort={toggleTxSort} />
                     <Table.Th>{t('table.description')}</Table.Th>
-                    <Table.Th>{t('table.category')}</Table.Th>
-                    <Table.Th>{t('table.city')}</Table.Th>
-                    <Table.Th>{t('table.period')}</Table.Th>
-                    <Table.Th ta="right">{t('table.amount')}</Table.Th>
+                    <SortableTh field="category" label={t('table.category')} sortField={txSortField} sortDir={txSortDir} onSort={toggleTxSort} />
+                    <SortableTh field="city" label={t('table.city')} sortField={txSortField} sortDir={txSortDir} onSort={toggleTxSort} />
+                    <SortableTh field="period" label={t('table.period')} sortField={txSortField} sortDir={txSortDir} onSort={toggleTxSort} />
+                    <SortableTh field="amount" label={t('table.amount')} sortField={txSortField} sortDir={txSortDir} onSort={toggleTxSort} align="right" />
                     <Table.Th />
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                  {sortedTx.map((tx) => {
+                  {filteredTx.map((tx) => {
                     const c = cost(tx);
                     const cat = tx.categoryId ? catById.get(tx.categoryId) : undefined;
                     return (
-                      <Table.Tr key={tx.id} bg={selected.has(tx.id) ? 'var(--mantine-color-orange-0)' : undefined}>
+                      <Table.Tr key={tx.id} bg={selected.has(tx.id) ? 'var(--mantine-color-orange-light)' : undefined}>
                         <Table.Td>
                           <Checkbox
                             aria-label="select-row"
@@ -476,7 +705,7 @@ export function Trip() {
                           {tx.kind === 'IOF_REFUND' ? (
                             <Badge variant="light" color="gray" size="sm">IOF</Badge>
                           ) : cat ? (
-                            <CategoryChip color={cat.color} name={cat.name} />
+                            <CategoryChip color={cat.color} name={cat.name} icon={cat.icon} />
                           ) : (
                             <Text size="sm" c="dimmed">—</Text>
                           )}

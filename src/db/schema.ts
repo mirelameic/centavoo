@@ -25,7 +25,7 @@ export interface Category {
   tripId: string;            // categories are per-trip
   name: string;
   color: string;             // hex, e.g. '#FF9900'
-  icon?: string;             // emoji
+  icon?: string;             // key into lib/categoryIcons' ICON_MAP
   sortOrder: number;
 }
 

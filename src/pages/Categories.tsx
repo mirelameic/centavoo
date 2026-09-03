@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
@@ -24,10 +24,11 @@ import { IconPlus, IconPencil, IconTrash, IconArrowLeft, IconCheck } from '@tabl
 import { db } from '../db/db';
 import { addCategory, updateCategory, deleteCategory } from '../db/repo';
 import type { Category } from '../db/schema';
-import { COLOR_OPTIONS, EMOJI_OPTIONS } from '../lib/constants';
+import { COLOR_OPTIONS, ICON_OPTIONS } from '../lib/constants';
+import { CategoryIcon } from '../lib/categoryIcons';
 import { useI18n } from '../i18n';
 
-const DEFAULT_COLOR = '#4263EB';
+const DEFAULT_COLOR = '#C2540D';
 
 export function Categories() {
   const { t } = useI18n();
@@ -68,7 +69,8 @@ export function Categories() {
             <Group justify="space-between">
               <Group gap="sm">
                 <Box w={18} h={18} style={{ background: c.color, borderRadius: 4 }} />
-                <Text>{c.icon ? `${c.icon} ` : ''}{c.name}</Text>
+                <CategoryIcon name={c.icon} size={16} color="var(--mantine-color-dimmed)" />
+                <Text>{c.name}</Text>
               </Group>
               <Group gap={2}>
                 <ActionIcon variant="subtle" color="gray" onClick={() => openEdit(c)} aria-label="edit">
@@ -148,26 +150,12 @@ function Fields({ tripId, editing, onClose }: Omit<ModalProps, 'opened'>) {
         </Group>
       </div>
       <div>
-        <Text size="sm" fw={500} mb={6}>{t('cat.emoji')}</Text>
+        <Text size="sm" fw={500} mb={6}>{t('cat.icon')}</Text>
         <SimpleGrid cols={8} spacing={6}>
-          {EMOJI_OPTIONS.map((em) => (
-            <UnstyledButton
-              key={em}
-              onClick={() => setIcon(icon === em ? '' : em)}
-              style={{
-                fontSize: 20,
-                textAlign: 'center',
-                padding: 4,
-                borderRadius: 8,
-                border:
-                  icon === em
-                    ? '2px solid var(--mantine-color-orange-5)'
-                    : '1px solid var(--mantine-color-gray-3)',
-                background: icon === em ? 'var(--mantine-color-orange-0)' : 'transparent',
-              }}
-            >
-              {em}
-            </UnstyledButton>
+          {ICON_OPTIONS.map((key) => (
+            <IconOption key={key} value={key} selected={icon === key} onSelect={setIcon}>
+              <CategoryIcon name={key} size={20} />
+            </IconOption>
           ))}
         </SimpleGrid>
       </div>
@@ -176,5 +164,34 @@ function Fields({ tripId, editing, onClose }: Omit<ModalProps, 'opened'>) {
         <Button onClick={handleSave} disabled={!name.trim()}>{t('common.save')}</Button>
       </Group>
     </Stack>
+  );
+}
+
+interface IconOptionProps {
+  value: string;
+  selected: boolean;
+  onSelect: (value: string) => void;
+  children: ReactNode;
+}
+
+function IconOption({ value, selected, onSelect, children }: IconOptionProps) {
+  return (
+    <UnstyledButton
+      onClick={() => onSelect(selected ? '' : value)}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 8,
+        borderRadius: 8,
+        border: selected
+          ? '2px solid var(--mantine-color-orange-5)'
+          : '1px solid var(--mantine-color-default-border)',
+        background: selected ? 'var(--mantine-color-orange-light)' : 'transparent',
+        color: selected ? 'var(--mantine-color-orange-5)' : 'var(--mantine-color-dimmed)',
+      }}
+    >
+      {children}
+    </UnstyledButton>
   );
 }

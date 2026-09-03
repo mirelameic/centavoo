@@ -6,14 +6,15 @@ export const cost = (t: Transaction) => t.amount / (t.splitCount || 1);
 
 // Palette used to color cities in the "by city" chart.
 const CITY_PALETTE = [
-  '#4263EB', '#0CA678', '#F08C00', '#E64980', '#7048E8',
-  '#1098AD', '#F03E3E', '#66A80F', '#AE3EC9', '#1864AB',
+  '#C2540D', '#0E8C6B', '#B8860B', '#B23368', '#7A4A2A',
+  '#3D8B4C', '#C1352E', '#6B8A1E', '#7D1F44', '#5C5650',
 ];
 
 export interface CatAgg {
   id: string | null;
   name: string;
   color: string;
+  icon?: string;
   amount: number;
 }
 
@@ -36,6 +37,7 @@ export interface TripStats {
   categoryTable: {
     name: string;
     color: string;
+    icon?: string;
     total: number;
     pct: number;
     count: number;
@@ -104,6 +106,7 @@ export function computeStats(
         id: t.categoryId ?? null,
         name: cat.name,
         color: cat.color,
+        icon: (cat as { icon?: string }).icon,
         amount: 0,
       };
       agg.amount += c;
@@ -167,6 +170,7 @@ export function computeStats(
     return {
       name: c.name,
       color: c.color,
+      icon: c.icon,
       total: round(c.amount),
       pct: round((c.amount / totalCat) * 100),
       count,

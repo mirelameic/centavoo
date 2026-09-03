@@ -1,17 +1,21 @@
 // Shared UI constants (curated palettes — no arbitrary values).
 
-// Category color/emoji choices offered in the Categories editor.
+// Category color choices offered in the Categories editor. A deep, moody
+// sunset-leaning palette (rust/gold/berry/wine, grounded by a couple of
+// darker greens and neutrals) — never blue-leaning, to match the app's dark
+// glass aesthetic (see the `dark` shades note in theme.ts).
 export const COLOR_OPTIONS = [
-  '#FF9900', '#FA5252', '#E64980', '#BE4BDB', '#7950F2', '#4263EB',
-  '#4A86E8', '#15AABF', '#0CA678', '#40C057', '#82C91E', '#E6B800',
-  '#FF00FF', '#F08C00', '#868E96', '#212529',
-];
-
-export const EMOJI_OPTIONS = [
-  '✈️', '🏨', '🏠', '🚕', '🚆', '🚌', '🚲', '⛽',
-  '🍽️', '☕', '🍷', '🍦', '🛍️', '🎁', '🎟️', '🏛️',
-  '🧳', '🎒', '🏖️', '⛰️', '🗺️', '📱', '💊', '🌿',
+  '#0E8C6B', '#3D8B4C', '#6B8A1E', '#8A7220', '#B8860B', '#C2540D',
+  '#C1352E', '#B23368', '#7D1F44', '#9C4221', '#7A4A2A', '#4F7942',
+  '#0F7A82', '#5C5650', '#3A3733', '#A8481F',
 ];
 
 // Colors for the before/during comparison bars.
-export const PERIOD_COLORS = { before: '#4c6ef5', during: '#cc5de8' };
+export const PERIOD_COLORS = { before: '#B8860B', during: '#7A3B12' };
+
+// Minimalist line-icon choices offered in the Categories editor. Rendered via CategoryIcon.
+export const ICON_OPTIONS = [
+  'plane', 'bed', 'home', 'car', 'train', 'bus', 'bike', 'fuel',
+  'food', 'coffee', 'wine', 'shopping', 'gift', 'ticket', 'landmark', 'luggage',
+  'backpack', 'beach', 'mountain', 'map', 'phone', 'pill', 'leaf', 'bookmark',
+];

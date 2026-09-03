@@ -14,6 +14,7 @@ import { DatePickerInput } from '@mantine/dates';
 import type { Category, CategoryRule, Kind, Period, Transaction, Trip } from '../db/schema';
 import { addTransaction, updateTransaction } from '../db/repo';
 import { suggestCategory } from '../lib/categorize';
+import { CategoryIcon } from '../lib/categoryIcons';
 import { toISO } from '../lib/format';
 import { useI18n } from '../i18n';
 
@@ -56,7 +57,7 @@ function Fields({
   const [categoryId, setCategoryId] = useState<string | null>(editing?.categoryId ?? null);
   const [splitCount, setSplitCount] = useState<number | string>(editing?.splitCount || 1);
 
-  const colorById = new Map(categories.map((c) => [c.id, c.color] as const));
+  const catById = new Map(categories.map((c) => [c.id, c] as const));
   const catData = categories.map((c) => ({ value: c.id, label: c.name }));
 
   function suggestFromDescription() {
@@ -162,8 +163,9 @@ function Fields({
               <Box
                 w={12}
                 h={12}
-                style={{ background: colorById.get(option.value), borderRadius: 3 }}
+                style={{ background: catById.get(option.value)?.color, borderRadius: 3 }}
               />
+              <CategoryIcon name={catById.get(option.value)?.icon} size={14} />
               {option.label}
             </Group>
           )}

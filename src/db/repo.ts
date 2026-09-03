@@ -3,16 +3,16 @@ import type { Category, CityMap, Transaction, Trip } from './schema';
 
 // Default categories created for every new trip (categories are per-trip).
 export const DEFAULT_CATEGORIES: Omit<Category, 'id' | 'tripId'>[] = [
-  { name: 'Hospedagem', color: '#0CA678', icon: '🏨', sortOrder: 0 },
-  { name: 'Passagem', color: '#4263EB', icon: '✈️', sortOrder: 1 },
-  { name: 'Transporte', color: '#FF9900', icon: '🚕', sortOrder: 2 },
-  { name: 'Alimentação', color: '#9900FF', icon: '🍽️', sortOrder: 3 },
-  { name: 'Compras', color: '#4A86E8', icon: '🛍️', sortOrder: 4 },
-  { name: 'Brindes', color: '#00B5C7', icon: '🎁', sortOrder: 5 },
-  { name: 'Turismo', color: '#E6B800', icon: '🎟️', sortOrder: 6 },
-  { name: 'Genéricos de viagem', color: '#FF0000', icon: '🧳', sortOrder: 7 },
-  { name: 'Cannabis', color: '#00C000', icon: '🌿', sortOrder: 8 },
-  { name: 'Outros', color: '#FF00FF', icon: '🔖', sortOrder: 9 },
+  { name: 'Hospedagem', color: '#0E8C6B', icon: 'bed', sortOrder: 0 },
+  { name: 'Passagem', color: '#B8860B', icon: 'plane', sortOrder: 1 },
+  { name: 'Transporte', color: '#C2540D', icon: 'car', sortOrder: 2 },
+  { name: 'Alimentação', color: '#C1352E', icon: 'food', sortOrder: 3 },
+  { name: 'Compras', color: '#B23368', icon: 'shopping', sortOrder: 4 },
+  { name: 'Brindes', color: '#7D1F44', icon: 'gift', sortOrder: 5 },
+  { name: 'Turismo', color: '#8A7220', icon: 'ticket', sortOrder: 6 },
+  { name: 'Genéricos de viagem', color: '#7A4A2A', icon: 'luggage', sortOrder: 7 },
+  { name: 'Cannabis', color: '#3D8B4C', icon: 'leaf', sortOrder: 8 },
+  { name: 'Outros', color: '#5C5650', icon: 'bookmark', sortOrder: 9 },
 ];
 
 // ---- trips -------------------------------------------------------------------

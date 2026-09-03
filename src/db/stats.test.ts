@@ -152,8 +152,8 @@ describe('computeStats — by city', () => {
 
   it('totals by city (desc) with palette colors by rank', () => {
     expect(s.byCity).toEqual([
-      { city: 'Paris', amount: 150, color: '#4263EB' },
-      { city: 'Lyon', amount: 80, color: '#0CA678' },
+      { city: 'Paris', amount: 150, color: '#C2540D' },
+      { city: 'Lyon', amount: 80, color: '#0E8C6B' },
     ]);
   });
   it('builds the city table with days, avg and top category', () => {
@@ -195,15 +195,15 @@ describe('cityBreakdown', () => {
   it('totals expenses by city with the top category', () => {
     const { byCity, cityTable } = cityBreakdown(txs, cats, cities);
     expect(byCity).toEqual([
-      { city: 'Paris', amount: 130, color: '#4263EB' },
-      { city: 'Lyon', amount: 50, color: '#0CA678' },
+      { city: 'Paris', amount: 130, color: '#C2540D' },
+      { city: 'Lyon', amount: 50, color: '#0E8C6B' },
     ]);
     expect(cityTable[0]).toMatchObject({ city: 'Paris', days: 1, total: 130, topCategory: 'Food' });
   });
 
   it('restricts to the allowed categories (uncategorized excluded)', () => {
     const { byCity } = cityBreakdown(txs, cats, cities, new Set(['c2']));
-    expect(byCity).toEqual([{ city: 'Lyon', amount: 50, color: '#4263EB' }]);
+    expect(byCity).toEqual([{ city: 'Lyon', amount: 50, color: '#C2540D' }]);
   });
 
   it('shows "—" as top category when the spend has no category', () => {
@@ -310,7 +310,7 @@ describe('computeStats — city edge cases', () => {
     }
     const s = computeStats(txs, [], cities);
     expect(s.byCity).toHaveLength(11);
-    expect(s.byCity[0].color).toBe('#4263EB');
+    expect(s.byCity[0].color).toBe('#C2540D');
     expect(s.byCity[10].color).toBe(s.byCity[0].color); // 10 % 10 → palette[0]
   });
 });

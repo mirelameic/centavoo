@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Box, Card, Group, Text } from '@mantine/core';
+import { CategoryIcon } from '../../lib/categoryIcons';
 
 // Small presentational pieces shared across the Trip dashboard.
 
@@ -19,7 +20,7 @@ function Dot({ color }: { color: string }) {
       component="span"
       w={10}
       h={10}
-      style={{ background: color, borderRadius: 3, display: 'inline-block' }}
+      style={{ background: color, borderRadius: '50%', display: 'inline-block' }}
     />
   );
 }
@@ -34,11 +35,23 @@ export function Section({ children, first }: { children: ReactNode; first?: bool
 }
 
 // Category/city label with its color dot — the recurring "legend row" look
-// used in charts, tables and lists across the Trip dashboard.
-export function CategoryChip({ color, name, gap = 6 }: { color: string; name: string; gap?: number }) {
+// used in charts, tables and lists across the Trip dashboard. `icon` is only
+// present for categories (cities have none), rendered right after the dot.
+export function CategoryChip({
+  color,
+  name,
+  icon,
+  gap = 6,
+}: {
+  color: string;
+  name: string;
+  icon?: string;
+  gap?: number;
+}) {
   return (
     <Group gap={gap} wrap="nowrap">
       <Dot color={color} />
+      {icon && <CategoryIcon name={icon} size={14} />}
       <Text size="sm">{name}</Text>
     </Group>
   );

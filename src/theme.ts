@@ -34,5 +34,19 @@ export const theme = createTheme({
     Modal: {
       defaultProps: { overlayProps: { backgroundOpacity: 0.55, blur: 4 } },
     },
+    Table: {
+      defaultProps: { highlightOnHover: true, verticalSpacing: 'sm' },
+    },
+    // Grid/axis colors adapt to the color scheme via Mantine's own semantic
+    // tokens (same neutral warm-gray the rest of the app already uses).
+    BarChart: {
+      defaultProps: {
+        gridColor: 'var(--mantine-color-default-border)',
+        textColor: 'var(--mantine-color-dimmed)',
+      },
+    },
+    DonutChart: {
+      defaultProps: { paddingAngle: 2 },
+    },
   },
 });
