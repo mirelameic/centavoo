@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Modal, Stack, Group, Button, Divider } from '@mantine/core';
+import type { DateValue } from '@mantine/dates';
 import { IconTrash } from '@tabler/icons-react';
-import type { Trip } from '../db/schema';
-import { updateTrip, deleteTrip } from '../db/repo';
-import { toISO } from '../lib/format';
-import { useI18n } from '../i18n';
+import type { Trip } from '../../db/schema';
+import { updateTrip, deleteTrip } from '../../db/repo';
+import { toISO } from '../../lib/format';
+import { useI18n } from '../../i18n';
 import { TripIdentityFields } from './TripFields';
 
 interface Props {
@@ -30,7 +31,7 @@ function Fields({ trip, onClose }: Omit<Props, 'opened'>) {
   const navigate = useNavigate();
   const [name, setName] = useState(trip.name);
   const [destination, setDestination] = useState(trip.destination ?? '');
-  const [range, setRange] = useState<[unknown, unknown]>([
+  const [range, setRange] = useState<[DateValue, DateValue]>([
     trip.startDate ?? null,
     trip.endDate ?? null,
   ]);

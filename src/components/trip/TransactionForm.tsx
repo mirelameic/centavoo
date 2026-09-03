@@ -8,15 +8,15 @@ import {
   TextInput,
   NumberInput,
   Select,
-  Box,
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
-import type { Category, CategoryRule, Kind, Period, Transaction, Trip } from '../db/schema';
-import { addTransaction, updateTransaction } from '../db/repo';
-import { suggestCategory } from '../lib/categorize';
-import { CategoryIcon } from '../lib/categoryIcons';
-import { toISO } from '../lib/format';
-import { useI18n } from '../i18n';
+import type { Category, CategoryRule, Kind, Period, Transaction, Trip } from '../../db/schema';
+import { addTransaction, updateTransaction } from '../../db/repo';
+import { suggestCategory } from '../../lib/categorize';
+import { toCatById } from '../../lib/categories';
+import { toISO } from '../../lib/format';
+import { useI18n } from '../../i18n';
+import { CategoryOption } from './CategoryOption';
 
 interface Props {
   opened: boolean;
@@ -57,7 +57,7 @@ function Fields({
   const [categoryId, setCategoryId] = useState<string | null>(editing?.categoryId ?? null);
   const [splitCount, setSplitCount] = useState<number | string>(editing?.splitCount || 1);
 
-  const catById = new Map(categories.map((c) => [c.id, c] as const));
+  const catById = toCatById(categories);
   const catData = categories.map((c) => ({ value: c.id, label: c.name }));
 
   function suggestFromDescription() {
@@ -108,7 +108,7 @@ function Fields({
       <DatePickerInput
         label={t('table.date')}
         placeholder="—"
-        value={date as never}
+        value={date}
         onChange={(v) => setDate(toISO(v))}
         clearable
       />
@@ -159,15 +159,7 @@ function Fields({
           searchable
           clearable
           renderOption={({ option }) => (
-            <Group gap={8}>
-              <Box
-                w={12}
-                h={12}
-                style={{ background: catById.get(option.value)?.color, borderRadius: 3 }}
-              />
-              <CategoryIcon name={catById.get(option.value)?.icon} size={14} />
-              {option.label}
-            </Group>
+            <CategoryOption category={catById.get(option.value)} label={option.label} withSwatch />
           )}
         />
       )}

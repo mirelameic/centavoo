@@ -17,10 +17,10 @@ import {
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconUpload, IconAlertCircle } from '@tabler/icons-react';
-import type { Category, CategoryRule, Kind, Period, Trip } from '../db/schema';
-import { bulkAddTransactions } from '../db/repo';
-import { suggestCategory } from '../lib/categorize';
-import { CategoryIcon } from '../lib/categoryIcons';
+import type { Category, CategoryRule, Kind, Period, Trip } from '../../db/schema';
+import { bulkAddTransactions } from '../../db/repo';
+import { suggestCategory } from '../../lib/categorize';
+import { toCatById } from '../../lib/categories';
 import {
   splitRows,
   parseAmount,
@@ -29,8 +29,9 @@ import {
   looksLikeHeaderRow,
   type ColumnRole,
   type DelimiterOption,
-} from '../lib/parseTable';
-import { useI18n } from '../i18n';
+} from '../../lib/parseTable';
+import { useI18n } from '../../i18n';
+import { CategoryOption } from './CategoryOption';
 
 interface Props {
   opened: boolean;
@@ -183,14 +184,10 @@ function Flow({ onClose, trip, categories, rules }: Omit<Props, 'opened'>) {
     }
   }
 
-  const catById = new Map(categories.map((c) => [c.id, c] as const));
+  const catById = toCatById(categories);
   const catData = categories.map((c) => ({ value: c.id, label: c.name }));
   const catRenderOption = ({ option }: { option: { value: string; label: string } }) => (
-    <Group gap={8} wrap="nowrap">
-      <Box w={12} h={12} style={{ background: catById.get(option.value)?.color, borderRadius: 3 }} />
-      <CategoryIcon name={catById.get(option.value)?.icon} size={14} />
-      {option.label}
-    </Group>
+    <CategoryOption category={catById.get(option.value)} label={option.label} withSwatch />
   );
   const roleOptions = [
     { value: 'ignore', label: t('import.colIgnore') },

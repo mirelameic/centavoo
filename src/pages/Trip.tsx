@@ -23,6 +23,7 @@ import {
   Box,
   SegmentedControl,
   Pill,
+  type ComboboxRenderPillInput,
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
@@ -44,17 +45,33 @@ import { deleteTransaction, deleteTransactions } from '../db/repo';
 import type { Period, Transaction } from '../db/schema';
 import { dateRange, toISO } from '../lib/format';
 import { PERIOD_COLORS } from '../lib/constants';
-import { TransactionForm } from '../components/TransactionForm';
-import { TripForm } from '../components/TripForm';
-import { ImportTransactions } from '../components/ImportTransactions';
+import { toCatById } from '../lib/categories';
+import { TransactionForm } from '../components/trip/TransactionForm';
+import { TripForm } from '../components/trip/TripForm';
+import { ImportTransactions } from '../components/trip/ImportTransactions';
 import { CategoryChip, Kpi, Section, SplitTag } from '../components/trip/primitives';
-import { CategoryIcon } from '../lib/categoryIcons';
+import { CategoryOption } from '../components/trip/CategoryOption';
 import { TopTable } from '../components/trip/TopTable';
 import { CityEditor } from '../components/trip/CityEditor';
 import { useI18n } from '../i18n';
 
 // Left-align the built-in (interactive) chart legend — Mantine defaults it to flex-end.
 const leftLegend = { legend: { justifyContent: 'flex-start' as const } };
+
+// MultiSelect pill renderer that caps visible pills at 2 and summarizes the rest as "+N".
+function renderCappedPill(selected: string[]) {
+  return ({ option, onRemove }: ComboboxRenderPillInput<string>) => {
+    const idx = selected.indexOf(String(option.value));
+    if (idx > 1) {
+      return idx === 2 ? <Pill key="more" size="sm">{`+${selected.length - 2}`}</Pill> : null;
+    }
+    return (
+      <Pill key={String(option.value)} size="sm" withRemoveButton onRemove={onRemove}>
+        {option.label}
+      </Pill>
+    );
+  };
+}
 
 type TxSortField = 'date' | 'category' | 'city' | 'period' | 'amount';
 
@@ -155,10 +172,7 @@ export function Trip() {
     () => (txs && cats && trip ? computeStats(txs, cats, trip.cities ?? {}) : null),
     [txs, cats, trip],
   );
-  const catById = useMemo(
-    () => new Map((cats ?? []).map((c) => [c.id, c] as const)),
-    [cats],
-  );
+  const catById = useMemo(() => toCatById(cats ?? []), [cats]);
 
   if (trip === undefined || !stats) {
     return <Center mih="50vh"><Loader /></Center>;
@@ -414,15 +428,9 @@ export function Trip() {
               onChange={setCityCatFilter}
               clearable
               mb="md"
-              renderOption={({ option }) => {
-                const c = catById.get(option.value);
-                return (
-                  <Group gap={6} wrap="nowrap">
-                    {c && <CategoryIcon name={c.icon} size={14} />}
-                    {option.label}
-                  </Group>
-                );
-              }}
+              renderOption={({ option }) => (
+                <CategoryOption category={catById.get(option.value)} label={option.label} />
+              )}
             />
             {cityDonut.length ? (
               <>
@@ -542,7 +550,7 @@ export function Trip() {
                         <DatePickerInput
                           valueFormat="DD/MM/YYYY"
                           placeholder={t('tx.filterDatePlaceholder')}
-                          value={txDate as never}
+                          value={txDate}
                           onChange={(v) => setTxDate(toISO(v))}
                           clearable
                         />
@@ -551,7 +559,7 @@ export function Trip() {
                           type="range"
                           valueFormat="DD/MM/YY"
                           placeholder={t('tx.filterDatePlaceholder')}
-                          value={txDateRange as never}
+                          value={txDateRange}
                           onChange={(v) => setTxDateRange([toISO(v[0]), toISO(v[1])])}
                           clearable
                         />
@@ -575,28 +583,10 @@ export function Trip() {
                   value={txCatFilter}
                   onChange={setTxCatFilter}
                   clearable
-                  renderPill={({ option, onRemove }) => {
-                    const idx = txCatFilter.indexOf(String(option.value));
-                    if (idx > 1) {
-                      return idx === 2 ? (
-                        <Pill key="more" size="sm">{`+${txCatFilter.length - 2}`}</Pill>
-                      ) : null;
-                    }
-                    return (
-                      <Pill key={String(option.value)} size="sm" withRemoveButton onRemove={onRemove}>
-                        {option.label}
-                      </Pill>
-                    );
-                  }}
-                  renderOption={({ option }) => {
-                    const c = catById.get(option.value);
-                    return (
-                      <Group gap={6} wrap="nowrap">
-                        {c && <CategoryIcon name={c.icon} size={14} />}
-                        {option.label}
-                      </Group>
-                    );
-                  }}
+                  renderPill={renderCappedPill(txCatFilter)}
+                  renderOption={({ option }) => (
+                    <CategoryOption category={catById.get(option.value)} label={option.label} />
+                  )}
                 />
                 <MultiSelect
                   label={t('tx.filterCity')}
@@ -605,19 +595,7 @@ export function Trip() {
                   value={txCityFilter}
                   onChange={setTxCityFilter}
                   clearable
-                  renderPill={({ option, onRemove }) => {
-                    const idx = txCityFilter.indexOf(String(option.value));
-                    if (idx > 1) {
-                      return idx === 2 ? (
-                        <Pill key="more" size="sm">{`+${txCityFilter.length - 2}`}</Pill>
-                      ) : null;
-                    }
-                    return (
-                      <Pill key={String(option.value)} size="sm" withRemoveButton onRemove={onRemove}>
-                        {option.label}
-                      </Pill>
-                    );
-                  }}
+                  renderPill={renderCappedPill(txCityFilter)}
                 />
                 <div>
                   <Text size="sm" fw={500} mb={4}>{t('tx.filterPeriod')}</Text>

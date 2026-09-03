@@ -15,13 +15,14 @@ import {
   Center,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import type { DateValue } from '@mantine/dates';
 import { IconPlus, IconMapPin } from '@tabler/icons-react';
 import { db } from '../db/db';
 import { createTrip } from '../db/repo';
 import { cost } from '../db/stats';
 import { toISO } from '../lib/format';
 import { useI18n } from '../i18n';
-import { TripIdentityFields } from '../components/TripFields';
+import { TripIdentityFields } from '../components/trip/TripFields';
 
 export function Trips() {
   const { t, money, date } = useI18n();
@@ -37,7 +38,7 @@ export function Trips() {
   const [opened, { open, close }] = useDisclosure(false);
   const [name, setName] = useState('');
   const [destination, setDestination] = useState('');
-  const [range, setRange] = useState<[unknown, unknown]>([null, null]);
+  const [range, setRange] = useState<[DateValue, DateValue]>([null, null]);
 
   async function handleCreate() {
     if (!name.trim()) return;

@@ -1,14 +1,14 @@
 import { TextInput } from '@mantine/core';
-import { DatePickerInput } from '@mantine/dates';
-import { useI18n } from '../i18n';
+import { DatePickerInput, type DateValue } from '@mantine/dates';
+import { useI18n } from '../../i18n';
 
 interface Props {
   name: string;
   onNameChange: (v: string) => void;
   destination: string;
   onDestinationChange: (v: string) => void;
-  range: [unknown, unknown];
-  onRangeChange: (v: [unknown, unknown]) => void;
+  range: [DateValue, DateValue];
+  onRangeChange: (v: [DateValue, DateValue]) => void;
 }
 
 // Name + destination + date-range fields shared by the "new trip" (Trips) and
@@ -42,8 +42,8 @@ export function TripIdentityFields({
         type="range"
         label={t('form.dates')}
         placeholder={t('form.datesPlaceholder')}
-        value={range as never}
-        onChange={(v) => onRangeChange(v as [unknown, unknown])}
+        value={range}
+        onChange={onRangeChange}
         clearable
       />
     </>
