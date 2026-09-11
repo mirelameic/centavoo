@@ -1,6 +1,7 @@
-import type { ReactNode } from 'react';
-import { Box, Card, Group, Text } from '@mantine/core';
+import { Fragment, type ReactNode } from 'react';
+import { Box, Card, Group, Text, UnstyledButton } from '@mantine/core';
 import { CategoryIcon } from '../../lib/categoryIcons';
+import { moneyParts } from '../../lib/format';
 
 // Small presentational pieces shared across the Trip dashboard.
 
@@ -14,7 +15,7 @@ export function Kpi({ label, value, color }: { label: string; value: string; col
 }
 
 // Colored square used as a legend marker next to a category/city name.
-function Dot({ color }: { color: string }) {
+export function Dot({ color }: { color: string }) {
   return (
     <Box
       component="span"
@@ -53,6 +54,83 @@ export function CategoryChip({
       <Dot color={color} />
       {icon && <CategoryIcon name={icon} size={14} />}
       <Text size="sm">{name}</Text>
+    </Group>
+  );
+}
+
+// A donut chart's side legend (color + name + amount), laid out as a 3-column
+// grid — label, currency symbol, number — so the symbol and the numbers each
+// form their own straight column regardless of how many digits a row has
+// (a plain right-aligned "R$ 1.234,56" string left the symbol drifting left
+// or right per row, which read as crooked).
+export function LegendList({
+  currency,
+  locale,
+  rows,
+}: {
+  currency: string;
+  locale: string;
+  rows: { key: string; color: string; label: string; icon?: string; amount: number }[];
+}) {
+  return (
+    <Box
+      miw={220}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr auto auto',
+        columnGap: 12,
+        rowGap: 6,
+        alignItems: 'center',
+      }}
+    >
+      {rows.map((r) => {
+        const { symbol, value } = moneyParts(r.amount, currency, locale);
+        return (
+          <Fragment key={r.key}>
+            <CategoryChip color={r.color} name={r.label} icon={r.icon} gap={8} />
+            <Text size="sm" fw={600}>{symbol}</Text>
+            <Text size="sm" fw={600} ta="right">{value}</Text>
+          </Fragment>
+        );
+      })}
+    </Box>
+  );
+}
+
+// Click/tap-to-toggle chart legend. Replaces Mantine's built-in chart legend
+// (which only reacts to mouse hover — unreliable on touch) with an explicit
+// tap target per series: tapping removes that series from the chart, tapping
+// again brings it back. `hidden` holds the currently-hidden series names.
+export function ToggleLegend({
+  series,
+  hidden,
+  onToggle,
+}: {
+  series: { name: string; color: string; label?: string }[];
+  hidden: Set<string>;
+  onToggle: (name: string) => void;
+}) {
+  return (
+    <Group gap="md" mt="xs" mb={4}>
+      {series.map((s) => {
+        const isHidden = hidden.has(s.name);
+        return (
+          <UnstyledButton
+            key={s.name}
+            aria-label={`toggle-${s.name}`}
+            data-hidden={isHidden || undefined}
+            onClick={() => onToggle(s.name)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 2px' }}
+          >
+            <Box style={{ opacity: isHidden ? 0.35 : 1 }}>
+              <Dot color={s.color} />
+            </Box>
+            <Text size="sm" c={isHidden ? 'dimmed' : undefined} td={isHidden ? 'line-through' : undefined}>
+              {s.label ?? s.name}
+            </Text>
+          </UnstyledButton>
+        );
+      })}
     </Group>
   );
 }

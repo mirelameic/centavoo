@@ -150,10 +150,10 @@ describe('computeStats — by city', () => {
     tx({ amount: 40, categoryId: 'c1', date: '2026-06-24' }), // no city mapping
   ], [cat('c1', 'Food')], cities);
 
-  it('totals by city (desc) with palette colors by rank', () => {
+  it('totals by city (desc), colored by name', () => {
     expect(s.byCity).toEqual([
-      { city: 'Paris', amount: 150, color: '#C2540D' },
-      { city: 'Lyon', amount: 80, color: '#0E8C6B' },
+      { city: 'Paris', amount: 150, color: '#0E8C6B' },
+      { city: 'Lyon', amount: 80, color: '#7D1F44' },
     ]);
   });
   it('builds the city table with days, avg and top category', () => {
@@ -195,15 +195,17 @@ describe('cityBreakdown', () => {
   it('totals expenses by city with the top category', () => {
     const { byCity, cityTable } = cityBreakdown(txs, cats, cities);
     expect(byCity).toEqual([
-      { city: 'Paris', amount: 130, color: '#C2540D' },
-      { city: 'Lyon', amount: 50, color: '#0E8C6B' },
+      { city: 'Paris', amount: 130, color: '#0E8C6B' },
+      { city: 'Lyon', amount: 50, color: '#7D1F44' },
     ]);
     expect(cityTable[0]).toMatchObject({ city: 'Paris', days: 1, total: 130, topCategory: 'Food' });
   });
 
-  it('restricts to the allowed categories (uncategorized excluded)', () => {
+  it('keeps each city\'s color the same even when a filter changes the ranking', () => {
     const { byCity } = cityBreakdown(txs, cats, cities, new Set(['c2']));
-    expect(byCity).toEqual([{ city: 'Lyon', amount: 50, color: '#C2540D' }]);
+    // Unfiltered, Lyon ranks 2nd; filtered to just 'Bar' spend, it ranks 1st —
+    // its color must stay '#7D1F44' either way (name-based, not rank-based).
+    expect(byCity).toEqual([{ city: 'Lyon', amount: 50, color: '#7D1F44' }]);
   });
 
   it('shows "—" as top category when the spend has no category', () => {
@@ -300,18 +302,36 @@ describe('computeStats — city edge cases', () => {
     expect(s.byCity).toEqual([]);
   });
 
-  it('wraps the city palette after 10 cities', () => {
+  it('handles more cities than the palette has colors', () => {
     const cities: CityMap = {};
     const txs: Transaction[] = [];
     for (let i = 0; i < 11; i++) {
       const date = `2026-03-${String(i + 1).padStart(2, '0')}`;
       cities[date] = `City${i}`;
-      txs.push(tx({ amount: 110 - i, date })); // descending → City0 ranks first
+      txs.push(tx({ amount: 110 - i, date }));
     }
     const s = computeStats(txs, [], cities);
     expect(s.byCity).toHaveLength(11);
-    expect(s.byCity[0].color).toBe('#C2540D');
-    expect(s.byCity[10].color).toBe(s.byCity[0].color); // 10 % 10 → palette[0]
+  });
+
+  it('keeps a city\'s color tied to its name, not its spend rank', () => {
+    const cities: CityMap = { '2026-03-01': 'Paris', '2026-03-02': 'Lyon' };
+    // Paris outspends Lyon here...
+    const a = computeStats(
+      [tx({ amount: 100, date: '2026-03-01' }), tx({ amount: 10, date: '2026-03-02' })],
+      [],
+      cities,
+    );
+    // ...and the other way around here — same two cities, ranks swapped.
+    const b = computeStats(
+      [tx({ amount: 10, date: '2026-03-01' }), tx({ amount: 100, date: '2026-03-02' })],
+      [],
+      cities,
+    );
+    const colorOf = (rows: typeof a.byCity, city: string) =>
+      rows.find((r) => r.city === city)?.color;
+    expect(colorOf(a.byCity, 'Paris')).toBe(colorOf(b.byCity, 'Paris'));
+    expect(colorOf(a.byCity, 'Lyon')).toBe(colorOf(b.byCity, 'Lyon'));
   });
 });
 

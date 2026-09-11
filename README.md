@@ -43,13 +43,6 @@ scripts/.venv/bin/pip install openpyxl
 scripts/.venv/bin/python scripts/seed_europa.py   # writes public/europa.json
 ```
 
-## Smoke test (headless)
-
-```bash
-npm run dev &                 # server on :5173
-node scripts/smoke.mjs        # loads the app, checks KPIs, saves screenshots to /tmp
-```
-
 ## Structure
 
 - `src/db/` — model (`schema.ts`), Dexie database (`db.ts`), CRUD (`repo.ts`), aggregations/analytics (`stats.ts`), seed and backup.

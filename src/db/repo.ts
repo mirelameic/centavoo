@@ -47,15 +47,18 @@ export async function deleteTrip(id: string) {
   });
 }
 
-// Set the city of a day. Stored on the trip (a day = a city), so it persists
-// even for days without transactions and even when cleared to empty.
-export async function setTripCity(tripId: string, date: string, city: string) {
+// Sets (or clears, if `city` is empty) the city for every day in `days` at
+// once — a single read + write. Stored on the trip (a day = a city), so it
+// persists even for days without transactions and even when cleared.
+export async function setTripCityRange(tripId: string, days: string[], city: string) {
   const trip = await db.trips.get(tripId);
   if (!trip) return;
   const cities: CityMap = { ...(trip.cities ?? {}) };
   const v = city.trim();
-  if (v) cities[date] = v;
-  else delete cities[date];
+  for (const d of days) {
+    if (v) cities[d] = v;
+    else delete cities[d];
+  }
   await db.trips.update(tripId, { cities });
 }
 

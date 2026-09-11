@@ -6,7 +6,6 @@ import {
   Title,
   Text,
   Group,
-  Stack,
   SimpleGrid,
   Card,
   Tabs,
@@ -49,14 +48,12 @@ import { toCatById } from '../lib/categories';
 import { TransactionForm } from '../components/trip/TransactionForm';
 import { TripForm } from '../components/trip/TripForm';
 import { ImportTransactions } from '../components/trip/ImportTransactions';
-import { CategoryChip, Kpi, Section, SplitTag } from '../components/trip/primitives';
+import { CategoryChip, Kpi, LegendList, Section, SplitTag, ToggleLegend } from '../components/trip/primitives';
 import { CategoryOption } from '../components/trip/CategoryOption';
 import { TopTable } from '../components/trip/TopTable';
 import { CityEditor } from '../components/trip/CityEditor';
 import { useI18n } from '../i18n';
 
-// Left-align the built-in (interactive) chart legend — Mantine defaults it to flex-end.
-const leftLegend = { legend: { justifyContent: 'flex-start' as const } };
 
 // MultiSelect pill renderer that caps visible pills at 2 and summarizes the rest as "+N".
 function renderCappedPill(selected: string[]) {
@@ -130,6 +127,24 @@ export function Trip() {
     if (window.confirm(t('tx.deleteConfirm'))) await deleteTransaction(tx.id);
   };
 
+  // Chart series hidden via the tap-to-toggle legend (see ToggleLegend).
+  const [hiddenDaySeries, setHiddenDaySeries] = useState<Set<string>>(new Set());
+  const toggleDaySeries = (name: string) =>
+    setHiddenDaySeries((s) => {
+      const n = new Set(s);
+      if (n.has(name)) n.delete(name);
+      else n.add(name);
+      return n;
+    });
+  const [hiddenBdSeries, setHiddenBdSeries] = useState<Set<string>>(new Set());
+  const toggleBdSeries = (name: string) =>
+    setHiddenBdSeries((s) => {
+      const n = new Set(s);
+      if (n.has(name)) n.delete(name);
+      else n.add(name);
+      return n;
+    });
+
   const [cityCatFilter, setCityCatFilter] = useState<string[]>([]);
   const [txCatFilter, setTxCatFilter] = useState<string[]>([]);
   const [txCityFilter, setTxCityFilter] = useState<string[]>([]);
@@ -202,12 +217,18 @@ export function Trip() {
     cityCatFilter.length ? new Set(cityCatFilter) : undefined,
   );
   const cityDonut = cityBd.byCity.map((c) => ({ name: c.city, value: c.amount, color: c.color }));
+  const cityTotal = cityBd.byCity.reduce((sum, c) => sum + c.amount, 0);
 
   const dayKeys = new Set<string>();
   stats.dayData.forEach((r) => Object.keys(r).forEach((k) => k !== 'date' && dayKeys.add(k)));
   const daySeries = stats.usedCategories
     .filter((c) => dayKeys.has(c.name))
     .map((c) => ({ name: c.name, color: c.color }));
+
+  const bdSeries = [
+    { name: 'before', label: t('chart.before'), color: PERIOD_COLORS.before },
+    { name: 'during', label: t('chart.during'), color: PERIOD_COLORS.during },
+  ];
 
   // Spending by weekday (Mon → Sun), labels localized.
   const wdFmt = new Intl.DateTimeFormat(locale, { weekday: 'short' });
@@ -313,12 +334,13 @@ export function Trip() {
       </SimpleGrid>
 
       <Tabs defaultValue="summary">
-        <Tabs.List mb="md">
-          <Tabs.Tab value="summary">{t('tab.summary')}</Tabs.Tab>
-          <Tabs.Tab value="time">{t('tab.time')}</Tabs.Tab>
-          <Tabs.Tab value="cities">{t('tab.cities')}</Tabs.Tab>
-          <Tabs.Tab value="cats">{t('tab.cats')}</Tabs.Tab>
-          <Tabs.Tab value="tx">{t('tab.transactions')}</Tabs.Tab>
+        <Tabs.List mb="md" style={{ flexWrap: 'nowrap', overflowX: 'auto' }}>
+          <Tabs.Tab value="summary" style={{ flexShrink: 0 }}>{t('tab.summary')}</Tabs.Tab>
+          <Tabs.Tab value="top" style={{ flexShrink: 0 }}>{t('tab.top')}</Tabs.Tab>
+          <Tabs.Tab value="time" style={{ flexShrink: 0 }}>{t('tab.time')}</Tabs.Tab>
+          <Tabs.Tab value="cities" style={{ flexShrink: 0 }}>{t('tab.cities')}</Tabs.Tab>
+          <Tabs.Tab value="cats" style={{ flexShrink: 0 }}>{t('tab.cats')}</Tabs.Tab>
+          <Tabs.Tab value="tx" style={{ flexShrink: 0 }}>{t('tab.transactions')}</Tabs.Tab>
         </Tabs.List>
 
         {/* Summary */}
@@ -334,20 +356,23 @@ export function Trip() {
                 chartLabel={money(stats.gross, cur)}
                 valueFormatter={(v) => money(v, cur)}
               />
-              <Stack gap={6} miw={240}>
-                {stats.byCategory.map((c) => (
-                  <Group key={c.name} justify="space-between">
-                    <CategoryChip color={c.color} name={c.name} icon={c.icon} gap={8} />
-                    <Text size="sm" fw={600}>{money(c.amount, cur)}</Text>
-                  </Group>
-                ))}
-              </Stack>
+              <LegendList
+                currency={cur}
+                locale={locale}
+                rows={stats.byCategory.map((c) => ({
+                  key: c.name,
+                  color: c.color,
+                  label: c.name,
+                  icon: c.icon,
+                  amount: c.amount,
+                }))}
+              />
             </Group>
 
             {hasSplit && (
               <>
                 <Section>{t('sec.split')}</Section>
-                <SimpleGrid cols={{ base: 3 }} spacing="sm">
+                <SimpleGrid cols={{ base: 1, xs: 3 }} spacing="sm">
                   <Card withBorder padding="sm">
                     <Text size="xs" c="dimmed" tt="uppercase">{t('split.integral')}</Text>
                     <Text fw={700}>{money(stats.split.integral, cur)}</Text>
@@ -363,18 +388,26 @@ export function Trip() {
                 </SimpleGrid>
               </>
             )}
+          </Card>
+        </Tabs.Panel>
 
+        {/* Top spends */}
+        <Tabs.Panel value="top">
+          <Card withBorder padding="lg">
             {topBefore.length > 0 && (
               <>
-                <Section>{t('sec.topBefore')}</Section>
+                <Section first>{t('sec.topBefore')}</Section>
                 <TopTable items={topBefore} catById={catById} cities={cities} cur={cur} />
               </>
             )}
             {topDuring.length > 0 && (
               <>
-                <Section>{t('sec.topDuring')}</Section>
+                <Section first={topBefore.length === 0}>{t('sec.topDuring')}</Section>
                 <TopTable items={topDuring} catById={catById} cities={cities} cur={cur} />
               </>
+            )}
+            {topBefore.length === 0 && topDuring.length === 0 && (
+              <Text c="dimmed">{t('chart.noTop')}</Text>
             )}
           </Card>
         </Tabs.Panel>
@@ -389,12 +422,16 @@ export function Trip() {
                 data={stats.dayData}
                 dataKey="date"
                 type="stacked"
-                series={daySeries}
+                series={daySeries.filter((s) => !hiddenDaySeries.has(s.name))}
                 valueFormatter={(v) => money(v, cur)}
                 yAxisProps={{ width: 88 }}
                 withLegend
-                legendProps={{ verticalAlign: 'bottom' }}
-                styles={leftLegend}
+                legendProps={{
+                  verticalAlign: 'bottom',
+                  content: () => (
+                    <ToggleLegend series={daySeries} hidden={hiddenDaySeries} onToggle={toggleDaySeries} />
+                  ),
+                }}
                 barProps={{ radius: [4, 4, 0, 0] }}
               />
             ) : (
@@ -413,6 +450,12 @@ export function Trip() {
               gridAxis="none"
               withYAxis={false}
               withBarValueLabel
+              // Shorter than the full currency string (which overflows into
+              // neighboring bars on narrow screens) — the tooltip still shows
+              // the full formatted amount via `valueFormatter` above.
+              valueLabelProps={{
+                formatter: (v) => (typeof v === 'number' ? Math.round(v).toLocaleString(locale) : v),
+              }}
             />
           </Card>
         </Tabs.Panel>
@@ -442,41 +485,41 @@ export function Trip() {
                     thickness={32}
                     withTooltip
                     tooltipDataSource="segment"
+                    chartLabel={money(cityTotal, cur)}
                     valueFormatter={(v) => money(v, cur)}
                   />
-                  <Stack gap={6} miw={220}>
-                    {cityBd.byCity.map((c) => (
-                      <Group key={c.city} justify="space-between">
-                        <CategoryChip color={c.color} name={c.city} gap={8} />
-                        <Text size="sm" fw={600}>{money(c.amount, cur)}</Text>
-                      </Group>
-                    ))}
-                  </Stack>
+                  <LegendList
+                    currency={cur}
+                    locale={locale}
+                    rows={cityBd.byCity.map((c) => ({ key: c.city, color: c.color, label: c.city, amount: c.amount }))}
+                  />
                 </Group>
 
                 <Section>{t('sec.cityTable')}</Section>
-                <Table>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>{t('table.city')}</Table.Th>
-                      <Table.Th ta="right">{t('col.days')}</Table.Th>
-                      <Table.Th ta="right">{t('col.total')}</Table.Th>
-                      <Table.Th ta="right">{t('col.avgDay')}</Table.Th>
-                      <Table.Th>{t('col.topCat')}</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {cityBd.cityTable.map((c) => (
-                      <Table.Tr key={c.city}>
-                        <Table.Td>{c.city}</Table.Td>
-                        <Table.Td ta="right">{c.days}</Table.Td>
-                        <Table.Td ta="right">{money(c.total, cur)}</Table.Td>
-                        <Table.Td ta="right">{money(c.avgPerDay, cur)}</Table.Td>
-                        <Table.Td><Text size="sm" c="dimmed">{c.topCategory}</Text></Table.Td>
+                <Table.ScrollContainer minWidth={520}>
+                  <Table>
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th>{t('table.city')}</Table.Th>
+                        <Table.Th ta="right">{t('col.days')}</Table.Th>
+                        <Table.Th ta="right">{t('col.total')}</Table.Th>
+                        <Table.Th ta="right">{t('col.avgDay')}</Table.Th>
+                        <Table.Th>{t('col.topCat')}</Table.Th>
                       </Table.Tr>
-                    ))}
-                  </Table.Tbody>
-                </Table>
+                    </Table.Thead>
+                    <Table.Tbody>
+                      {cityBd.cityTable.map((c) => (
+                        <Table.Tr key={c.city}>
+                          <Table.Td>{c.city}</Table.Td>
+                          <Table.Td ta="right">{c.days}</Table.Td>
+                          <Table.Td ta="right">{money(c.total, cur)}</Table.Td>
+                          <Table.Td ta="right">{money(c.avgPerDay, cur)}</Table.Td>
+                          <Table.Td><Text size="sm" c="dimmed">{c.topCategory}</Text></Table.Td>
+                        </Table.Tr>
+                      ))}
+                    </Table.Tbody>
+                  </Table>
+                </Table.ScrollContainer>
               </>
             ) : (
               <Text c="dimmed">{t('chart.noCity')}</Text>
@@ -495,44 +538,47 @@ export function Trip() {
         <Tabs.Panel value="cats">
           <Card withBorder padding="lg">
             <Section first>{t('sec.catTable')}</Section>
-            <Table>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>{t('table.category')}</Table.Th>
-                  <Table.Th ta="right">{t('col.total')}</Table.Th>
-                  <Table.Th ta="right">%</Table.Th>
-                  <Table.Th ta="right">{t('col.count')}</Table.Th>
-                  <Table.Th ta="right">{t('col.avgTicket')}</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {stats.categoryTable.map((c) => (
-                  <Table.Tr key={c.name}>
-                    <Table.Td><CategoryChip color={c.color} name={c.name} icon={c.icon} /></Table.Td>
-                    <Table.Td ta="right">{money(c.total, cur)}</Table.Td>
-                    <Table.Td ta="right"><Text size="sm" c="dimmed">{c.pct}%</Text></Table.Td>
-                    <Table.Td ta="right">{c.count}</Table.Td>
-                    <Table.Td ta="right">{money(c.avgTicket, cur)}</Table.Td>
+            <Table.ScrollContainer minWidth={480}>
+              <Table>
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th>{t('table.category')}</Table.Th>
+                    <Table.Th ta="right">{t('col.total')}</Table.Th>
+                    <Table.Th ta="right">%</Table.Th>
+                    <Table.Th ta="right">{t('col.count')}</Table.Th>
+                    <Table.Th ta="right">{t('col.avgTicket')}</Table.Th>
                   </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
+                </Table.Thead>
+                <Table.Tbody>
+                  {stats.categoryTable.map((c) => (
+                    <Table.Tr key={c.name}>
+                      <Table.Td><CategoryChip color={c.color} name={c.name} icon={c.icon} /></Table.Td>
+                      <Table.Td ta="right">{money(c.total, cur)}</Table.Td>
+                      <Table.Td ta="right"><Text size="sm" c="dimmed">{c.pct}%</Text></Table.Td>
+                      <Table.Td ta="right">{c.count}</Table.Td>
+                      <Table.Td ta="right">{money(c.avgTicket, cur)}</Table.Td>
+                    </Table.Tr>
+                  ))}
+                </Table.Tbody>
+              </Table>
+            </Table.ScrollContainer>
 
             <Section>{t('sec.beforeDuring')}</Section>
             <BarChart
               h={340}
               data={stats.beforeDuringData}
               dataKey="category"
-              series={[
-                { name: 'before', label: t('chart.before'), color: PERIOD_COLORS.before },
-                { name: 'during', label: t('chart.during'), color: PERIOD_COLORS.during },
-              ]}
+              series={bdSeries.filter((s) => !hiddenBdSeries.has(s.name))}
               valueFormatter={(v) => money(v, cur)}
               yAxisProps={{ width: 88 }}
               barProps={{ radius: 4 }}
               withLegend
-              legendProps={{ verticalAlign: 'bottom' }}
-              styles={leftLegend}
+              legendProps={{
+                verticalAlign: 'bottom',
+                content: () => (
+                  <ToggleLegend series={bdSeries} hidden={hiddenBdSeries} onToggle={toggleBdSeries} />
+                ),
+              }}
             />
           </Card>
         </Tabs.Panel>

@@ -4,11 +4,21 @@ import type { Category, CityMap, Transaction } from './schema';
 // `amount` always holds the full (integral) value; this divides it by splitCount.
 export const cost = (t: Transaction) => t.amount / (t.splitCount || 1);
 
-// Palette used to color cities in the "by city" chart.
-const CITY_PALETTE = [
+// Palette used to color cities in the "by city" chart (also reused, by
+// name-hash, to color the city list in CityEditor).
+export const CITY_PALETTE = [
   '#C2540D', '#0E8C6B', '#B8860B', '#B23368', '#7A4A2A',
   '#3D8B4C', '#C1352E', '#6B8A1E', '#7D1F44', '#5C5650',
 ];
+
+// A stable color per city name — independent of spend or rank, so a city's
+// color never shifts as amounts change or a category filter is applied.
+// Shared by every "by city" view (chart, table) and the trip's city editor.
+export function colorForCity(name: string): string {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return CITY_PALETTE[h % CITY_PALETTE.length];
+}
 
 export interface CatAgg {
   id: string | null;
@@ -241,14 +251,15 @@ export function cityBreakdown(
   return { byCity, cityTable: buildCityTable(byCity, cityDays, cityCat) };
 }
 
-// City totals sorted desc, each assigned a stable palette color by rank.
+// City totals sorted desc (amount), each colored by name via colorForCity —
+// the sort order can shift with a filter, but the color never does.
 function paletteByCity(cityMap: Map<string, number>) {
   return [...cityMap.entries()]
     .sort(([, a], [, b]) => b - a)
-    .map(([city, amount], i) => ({
+    .map(([city, amount]) => ({
       city,
       amount: round(amount),
-      color: CITY_PALETTE[i % CITY_PALETTE.length],
+      color: colorForCity(city),
     }));
 }
 

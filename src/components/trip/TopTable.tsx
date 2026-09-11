@@ -18,24 +18,26 @@ export function TopTable({
 }) {
   const { money, date } = useI18n();
   return (
-    <Table>
-      <Table.Tbody>
-        {items.map((tx) => {
-          const c = tx.categoryId ? catById.get(tx.categoryId) : undefined;
-          return (
-            <Table.Tr key={tx.id}>
-              <Table.Td>
-                {tx.description}
-                <SplitTag count={tx.splitCount} />
-              </Table.Td>
-              <Table.Td>{c ? <CategoryChip color={c.color} name={c.name} icon={c.icon} /> : '—'}</Table.Td>
-              <Table.Td><Text size="sm" c="dimmed">{(tx.date && cities[tx.date]) || '—'}</Text></Table.Td>
-              <Table.Td><Text size="sm" c="dimmed">{date(tx.date)}</Text></Table.Td>
-              <Table.Td ta="right" fw={600}>{money(cost(tx), cur)}</Table.Td>
-            </Table.Tr>
-          );
-        })}
-      </Table.Tbody>
-    </Table>
+    <Table.ScrollContainer minWidth={420}>
+      <Table>
+        <Table.Tbody>
+          {items.map((tx) => {
+            const c = tx.categoryId ? catById.get(tx.categoryId) : undefined;
+            return (
+              <Table.Tr key={tx.id}>
+                <Table.Td>
+                  {tx.description}
+                  <SplitTag count={tx.splitCount} />
+                </Table.Td>
+                <Table.Td>{c ? <CategoryChip color={c.color} name={c.name} icon={c.icon} /> : '—'}</Table.Td>
+                <Table.Td><Text size="sm" c="dimmed">{(tx.date && cities[tx.date]) || '—'}</Text></Table.Td>
+                <Table.Td><Text size="sm" c="dimmed">{date(tx.date)}</Text></Table.Td>
+                <Table.Td ta="right" fw={600}>{money(cost(tx), cur)}</Table.Td>
+              </Table.Tr>
+            );
+          })}
+        </Table.Tbody>
+      </Table>
+    </Table.ScrollContainer>
   );
 }

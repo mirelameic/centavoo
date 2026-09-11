@@ -1,11 +1,32 @@
-import { Box, Group, Select, Stack, TagsInput, Text } from '@mantine/core';
+import { useState } from 'react';
+import {
+  ActionIcon,
+  Box,
+  Button,
+  Card,
+  Group,
+  Pill,
+  Select,
+  Stack,
+  Text,
+  TextInput,
+} from '@mantine/core';
+import { DatePickerInput } from '@mantine/dates';
+import { IconCheck, IconPencil, IconPlus, IconTrash, IconX } from '@tabler/icons-react';
+import { colorForCity } from '../../db/stats';
 import type { CityMap } from '../../db/schema';
-import { setTripCity, updateTrip } from '../../db/repo';
+import { setTripCityRange, updateTrip } from '../../db/repo';
+import { dateRange, groupCityBlocks, toISO, type CityBlock } from '../../lib/format';
 import { useI18n } from '../../i18n';
+import { Dot } from './primitives';
 
-// Editable city per day. First you list the trip's cities (TagsInput), then pick
-// one per day from a dropdown. Stored on the trip (a day = a city); days flow
-// top-to-bottom in date order via CSS columns.
+// Cities are assigned to date *ranges* ("blocks"), not day by day — most
+// trips stay in one city for several days in a row. The block list is a pure
+// read of `trip.cities` (via groupCityBlocks): it never writes anything by
+// itself. Data only changes on an explicit action — add/edit/remove a block,
+// or remove a city from "Cidades da viagem" that's still in use (which asks
+// first, since that would otherwise leave assigned days pointing at a city
+// no longer in the list).
 export function CityEditor({
   tripId,
   days,
@@ -20,33 +41,190 @@ export function CityEditor({
   const { t, date } = useI18n();
   const distinct = [...new Set(Object.values(cities).filter(Boolean))].sort();
   const listValue = cityList ?? distinct;
-  const options = [...new Set([...listValue, ...distinct])].sort();
+
+  const blocks = groupCityBlocks(days, cities);
+  const unassigned = days.length - blocks.reduce((n, b) => n + b.days.length, 0);
+
+  const [editing, setEditing] = useState<CityBlock | null>(null);
+  const [formCity, setFormCity] = useState<string | null>(null);
+  const [formRange, setFormRange] = useState<[string | null, string | null]>([null, null]);
+
+  const resetForm = () => {
+    setEditing(null);
+    setFormCity(null);
+    setFormRange([null, null]);
+  };
+
+  const startEdit = (b: CityBlock) => {
+    setEditing(b);
+    setFormCity(b.city);
+    setFormRange([b.start, b.end]);
+  };
+
+  const submit = async () => {
+    if (!formCity || !formRange[0] || !formRange[1]) return;
+    if (editing) await setTripCityRange(tripId, editing.days, '');
+    await setTripCityRange(tripId, dateRange(formRange[0], formRange[1]), formCity);
+    resetForm();
+  };
+
+  const removeBlock = async (b: CityBlock) => {
+    if (!window.confirm(t('city.removeBlockConfirm'))) return;
+    await setTripCityRange(tripId, b.days, '');
+    if (editing === b) resetForm();
+  };
+
+  // Removing a city that's still assigned to days would otherwise leave
+  // those days pointing at a city no longer in the list — ask first, and
+  // only clear them if the user confirms.
+  const removeCity = async (city: string) => {
+    const daysUsed = days.filter((d) => cities[d] === city);
+    if (daysUsed.length > 0) {
+      const msg = `${city} — ${daysUsed.length} ${t('city.daysN')}. ${t('city.removeUsedWarning')}`;
+      if (!window.confirm(msg)) return;
+      await setTripCityRange(tripId, daysUsed, '');
+    }
+    await updateTrip(tripId, { cityList: listValue.filter((c) => c !== city) });
+  };
+
+  const [addingCity, setAddingCity] = useState(false);
+  const [newCityText, setNewCityText] = useState('');
+
+  const cancelAddCity = () => {
+    setAddingCity(false);
+    setNewCityText('');
+  };
+
+  const confirmAddCity = async () => {
+    const v = newCityText.trim();
+    if (v && !listValue.includes(v)) {
+      await updateTrip(tripId, { cityList: [...listValue, v] });
+    }
+    cancelAddCity();
+  };
+
   return (
     <Stack gap="sm">
-      <TagsInput
-        label={t('city.list')}
-        placeholder={t('city.listPlaceholder')}
-        value={listValue}
-        onChange={(vals) => updateTrip(tripId, { cityList: vals })}
-        clearable
-      />
-      <Box style={{ columnWidth: 240, columnGap: 16 }}>
-        {days.map((d) => (
-          <Group key={d} gap="xs" wrap="nowrap" style={{ breakInside: 'avoid', marginBottom: 8 }}>
-            <Text size="sm" c="dimmed" w={56}>{date(d)}</Text>
-            <Select
+      <Box>
+        <Text size="sm" fw={500} mb={6}>{t('city.list')}</Text>
+        <Pill.Group>
+          {listValue.map((city) => (
+            <Pill
+              key={city}
+              size="md"
+              withRemoveButton
+              onRemove={() => removeCity(city)}
+              removeButtonProps={{ 'aria-label': `${t('city.removeCity')} ${city}`, 'aria-hidden': false }}
+            >
+              <Group gap={6} wrap="nowrap">
+                <Dot color={colorForCity(city)} />
+                {city}
+              </Group>
+            </Pill>
+          ))}
+          {addingCity ? (
+            <Group gap={4} wrap="nowrap">
+              <TextInput
+                size="xs"
+                autoFocus
+                value={newCityText}
+                onChange={(e) => setNewCityText(e.currentTarget.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') confirmAddCity();
+                  if (e.key === 'Escape') cancelAddCity();
+                }}
+                placeholder={t('city.placeholder')}
+                style={{ width: 140 }}
+              />
+              <ActionIcon variant="filled" aria-label="confirm-add-city" onClick={confirmAddCity}>
+                <IconCheck size={16} />
+              </ActionIcon>
+              <ActionIcon variant="subtle" color="gray" aria-label="cancel-add-city" onClick={cancelAddCity}>
+                <IconX size={16} />
+              </ActionIcon>
+            </Group>
+          ) : (
+            <Button
               size="xs"
-              placeholder={t('city.placeholder')}
-              data={options}
-              value={cities[d] ?? null}
-              onChange={(v) => setTripCity(tripId, d, v ?? '')}
-              searchable
-              clearable
-              style={{ flex: 1 }}
-            />
-          </Group>
-        ))}
+              variant="light"
+              radius="xl"
+              leftSection={<IconPlus size={14} />}
+              onClick={() => setAddingCity(true)}
+            >
+              {t('city.addCity')}
+            </Button>
+          )}
+        </Pill.Group>
       </Box>
+
+      <Group align="flex-end" gap="xs" wrap="wrap">
+        <Select
+          label={t('city.blockCityLabel')}
+          placeholder={t('city.placeholder')}
+          data={listValue}
+          value={formCity}
+          onChange={setFormCity}
+          searchable
+          style={{ flex: '1 1 160px' }}
+        />
+        <DatePickerInput
+          type="range"
+          label={t('city.blockRangeLabel')}
+          valueFormat="DD/MM/YY"
+          value={formRange}
+          onChange={(v) => setFormRange([toISO(v[0]), toISO(v[1])])}
+          style={{ flex: '1 1 200px' }}
+        />
+        <Button size="sm" onClick={submit} disabled={!formCity || !formRange[0] || !formRange[1]}>
+          {editing ? t('common.save') : t('city.addBlock')}
+        </Button>
+        {editing && (
+          <Button size="sm" variant="subtle" onClick={resetForm}>{t('common.cancel')}</Button>
+        )}
+      </Group>
+
+      <Stack gap={6}>
+        {blocks.length === 0 && (
+          <Text size="sm" c="dimmed">{t('city.noBlocks')}</Text>
+        )}
+        {blocks.map((b) => (
+          <Card key={`${b.city}-${b.start}`} withBorder padding="xs">
+            <Group justify="space-between" wrap="nowrap">
+              <Group gap={8} wrap="nowrap">
+                <Dot color={colorForCity(b.city)} />
+                <Box>
+                  <Text size="sm" fw={600}>{b.city}</Text>
+                  <Text size="xs" c="dimmed">
+                    {b.start === b.end ? date(b.start) : `${date(b.start)} – ${date(b.end)}`}
+                    {' · '}{b.days.length} {t('city.daysN')}
+                  </Text>
+                </Box>
+              </Group>
+              <Group gap={4} wrap="nowrap">
+                <ActionIcon
+                  variant="subtle"
+                  color="gray"
+                  aria-label="edit-city-block"
+                  onClick={() => startEdit(b)}
+                >
+                  <IconPencil size={16} />
+                </ActionIcon>
+                <ActionIcon
+                  variant="subtle"
+                  color="red"
+                  aria-label="delete-city-block"
+                  onClick={() => removeBlock(b)}
+                >
+                  <IconTrash size={16} />
+                </ActionIcon>
+              </Group>
+            </Group>
+          </Card>
+        ))}
+        {unassigned > 0 && (
+          <Text size="xs" c="dimmed">{unassigned} {t('city.unassignedN')}</Text>
+        )}
+      </Stack>
     </Stack>
   );
 }
