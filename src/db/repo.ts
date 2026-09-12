@@ -1,7 +1,6 @@
 import { db } from './db';
 import type { Category, CityMap, Transaction, Trip } from './schema';
 
-// Default categories created for every new trip (categories are per-trip).
 export const DEFAULT_CATEGORIES: Omit<Category, 'id' | 'tripId'>[] = [
   { name: 'Hospedagem', color: '#0E8C6B', icon: 'bed', sortOrder: 0 },
   { name: 'Passagem', color: '#B8860B', icon: 'plane', sortOrder: 1 },
@@ -15,7 +14,6 @@ export const DEFAULT_CATEGORIES: Omit<Category, 'id' | 'tripId'>[] = [
   { name: 'Outros', color: '#5C5650', icon: 'bookmark', sortOrder: 9 },
 ];
 
-// ---- trips -------------------------------------------------------------------
 export async function createTrip(
   data: Omit<Trip, 'id' | 'createdAt' | 'currency'> & { currency?: string },
 ): Promise<string> {
@@ -27,7 +25,6 @@ export async function createTrip(
     cities: data.cities ?? {},
     createdAt: new Date().toISOString(),
   });
-  // seed this trip with its own default categories
   await db.categories.bulkAdd(
     DEFAULT_CATEGORIES.map((c) => ({ ...c, id: `cat_${crypto.randomUUID()}`, tripId: id })),
   );
@@ -36,7 +33,6 @@ export async function createTrip(
 
 export const updateTrip = (id: string, patch: Partial<Trip>) => db.trips.update(id, patch);
 
-// Permanently delete a trip and everything that belongs to it.
 export async function deleteTrip(id: string) {
   await db.transaction('rw', [db.trips, db.transactions, db.categories, db.rules], async () => {
     const catIds = (await db.categories.where('tripId').equals(id).primaryKeys()) as string[];
@@ -47,9 +43,6 @@ export async function deleteTrip(id: string) {
   });
 }
 
-// Sets (or clears, if `city` is empty) the city for every day in `days` at
-// once — a single read + write. Stored on the trip (a day = a city), so it
-// persists even for days without transactions and even when cleared.
 export async function setTripCityRange(tripId: string, days: string[], city: string) {
   const trip = await db.trips.get(tripId);
   if (!trip) return;
@@ -62,7 +55,6 @@ export async function setTripCityRange(tripId: string, days: string[], city: str
   await db.trips.update(tripId, { cities });
 }
 
-// ---- transactions ------------------------------------------------------------
 export async function addTransaction(
   t: Omit<Transaction, 'id' | 'createdAt'>,
 ): Promise<string> {
@@ -78,8 +70,6 @@ export const deleteTransaction = (id: string) => db.transactions.delete(id);
 
 export const deleteTransactions = (ids: string[]) => db.transactions.bulkDelete(ids);
 
-// Inserts many transactions at once (statement import) — same shape as
-// addTransaction, batched into a single Dexie call.
 export async function bulkAddTransactions(
   rows: Omit<Transaction, 'id' | 'createdAt'>[],
 ): Promise<string[]> {
@@ -89,7 +79,6 @@ export async function bulkAddTransactions(
   return withIds.map((r) => r.id);
 }
 
-// ---- categories --------------------------------------------------------------
 export async function addCategory(
   data: Omit<Category, 'id' | 'sortOrder'> & { sortOrder?: number },
 ): Promise<string> {
@@ -103,7 +92,6 @@ export async function addCategory(
 export const updateCategory = (id: string, patch: Partial<Category>) =>
   db.categories.update(id, patch);
 
-// Deleting a category clears it from any transaction that used it.
 export async function deleteCategory(id: string) {
   await db.transaction('rw', [db.categories, db.transactions, db.rules], async () => {
     await db.transactions.where('categoryId').equals(id).modify({ categoryId: null });

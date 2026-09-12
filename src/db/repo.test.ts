@@ -29,9 +29,6 @@ describe('createTrip', () => {
 
     const cats = await db.categories.where('tripId').equals(id).toArray();
     expect(cats).toHaveLength(DEFAULT_CATEGORIES.length);
-    // Sort by sortOrder before comparing — Dexie/IndexedDB does not guarantee
-    // retrieval order for a non-unique index query (ties break by primary
-    // key, which is a random UUID here, not insertion order).
     const byOrder = [...cats].sort((a, b) => a.sortOrder - b.sortOrder);
     expect(byOrder.map((c) => c.name)).toEqual(DEFAULT_CATEGORIES.map((c) => c.name));
   });

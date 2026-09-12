@@ -1,31 +1,27 @@
-// Domain types. These same shapes are produced by the Python seed
-// (scripts/seed_europa.py -> public/europa.json).
-
 export type Period = 'BEFORE' | 'DURING';
 export type Kind = 'EXPENSE' | 'REFUND' | 'IOF_REFUND';
 
-// Maps a day ('YYYY-MM-DD') to the city visited that day. Stored on the trip.
 export type CityMap = Record<string, string>;
 
 export interface Trip {
   id: string;
   name: string;
   destination?: string;
-  startDate?: string | null; // 'YYYY-MM-DD'
+  startDate?: string | null;
   endDate?: string | null;
-  currency: string;          // 'BRL'
+  currency: string;
   notes?: string;
-  cities?: CityMap;                // a day = a city
-  cityList?: string[];             // curated list of cities, used as options per day
+  cities?: CityMap;
+  cityList?: string[];
   createdAt: string;
 }
 
 export interface Category {
   id: string;
-  tripId: string;            // categories are per-trip
+  tripId: string;
   name: string;
-  color: string;             // hex, e.g. '#FF9900'
-  icon?: string;             // key into lib/categoryIcons' ICON_MAP
+  color: string;
+  icon?: string;
   sortOrder: number;
 }
 
@@ -33,21 +29,21 @@ export interface Transaction {
   id: string;
   tripId: string;
   period: Period;
-  date?: string | null;      // 'YYYY-MM-DD' (may be null for BEFORE)
+  date?: string | null;
   description: string;
-  amount: number;            // SIGNED full amount: expense +, refund -
+  amount: number;
   categoryId?: string | null;
   kind: Kind;
   isIof: boolean;
-  splitCount: number;        // 1 = no split; effective cost = amount / splitCount
-  city?: string | null;      // where it happened (null for pre-trip BEFORE items)
+  splitCount: number;
+  city?: string | null;
   rawText?: string;
   createdAt: string;
 }
 
 export interface CategoryRule {
-  id?: number;               // auto-increment in Dexie
-  keyword: string;           // lowercase substring to look for in the description
+  id?: number;
+  keyword: string;
   categoryId: string;
-  priority: number;          // higher wins
+  priority: number;
 }

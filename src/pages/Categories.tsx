@@ -97,8 +97,6 @@ interface ModalProps {
   editing: Category | null;
 }
 
-// The fields remount (via `key`) whenever the modal opens or the edited category
-// changes, so state is initialized straight from props — no reset effect needed.
 function CategoryModal({ opened, onClose, tripId, editing }: ModalProps) {
   const { t } = useI18n();
   return (

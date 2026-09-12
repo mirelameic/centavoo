@@ -15,8 +15,6 @@ interface Props {
   trip: Trip;
 }
 
-// The fields remount (via `key`) each time the modal opens, so state starts from
-// the current trip — no reset effect needed.
 export function TripForm({ opened, onClose, trip }: Props) {
   const { t } = useI18n();
   return (

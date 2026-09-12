@@ -1,6 +1,5 @@
 import type { pt } from './pt';
 
-// Each locale must provide the same keys as the pt dictionary (the source of truth).
 export const en: Record<keyof typeof pt, string> = {
   'app.title': 'Centavoo',
   'loading': 'Preparing your data…',

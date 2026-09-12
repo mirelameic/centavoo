@@ -3,8 +3,6 @@ import { Box, Card, Group, Text, UnstyledButton } from '@mantine/core';
 import { CategoryIcon } from '../../lib/categoryIcons';
 import { moneyParts } from '../../lib/format';
 
-// Small presentational pieces shared across the Trip dashboard.
-
 export function Kpi({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
     <Card withBorder padding="md">
@@ -14,7 +12,6 @@ export function Kpi({ label, value, color }: { label: string; value: string; col
   );
 }
 
-// Colored square used as a legend marker next to a category/city name.
 export function Dot({ color }: { color: string }) {
   return (
     <Box
@@ -26,7 +23,6 @@ export function Dot({ color }: { color: string }) {
   );
 }
 
-// Section heading inside a tab (each tab groups a few related views).
 export function Section({ children, first }: { children: ReactNode; first?: boolean }) {
   return (
     <Text fw={600} size="sm" c="dimmed" mt={first ? 0 : 'xl'} mb="xs">
@@ -35,9 +31,6 @@ export function Section({ children, first }: { children: ReactNode; first?: bool
   );
 }
 
-// Category/city label with its color dot — the recurring "legend row" look
-// used in charts, tables and lists across the Trip dashboard. `icon` is only
-// present for categories (cities have none), rendered right after the dot.
 export function CategoryChip({
   color,
   name,
@@ -58,11 +51,6 @@ export function CategoryChip({
   );
 }
 
-// A donut chart's side legend (color + name + amount), laid out as a 3-column
-// grid — label, currency symbol, number — so the symbol and the numbers each
-// form their own straight column regardless of how many digits a row has
-// (a plain right-aligned "R$ 1.234,56" string left the symbol drifting left
-// or right per row, which read as crooked).
 export function LegendList({
   currency,
   locale,
@@ -97,10 +85,6 @@ export function LegendList({
   );
 }
 
-// Click/tap-to-toggle chart legend. Replaces Mantine's built-in chart legend
-// (which only reacts to mouse hover — unreliable on touch) with an explicit
-// tap target per series: tapping removes that series from the chart, tapping
-// again brings it back. `hidden` holds the currently-hidden series names.
 export function ToggleLegend({
   series,
   hidden,
@@ -135,7 +119,6 @@ export function ToggleLegend({
   );
 }
 
-// "(÷n)" note next to a description, shown when a transaction is split.
 export function SplitTag({ count }: { count: number }) {
   if (count <= 1) return null;
   return (

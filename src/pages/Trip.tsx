@@ -54,8 +54,6 @@ import { TopTable } from '../components/trip/TopTable';
 import { CityEditor } from '../components/trip/CityEditor';
 import { useI18n } from '../i18n';
 
-
-// MultiSelect pill renderer that caps visible pills at 2 and summarizes the rest as "+N".
 function renderCappedPill(selected: string[]) {
   return ({ option, onRemove }: ComboboxRenderPillInput<string>) => {
     const idx = selected.indexOf(String(option.value));
@@ -127,7 +125,6 @@ export function Trip() {
     if (window.confirm(t('tx.deleteConfirm'))) await deleteTransaction(tx.id);
   };
 
-  // Chart series hidden via the tap-to-toggle legend (see ToggleLegend).
   const [hiddenDaySeries, setHiddenDaySeries] = useState<Set<string>>(new Set());
   const toggleDaySeries = (name: string) =>
     setHiddenDaySeries((s) => {
@@ -203,13 +200,10 @@ export function Trip() {
 
   const cur = trip.currency;
   const cities = trip.cities ?? {};
-  // Days shown in the city editor: the trip's date range UNION every day that
-  // already has a transaction (so changing the trip dates never orphans a day).
   const txDates = (txs ?? []).filter((tx) => tx.date).map((tx) => tx.date as string);
   const rangeDays = trip.startDate && trip.endDate ? dateRange(trip.startDate, trip.endDate) : [];
   const tripDays = [...new Set([...rangeDays, ...txDates])].sort();
   const donut = stats.byCategory.map((c) => ({ name: c.name, value: c.amount, color: c.color }));
-  // City summary, restricted to the chosen categories (empty = all).
   const cityBd = cityBreakdown(
     txs ?? [],
     cats ?? [],
@@ -230,7 +224,6 @@ export function Trip() {
     { name: 'during', label: t('chart.during'), color: PERIOD_COLORS.during },
   ];
 
-  // Spending by weekday (Mon → Sun), labels localized.
   const wdFmt = new Intl.DateTimeFormat(locale, { weekday: 'short' });
   const weekdayData = [1, 2, 3, 4, 5, 6, 0].map((wd) => ({
     day: wdFmt.format(new Date(2023, 0, 1 + wd)),
@@ -258,7 +251,6 @@ export function Trip() {
     period: (a, b) => (a.period === b.period ? 0 : a.period === 'BEFORE' ? -1 : 1),
     amount: (a, b) => cost(a) - cost(b),
   };
-  // 3-state cycle per column: unsorted -> asc -> desc -> unsorted (back to default order).
   const toggleTxSort = (field: TxSortField) => {
     if (txSortField !== field) {
       setTxSortField(field);
@@ -343,7 +335,6 @@ export function Trip() {
           <Tabs.Tab value="tx" style={{ flexShrink: 0 }}>{t('tab.transactions')}</Tabs.Tab>
         </Tabs.List>
 
-        {/* Summary */}
         <Tabs.Panel value="summary">
           <Card withBorder padding="lg">
             <Group align="flex-start" justify="center" gap="xl" wrap="wrap">
@@ -391,7 +382,6 @@ export function Trip() {
           </Card>
         </Tabs.Panel>
 
-        {/* Top spends */}
         <Tabs.Panel value="top">
           <Card withBorder padding="lg">
             {topBefore.length > 0 && (
@@ -412,7 +402,6 @@ export function Trip() {
           </Card>
         </Tabs.Panel>
 
-        {/* Time */}
         <Tabs.Panel value="time">
           <Card withBorder padding="lg">
             <Section first>{t('sec.byDay')}</Section>
@@ -450,9 +439,6 @@ export function Trip() {
               gridAxis="none"
               withYAxis={false}
               withBarValueLabel
-              // Shorter than the full currency string (which overflows into
-              // neighboring bars on narrow screens) — the tooltip still shows
-              // the full formatted amount via `valueFormatter` above.
               valueLabelProps={{
                 formatter: (v) => (typeof v === 'number' ? Math.round(v).toLocaleString(locale) : v),
               }}
@@ -460,7 +446,6 @@ export function Trip() {
           </Card>
         </Tabs.Panel>
 
-        {/* Cities */}
         <Tabs.Panel value="cities">
           <Card withBorder padding="lg">
             <MultiSelect
@@ -534,7 +519,6 @@ export function Trip() {
           </Card>
         </Tabs.Panel>
 
-        {/* Categories */}
         <Tabs.Panel value="cats">
           <Card withBorder padding="lg">
             <Section first>{t('sec.catTable')}</Section>
@@ -583,7 +567,6 @@ export function Trip() {
           </Card>
         </Tabs.Panel>
 
-        {/* Transactions */}
         <Tabs.Panel value="tx">
           <Card withBorder padding={0}>
             <Box px="md" pt="md">

@@ -5,7 +5,6 @@ import {
   IconDeviceMobile, IconPill, IconLeaf, IconBookmark,
 } from '@tabler/icons-react';
 
-// Keys match ICON_OPTIONS in lib/constants.ts.
 const ICON_MAP: Record<string, typeof IconPlane> = {
   plane: IconPlane, bed: IconBed, home: IconHome, car: IconCar, train: IconTrain,
   bus: IconBus, bike: IconBike, fuel: IconGasStation, food: IconToolsKitchen,
@@ -19,6 +18,5 @@ export function CategoryIcon({ name, size = 16, color }: { name?: string; size?:
   if (!name) return null;
   const Cmp = ICON_MAP[name];
   if (Cmp) return <Cmp size={size} color={color} stroke={1.75} />;
-  // Not a recognized icon key — treat it as a literal emoji (legacy/user data).
   return <span style={{ fontSize: size, lineHeight: 1 }}>{name}</span>;
 }

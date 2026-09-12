@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { cost, computeStats, cityBreakdown } from './stats';
 import type { Category, CityMap, Transaction } from './schema';
 
-// --- builders (keep each test to just the fields that matter) ----------------
 function tx(p: Partial<Transaction> = {}): Transaction {
   return {
     id: 'tx',
@@ -49,7 +48,7 @@ describe('computeStats — totals', () => {
   it('net = gross + refunds', () => expect(s.net).toBe(110));
   it('splits before/during by period', () => {
     expect(s.before).toBe(50);
-    expect(s.during).toBe(60); // 100 - 30 - 10
+    expect(s.during).toBe(60);
   });
   it('sums IOF refunds separately', () => expect(s.iofRefund).toBe(-10));
   it('keeps refunds (incl. IOF) out of the category breakdown', () => {
@@ -116,7 +115,6 @@ describe('computeStats — before × during by category', () => {
 });
 
 describe('computeStats — days, weekday and daily series', () => {
-  // 2026-06-21 = Sunday (getDay 0), 2026-06-22 = Monday (1), 2026-06-23 = Tuesday.
   const s = computeStats([
     tx({ amount: 100, date: '2026-06-21' }),
     tx({ amount: 50, date: '2026-06-22' }),
@@ -128,7 +126,7 @@ describe('computeStats — days, weekday and daily series', () => {
     expect(s.days).toBe(3);
   });
   it('avgPerDay = during net / days', () => {
-    expect(s.avgPerDay).toBe(36.67); // (100 + 50 - 30 - 10) / 3
+    expect(s.avgPerDay).toBe(36.67);
   });
   it('buckets expenses by weekday (Sunday = index 0)', () => {
     expect(s.weekdayAmounts[0]).toBe(100);
@@ -147,7 +145,7 @@ describe('computeStats — by city', () => {
     tx({ amount: 100, categoryId: 'c1', date: '2026-06-21' }),
     tx({ amount: 50, categoryId: 'c1', date: '2026-06-23' }),
     tx({ amount: 80, categoryId: 'c1', date: '2026-06-22' }),
-    tx({ amount: 40, categoryId: 'c1', date: '2026-06-24' }), // no city mapping
+    tx({ amount: 40, categoryId: 'c1', date: '2026-06-24' }),
   ], [cat('c1', 'Food')], cities);
 
   it('totals by city (desc), colored by name', () => {
@@ -203,8 +201,6 @@ describe('cityBreakdown', () => {
 
   it('keeps each city\'s color the same even when a filter changes the ranking', () => {
     const { byCity } = cityBreakdown(txs, cats, cities, new Set(['c2']));
-    // Unfiltered, Lyon ranks 2nd; filtered to just 'Bar' spend, it ranks 1st —
-    // its color must stay '#7D1F44' either way (name-based, not rank-based).
     expect(byCity).toEqual([{ city: 'Lyon', amount: 50, color: '#7D1F44' }]);
   });
 
@@ -217,10 +213,6 @@ describe('cityBreakdown', () => {
     expect(cityTable[0].topCategory).toBe('—');
   });
 });
-
-// ===========================================================================
-// Corner cases — rounding, period boundaries, grouping, city edges, quirks
-// ===========================================================================
 
 describe('computeStats — rounding & float safety', () => {
   it('tames floating-point drift in totals (0.1 + 0.2)', () => {
@@ -250,7 +242,7 @@ describe('computeStats — period boundaries', () => {
       [cat('c1', 'Food')],
     );
     expect(s.before).toBe(100);
-    expect(s.days).toBe(0); // only DURING dates count as days
+    expect(s.days).toBe(0);
     expect(s.dayData).toEqual([]);
     expect(s.weekdayAmounts.reduce((a, b) => a + b, 0)).toBe(0);
     expect(s.beforeDuringData).toEqual([{ category: 'Food', before: 100, during: 0 }]);
@@ -316,13 +308,11 @@ describe('computeStats — city edge cases', () => {
 
   it('keeps a city\'s color tied to its name, not its spend rank', () => {
     const cities: CityMap = { '2026-03-01': 'Paris', '2026-03-02': 'Lyon' };
-    // Paris outspends Lyon here...
     const a = computeStats(
       [tx({ amount: 100, date: '2026-03-01' }), tx({ amount: 10, date: '2026-03-02' })],
       [],
       cities,
     );
-    // ...and the other way around here — same two cities, ranks swapped.
     const b = computeStats(
       [tx({ amount: 10, date: '2026-03-01' }), tx({ amount: 100, date: '2026-03-02' })],
       [],
@@ -336,10 +326,6 @@ describe('computeStats — city edge cases', () => {
 });
 
 describe('computeStats — known quirks', () => {
-  // Current behavior: a null categoryId and an unknown (dangling) categoryId do
-  // NOT merge — they produce two separate "No category" buckets. Unknown ids
-  // shouldn't occur in practice (deleting a category nulls its transactions),
-  // but this locks in the behavior so a future change is a conscious decision.
   it('keeps null and unknown categoryId as separate "No category" buckets', () => {
     const s = computeStats([
       tx({ amount: 20, categoryId: null }),

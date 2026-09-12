@@ -27,8 +27,6 @@ interface Props {
   editing?: Transaction | null;
 }
 
-// The fields remount (via `key`) whenever the modal opens or the edited row
-// changes, so state is initialized straight from props — no reset effect needed.
 export function TransactionForm({ opened, onClose, editing, ...rest }: Props) {
   const { t } = useI18n();
   return (
@@ -63,7 +61,6 @@ function Fields({
   function suggestFromDescription() {
     if (!categoryId && description.trim()) {
       const s = suggestCategory(description, rules);
-      // only apply if the suggested category belongs to this trip
       if (s && categories.some((c) => c.id === s)) setCategoryId(s);
     }
   }

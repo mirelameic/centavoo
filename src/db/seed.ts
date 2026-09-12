@@ -17,16 +17,12 @@ async function fetchSeed(): Promise<SeedFile> {
   return res.json();
 }
 
-// Writes the seed into the local database. Idempotent: bulkPut upserts by id,
-// so re-applying only touches the Europa trip + global categories/rules; trips
-// the user created have different ids and are left untouched.
 async function applySeed(data: SeedFile): Promise<void> {
   await db.transaction('rw', [db.trips, db.categories, db.transactions, db.rules], async () => {
     await db.categories.bulkPut(data.categories);
     await db.trips.bulkPut(data.trips);
     await db.transactions.bulkPut(data.transactions);
     await db.rules.clear();
-    // Drop the seed's `id` so Dexie assigns fresh auto-increment keys.
     await db.rules.bulkAdd(
       data.rules.map((r) => ({ keyword: r.keyword, categoryId: r.categoryId, priority: r.priority })),
     );
@@ -34,9 +30,6 @@ async function applySeed(data: SeedFile): Promise<void> {
   localStorage.setItem(SEED_VERSION_KEY, String(data.version));
 }
 
-// Seeds on first run (empty DB) and re-applies when the seed file version bumps,
-// so fixes to the Europa data reach an already-seeded browser on next load.
-// Dedupes concurrent calls (e.g. React StrictMode in dev) with a singleton.
 let seeding: Promise<boolean> | null = null;
 export function ensureSeeded(): Promise<boolean> {
   if (!seeding) {

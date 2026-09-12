@@ -3,9 +3,6 @@ import { initReactI18next } from 'react-i18next';
 import { pt } from './locales/pt';
 import { en } from './locales/en';
 
-// Registry of available languages. To add one: create a locale file under
-// locales/ and add a single entry here — the toggle in the header and the
-// language switcher pick it up automatically.
 export const LANGUAGES = [
   { code: 'pt', label: 'PT', locale: 'pt-BR', dict: pt },
   { code: 'en', label: 'EN', locale: 'en-US', dict: en },
@@ -26,10 +23,9 @@ i18next.use(initReactI18next).init({
   resources: Object.fromEntries(LANGUAGES.map((l) => [l.code, { translation: l.dict }])),
   lng: initialLng,
   fallbackLng: FALLBACK,
-  // Our keys contain dots (e.g. 'kpi.net') and are NOT nested — keep them flat.
   keySeparator: false,
   nsSeparator: false,
-  interpolation: { escapeValue: false }, // React already escapes output
+  interpolation: { escapeValue: false },
 });
 
 export { STORAGE_KEY };

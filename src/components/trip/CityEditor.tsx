@@ -20,13 +20,6 @@ import { dateRange, groupCityBlocks, toISO, type CityBlock } from '../../lib/for
 import { useI18n } from '../../i18n';
 import { Dot } from './primitives';
 
-// Cities are assigned to date *ranges* ("blocks"), not day by day — most
-// trips stay in one city for several days in a row. The block list is a pure
-// read of `trip.cities` (via groupCityBlocks): it never writes anything by
-// itself. Data only changes on an explicit action — add/edit/remove a block,
-// or remove a city from "Cidades da viagem" that's still in use (which asks
-// first, since that would otherwise leave assigned days pointing at a city
-// no longer in the list).
 export function CityEditor({
   tripId,
   days,
@@ -74,9 +67,6 @@ export function CityEditor({
     if (editing === b) resetForm();
   };
 
-  // Removing a city that's still assigned to days would otherwise leave
-  // those days pointing at a city no longer in the list — ask first, and
-  // only clear them if the user confirms.
   const removeCity = async (city: string) => {
     const daysUsed = days.filter((d) => cities[d] === city);
     if (daysUsed.length > 0) {

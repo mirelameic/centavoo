@@ -1,7 +1,5 @@
 import { useId } from 'react';
 
-// The Centavoo mark: a warm coin engraved with a cent (¢) sign, matching the
-// app's orange/warm-gray glass palette. Used in the header and favicon/icons.
 export function Logo({ size = 28 }: { size?: number }) {
   const gradId = `centavoo-coin-${useId()}`;
   return (
@@ -23,7 +21,6 @@ export function Logo({ size = 28 }: { size?: number }) {
         strokeWidth="2.4"
         strokeLinecap="round"
       />
-      {/* Tiny paper-plane silhouette standing in for the cent sign's stroke. */}
       <path d="M7 0 L-6 -4 L-2 0 L-6 4 Z" fill="#3a2413" transform="translate(16 16) rotate(-35)" />
     </svg>
   );

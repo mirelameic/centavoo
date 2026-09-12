@@ -1,14 +1,5 @@
-// Formatting and date helpers. Locale defaults to pt-BR but can be overridden —
-// the i18n layer passes the locale that matches the current language.
-
 const pad2 = (n: number) => String(n).padStart(2, '0');
 
-// Splits a formatted currency amount into its symbol ('R$', or '-R$' when
-// negative) and its number ('3.709,80'), so callers can lay them out as
-// separate, independently-aligned pieces (e.g. a right-aligned amount column
-// with the symbol pinned to its own column). Also used by `money` below to
-// guarantee one consistent space between symbol and number in every locale —
-// en-US's own currency formatting omits it ('R$3,709.80'), pt-BR's doesn't.
 export function moneyParts(n: number, currency = 'BRL', locale = 'pt-BR'): { symbol: string; value: string } {
   const parts = new Intl.NumberFormat(locale, { style: 'currency', currency }).formatToParts(n);
   let symbol = '';
@@ -33,9 +24,6 @@ export function fmtDate(d?: string | null, locale = 'pt-BR'): string {
   });
 }
 
-// Normalizes a value to a local 'YYYY-MM-DD' string. Accepts the strings or Date
-// objects that Mantine's date inputs may yield across versions. Uses local date
-// parts (not toISOString, which would shift across the UTC boundary).
 export function toISO(d: unknown): string | null {
   if (!d) return null;
   if (typeof d === 'string') return d.slice(0, 10);
@@ -43,7 +31,6 @@ export function toISO(d: unknown): string | null {
   return null;
 }
 
-// Inclusive list of 'YYYY-MM-DD' dates between start and end.
 export function dateRange(start: string, end: string): string[] {
   const out: string[] = [];
   const e = new Date(end + 'T00:00:00');
@@ -66,9 +53,6 @@ export interface CityBlock {
   days: string[];
 }
 
-// Groups a day -> city map into contiguous date ranges per city, for display
-// (e.g. "Barcelona, 18–19 mai" instead of one row per day). Purely a read of
-// `cities` — never mutates it, so it's safe to recompute on every render.
 export function groupCityBlocks(
   days: string[],
   cities: Record<string, string | null | undefined>,

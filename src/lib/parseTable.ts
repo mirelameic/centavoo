@@ -1,13 +1,6 @@
-// Deterministic, format-agnostic parsing for pasted/uploaded transaction tables
-// (bank or card statement exports). No column layout is assumed — the caller
-// always confirms which column is which before anything is imported, so a
-// bad guess here only affects a convenience default, never the actual import.
-
 export type ColumnRole = 'date' | 'description' | 'amount' | 'ignore';
 export type DelimiterOption = 'auto' | ',' | ';' | '\t';
 
-// Splits one line on `delimiter`, honoring simple double-quoted fields
-// ("a, b" stays one field; "" inside quotes is an escaped quote).
 function splitLine(line: string, delimiter: string): string[] {
   const out: string[] = [];
   let cur = '';
@@ -33,15 +26,12 @@ function splitLine(line: string, delimiter: string): string[] {
   return out;
 }
 
-// How many lines share the most common column count for this delimiter.
 function mostCommonCount(counts: number[]): number {
   const tally = new Map<number, number>();
   for (const n of counts) tally.set(n, (tally.get(n) ?? 0) + 1);
   return Math.max(...tally.values());
 }
 
-// Picks whichever of tab / semicolon / comma splits the most lines into the
-// same (>1) number of columns. Falls back to comma when nothing lines up.
 function detectDelimiter(lines: string[]): string {
   let best = ',';
   let bestScore = -1;
@@ -54,8 +44,6 @@ function detectDelimiter(lines: string[]): string {
   return best;
 }
 
-// Parses pasted or file text into a rectangular grid of cells. Blank lines are
-// dropped; short rows are padded so every row has the same column count.
 export function splitRows(text: string, delimiter: DelimiterOption = 'auto'): string[][] {
   const lines = text
     .replace(/\r\n?/g, '\n')
@@ -69,9 +57,6 @@ export function splitRows(text: string, delimiter: DelimiterOption = 'auto'): st
   return rows.map((r) => (r.length < width ? [...r, ...Array(width - r.length).fill('')] : r));
 }
 
-// Parses an amount written in any common style: "1.234,56", "1,234.56",
-// "R$ 45,90", "(30,00)" (parentheses = negative), "-12.5". Returns null
-// (never throws) when the text isn't a recognizable number.
 export function parseAmount(raw: string): number | null {
   if (raw == null) return null;
   let s = String(raw).trim();
@@ -90,7 +75,6 @@ export function parseAmount(raw: string): number | null {
   let normalized: string;
 
   if (lastComma !== -1 && lastDot !== -1) {
-    // Whichever separator appears last is the decimal one; the other is thousands.
     normalized = lastComma > lastDot
       ? s.replace(/\./g, '').replace(',', '.')
       : s.replace(/,/g, '');
@@ -117,9 +101,6 @@ function toISODate(year: number, month: number, day: number): string | null {
   return `${year}-${pad(month)}-${pad(day)}`;
 }
 
-// Parses a date in ISO ('YYYY-MM-DD') or day-first ('DD/MM/YYYY', 'DD-MM-YY',
-// 'DD.MM.YYYY') form — day-first is the deterministic choice for the ambiguous
-// case, matching the app's pt-BR date convention. Returns null when unrecognized.
 export function parseDate(raw: string): string | null {
   if (raw == null) return null;
   const s = String(raw).trim();
@@ -136,8 +117,6 @@ export function parseDate(raw: string): string | null {
   return null;
 }
 
-// Best-effort default mapping, shown to the user for confirmation/editing —
-// never used to import anything by itself.
 export function guessRoles(rows: string[][]): ColumnRole[] {
   const width = rows[0]?.length ?? 0;
   const roles: ColumnRole[] = Array(width).fill('ignore');
@@ -166,8 +145,6 @@ export function guessRoles(rows: string[][]): ColumnRole[] {
   return roles;
 }
 
-// True when the first row looks like labels rather than data — i.e. its
-// mapped date/amount cells don't parse but at least one later row's does.
 export function looksLikeHeaderRow(rows: string[][], roles: ColumnRole[]): boolean {
   if (rows.length < 2) return false;
   const checkCols = roles

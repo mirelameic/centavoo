@@ -11,8 +11,6 @@ interface Props {
   onRangeChange: (v: [DateValue, DateValue]) => void;
 }
 
-// Name + destination + date-range fields shared by the "new trip" (Trips) and
-// "edit trip" (TripForm) modals.
 export function TripIdentityFields({
   name,
   onNameChange,

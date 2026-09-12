@@ -1,8 +1,8 @@
-# Centavoo
+<p align="center">
+  <img src=".github/logo.png" alt="Centavoo" width="360" />
+</p>
 
-Personal PWA to record and analyze travel expenses per trip.
-
-Each trip stores its transactions split by **period** (before / during), **category**, and **city**, with charts and other analysis.
+Personal PWA to record and analyze travel expenses per trip. Each trip stores its transactions split by **period** (before / during), **category**, and **city**, with charts and other analysis.
 
 - **Stack:** Vite + React + TypeScript · Mantine (UI + charts) · Dexie (IndexedDB) · react-i18next · PWA.
 - **Local-first:** data lives on your device (the browser). Works offline.
@@ -11,45 +11,43 @@ Each trip stores its transactions split by **period** (before / during), **categ
 
 ```bash
 npm install
-npm run dev          # opens http://localhost:5173 — Ctrl+C to stop
+npm run dev   # http://localhost:5173
 ```
 
-The dev server runs only while that terminal is open (your data lives in the
-browser's IndexedDB, so stopping the server never loses anything).
+## Scripts
 
-Kill a server left running in the background (e.g. a stray one on :5173):
+| Command              | Purpose                              |
+| --------------------- | ------------------------------------- |
+| `npm run dev`          | Dev server                            |
+| `npm run build`        | Type-check + production build         |
+| `npm run preview`      | Serve the production build            |
+| `npm run lint`         | ESLint                                |
+| `npm run test`         | Unit tests (Vitest)                   |
+| `npm run test:e2e`     | End-to-end tests (Playwright)         |
+
+## Installing on your phone
+
+A PWA needs HTTPS to install (localhost is the exception). To try the installable build locally, with the service worker active:
 
 ```bash
-lsof -ti:5173 | xargs kill
+npm run build && npm run preview   # http://localhost:4173
 ```
 
-## Production build / install on your phone
+## Regenerating the Europa seed
 
-A PWA needs HTTPS to install (localhost is the exception). For a faster,
-production-like local run (with the PWA service worker active):
-
-```bash
-npm run build && npm run preview   # serves the build at http://localhost:4173
-```
-
-## Regenerate the Europa seed
-
-The Europa data is generated from the spreadsheet by a Python script. It reads the
-**font color** of each cell to infer the category (full fidelity to the sheet):
+`public/europa.json` is generated from a spreadsheet, reading each cell's **font color** to infer its category:
 
 ```bash
 python3 -m venv scripts/.venv
 scripts/.venv/bin/pip install openpyxl
-scripts/.venv/bin/python scripts/seed_europa.py   # writes public/europa.json
+scripts/.venv/bin/python scripts/seed_europa.py
 ```
 
 ## Structure
 
-- `src/db/` — model (`schema.ts`), Dexie database (`db.ts`), CRUD (`repo.ts`), aggregations/analytics (`stats.ts`), seed and backup.
-- `src/lib/` — formatting/date helpers, auto-categorization, statement-table parsing (`parseTable.ts`, used by the transaction importer), and shared constants.
-- `src/components/` — `Logo` (app mark), forms (`TransactionForm`, `TripForm`, and the `TripIdentityFields` they share), `ImportTransactions` (paste/upload a statement, map columns, review, then bulk-insert), and Trip dashboard pieces (`trip/`: `primitives.tsx` for small shared bits like `CategoryChip`/`Kpi`/`Section`, plus `TopTable`, `CityEditor`).
-- `src/i18n/` — translations (`locales/pt.ts`, `locales/en.ts`) via react-i18next, with locale-aware money/date helpers. To add a language, add a locale file and one entry in `config.ts`.
-- `src/pages/` — screens (Trips, Trip, Categories).
-- `scripts/seed_europa.py` — generates `public/europa.json` from the xlsx.
-- `scripts/render-icon.mjs` — renders `public/pwa-icon.svg` to PNG for a quick visual check.
-
+- `src/db/` — schema, Dexie database, CRUD (`repo.ts`), analytics (`stats.ts`), seed, and backup.
+- `src/lib/` — formatting/date helpers, auto-categorization, statement parsing, shared constants.
+- `src/components/` — `Logo`, shared forms, the transaction importer, and the trip dashboard pieces (`trip/`).
+- `src/i18n/` — translations (`locales/pt.ts`, `locales/en.ts`); add a language by adding a locale file and an entry in `config.ts`.
+- `src/pages/` — screens: Trips, Trip, Categories.
+- `scripts/` — `seed_europa.py` (generates `public/europa.json`), `render-icon.mjs` (SVG → PNG icon preview).

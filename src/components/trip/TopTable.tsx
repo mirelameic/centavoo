@@ -4,7 +4,6 @@ import { cost } from '../../db/stats';
 import { useI18n } from '../../i18n';
 import { CategoryChip, SplitTag } from './primitives';
 
-// Compact "top spends" table (description · category · city · date · amount).
 export function TopTable({
   items,
   catById,

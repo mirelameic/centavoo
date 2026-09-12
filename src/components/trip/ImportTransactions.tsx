@@ -62,12 +62,10 @@ interface ParsedRow {
 function Flow({ onClose, trip, categories, rules }: Omit<Props, 'opened'>) {
   const { t } = useI18n();
 
-  // Step 1: get raw text (pasted or from a file).
   const [rawText, setRawText] = useState('');
   const [delimiter, setDelimiter] = useState<DelimiterOption>('auto');
   const [noRowsError, setNoRowsError] = useState(false);
 
-  // Step 2: parsed grid + how to interpret it.
   const [rows, setRows] = useState<string[][] | null>(null);
   const [roles, setRoles] = useState<ColumnRole[]>([]);
   const [hasHeader, setHasHeader] = useState(false);
@@ -196,7 +194,6 @@ function Flow({ onClose, trip, categories, rules }: Omit<Props, 'opened'>) {
     { value: 'amount', label: t('import.colAmount') },
   ];
 
-  // Step 1 — get the raw text.
   if (!rows) {
     return (
       <Stack>
@@ -243,7 +240,6 @@ function Flow({ onClose, trip, categories, rules }: Omit<Props, 'opened'>) {
     );
   }
 
-  // Step 2 — map columns, review, confirm.
   return (
     <Stack>
       <Group grow align="flex-end">

@@ -1,19 +1,12 @@
 import type { Category, CityMap, Transaction } from './schema';
 
-// Effective cost of a transaction: applies the split (e.g. a shared Airbnb).
-// `amount` always holds the full (integral) value; this divides it by splitCount.
 export const cost = (t: Transaction) => t.amount / (t.splitCount || 1);
 
-// Palette used to color cities in the "by city" chart (also reused, by
-// name-hash, to color the city list in CityEditor).
 export const CITY_PALETTE = [
   '#C2540D', '#0E8C6B', '#B8860B', '#B23368', '#7A4A2A',
   '#3D8B4C', '#C1352E', '#6B8A1E', '#7D1F44', '#5C5650',
 ];
 
-// A stable color per city name — independent of spend or rank, so a city's
-// color never shifts as amounts change or a category filter is applied.
-// Shared by every "by city" view (chart, table) and the trip's city editor.
 export function colorForCity(name: string): string {
   let h = 0;
   for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
@@ -29,20 +22,20 @@ export interface CatAgg {
 }
 
 export interface TripStats {
-  gross: number; // sum of expenses (positive)
-  refunds: number; // sum of refunds (negative)
-  net: number; // net
-  before: number; // net for the "before" period
-  during: number; // net for the "during" period
-  iofRefund: number; // sum of IOF refunds
-  days: number; // number of days with spending during the trip
-  avgPerDay: number; // during net / days
-  byCategory: CatAgg[]; // expenses by category (whole trip), desc
-  usedCategories: { name: string; color: string }[]; // categories present
-  dayData: Record<string, number | string>[]; // [{ date:'17/05', Alimentação: 10, ... }]
+  gross: number;
+  refunds: number;
+  net: number;
+  before: number;
+  during: number;
+  iofRefund: number;
+  days: number;
+  avgPerDay: number;
+  byCategory: CatAgg[];
+  usedCategories: { name: string; color: string }[];
+  dayData: Record<string, number | string>[];
   beforeDuringData: { category: string; before: number; during: number }[];
-  byCity: { city: string; amount: number; color: string }[]; // expenses by city
-  weekdayAmounts: number[]; // length 7, gross expense by weekday (index 0 = Sunday)
+  byCity: { city: string; amount: number; color: string }[];
+  weekdayAmounts: number[];
   cityTable: CityRow[];
   categoryTable: {
     name: string;
@@ -53,7 +46,7 @@ export interface TripStats {
     count: number;
     avgTicket: number;
   }[];
-  split: { integral: number; share: number; savings: number }; // splitting savings
+  split: { integral: number; share: number; savings: number };
 }
 
 interface CityRow {
@@ -78,7 +71,6 @@ export function computeStats(
     if (!t.categoryId) return NO_CAT;
     return catById.get(t.categoryId) ?? NO_CAT;
   };
-  // City of a transaction is the city of its day (stored on the trip).
   const cityOf = (t: Transaction) => (t.date ? cities[t.date] : undefined) || undefined;
 
   let gross = 0,
@@ -89,15 +81,14 @@ export function computeStats(
   const days = new Set<string>();
 
   const byCat = new Map<string, CatAgg>();
-  const dayMap = new Map<string, Record<string, number>>(); // date -> {catName: amount}
-  const usedCat = new Map<string, string>(); // catName -> color
+  const dayMap = new Map<string, Record<string, number>>();
   const bdMap = new Map<string, { before: number; during: number }>();
-  const cityMap = new Map<string, number>(); // city -> amount
-  const weekday = [0, 0, 0, 0, 0, 0, 0]; // index 0 = Sunday
-  const catCount = new Map<string, number>(); // byCat key -> transaction count
-  const cityDays = new Map<string, Set<string>>(); // city -> set of dates
-  const cityCat = new Map<string, Map<string, number>>(); // city -> { catName: amount }
-  let integralExp = 0; // sum of full (integral) amounts of expenses
+  const cityMap = new Map<string, number>();
+  const weekday = [0, 0, 0, 0, 0, 0, 0];
+  const catCount = new Map<string, number>();
+  const cityDays = new Map<string, Set<string>>();
+  const cityCat = new Map<string, Map<string, number>>();
+  let integralExp = 0;
 
   for (const t of txs) {
     const c = cost(t);
@@ -109,7 +100,6 @@ export function computeStats(
     if (t.kind === 'IOF_REFUND') iofRefund += c;
     if (t.period === 'DURING' && t.date) days.add(t.date);
 
-    // Only expenses (positive) feed the category/city breakdowns.
     if (c > 0) {
       const key = t.categoryId ?? cat.name;
       const agg = byCat.get(key) ?? {
@@ -121,9 +111,8 @@ export function computeStats(
       };
       agg.amount += c;
       byCat.set(key, agg);
-      usedCat.set(cat.name, cat.color);
       catCount.set(key, (catCount.get(key) ?? 0) + 1);
-      integralExp += t.amount; // full value (= amount; larger than `c` when split)
+      integralExp += t.amount;
 
       if (t.period === 'DURING' && t.date) {
         const dm = dayMap.get(t.date) ?? {};
@@ -218,8 +207,6 @@ export function computeStats(
   };
 }
 
-// Expenses by city, optionally restricted to a set of category ids. Used by the
-// "City summary" so the user can ask "how much per city, only on food/shopping".
 export function cityBreakdown(
   txs: Transaction[],
   cats: Category[],
@@ -251,8 +238,6 @@ export function cityBreakdown(
   return { byCity, cityTable: buildCityTable(byCity, cityDays, cityCat) };
 }
 
-// City totals sorted desc (amount), each colored by name via colorForCity —
-// the sort order can shift with a filter, but the color never does.
 function paletteByCity(cityMap: Map<string, number>) {
   return [...cityMap.entries()]
     .sort(([, a], [, b]) => b - a)

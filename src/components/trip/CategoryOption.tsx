@@ -2,7 +2,6 @@ import { Box, Group } from '@mantine/core';
 import type { Category } from '../../db/schema';
 import { CategoryIcon } from '../../lib/categoryIcons';
 
-// Option row for a category Select/MultiSelect: icon + label, optionally a color swatch.
 export function CategoryOption({
   category,
   label,

@@ -1,9 +1,6 @@
 import { db } from './db';
 import type { Category, CategoryRule, Transaction, Trip } from './schema';
 
-// Full local database export/import as a single JSON file — how the user carries
-// their data between devices/browsers (it lives in IndexedDB, not in the repo).
-
 export interface BackupFile {
   app: 'centavoo';
   version: number;
@@ -39,8 +36,6 @@ export async function exportBackup(): Promise<void> {
   URL.revokeObjectURL(url);
 }
 
-// Merges a backup file into the local database (upsert by id). Existing records
-// with the same id are overwritten; new ones are added. Returns import counts.
 export async function importBackup(
   file: File,
 ): Promise<{ trips: number; transactions: number; categories: number }> {

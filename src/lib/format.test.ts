@@ -79,7 +79,7 @@ describe('groupCityBlocks', () => {
     const cities = {
       '2026-05-17': 'Barcelona',
       '2026-05-18': 'Barcelona',
-      '2026-05-20': 'Barcelona', // day 19 missing from `days` — not adjacent
+      '2026-05-20': 'Barcelona',
     };
     expect(groupCityBlocks(days, cities)).toEqual([
       {
