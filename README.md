@@ -15,8 +15,6 @@ npm run dev            # http://localhost:5173, only reachable from this machine
 npm run dev -- --host  # also listens on the network — use the printed Network URL on your phone (same Wi-Fi)
 ```
 
-Vite will print a `Network:` URL like `http://192.168.x.x:5173` — open that on your phone. If it doesn't load, check that your computer's firewall isn't blocking the port.
-
 ## Scripts
 
 | Command              | Purpose                              |
