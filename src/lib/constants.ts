@@ -6,6 +6,8 @@ export const COLOR_OPTIONS = [
 
 export const PERIOD_COLORS = { before: '#B8860B', during: '#7A3B12' };
 
+export const ROW_BREAK = Symbol('row-break');
+
 export const ICON_OPTIONS = [
   'plane', 'bed', 'home', 'car', 'train', 'bus', 'bike', 'fuel',
   'food', 'coffee', 'wine', 'shopping', 'gift', 'ticket', 'landmark', 'luggage',

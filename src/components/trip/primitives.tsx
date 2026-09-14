@@ -1,6 +1,7 @@
 import { Fragment, type ReactNode } from 'react';
 import { Box, Card, Group, Text, UnstyledButton } from '@mantine/core';
 import { CategoryIcon } from '../../lib/categoryIcons';
+import { ROW_BREAK } from '../../lib/constants';
 import { moneyParts } from '../../lib/format';
 
 export function Kpi({ label, value, color }: { label: string; value: string; color?: string }) {
@@ -116,6 +117,39 @@ export function ToggleLegend({
         );
       })}
     </Group>
+  );
+}
+
+export function SummaryRow({
+  leading,
+  meta,
+  amount,
+}: {
+  leading: ReactNode;
+  meta: (ReactNode | typeof ROW_BREAK)[];
+  amount: ReactNode;
+}) {
+  return (
+    <div className="list-row">
+      <div className="list-row-main">
+        <div className="list-row-title">{leading}</div>
+        <div className="list-row-meta">
+          {meta.map((m, i) => {
+            if (m === ROW_BREAK) {
+              return <span key={i} style={{ flexBasis: '100%', height: 0 }} />;
+            }
+            const showSep = i > 0 && meta[i - 1] !== ROW_BREAK;
+            return (
+              <Fragment key={i}>
+                {showSep && <span className="list-row-meta-sep">·</span>}
+                <span>{m}</span>
+              </Fragment>
+            );
+          })}
+        </div>
+      </div>
+      <Text className="list-row-amount">{amount}</Text>
+    </div>
   );
 }
 

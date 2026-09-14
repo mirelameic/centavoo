@@ -11,24 +11,21 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Warm ambient background, like a softly-lit room glowing behind glass panels.
-   Base tones are neutral/warm grays (R >= G >= B) — never blue-leaning, so the
-   glass panels below (which let this show through) don't read as purple. */
+.mantine-AppShell-header {
+  position: static !important;
+}
+.mantine-AppShell-main {
+  padding-top: var(--mantine-spacing-md) !important;
+}
+
 [data-mantine-color-scheme='dark'] body {
-  background:
-    radial-gradient(1100px 600px at 12% -10%, rgba(255, 158, 68, 0.14), transparent 60%),
-    radial-gradient(900px 520px at 92% 5%, rgba(255, 190, 110, 0.08), transparent 55%),
-    #131211;
+  background: #131211;
 }
 
 [data-mantine-color-scheme='light'] body {
-  background:
-    radial-gradient(1100px 600px at 12% -10%, rgba(255, 158, 68, 0.16), transparent 60%),
-    radial-gradient(900px 520px at 92% 5%, rgba(255, 200, 120, 0.14), transparent 55%),
-    #f7f2ec;
+  background: linear-gradient(180deg, #fbe9d8 0%, #f8f1e6 45%, #f5efe8 100%);
 }
 
-/* Frosted-glass panels used by Card and the app header. */
 .glass-panel {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -44,7 +41,6 @@ body {
   border-color: rgba(20, 15, 10, 0.07) !important;
 }
 
-/* Chart tooltip: same frosted-glass look as the cards it floats over. */
 .mantine-ChartTooltip-tooltip {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -63,11 +59,106 @@ body {
   border-color: rgba(20, 15, 10, 0.07);
 }
 
-/* Table headers: quieter, uppercase — matches the KPI label style. */
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .tabs-list-desktop {
+    display: none;
+  }
+  .hide-when-tab-open {
+    display: none;
+  }
+  .trip-page {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+  .mobile-bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    z-index: 100;
+    padding: 8px 6px;
+    border: 1px solid var(--mantine-color-default-border);
+    border-radius: 999px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  }
+  .mobile-bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    flex: 1 1 0;
+    padding: 6px 2px;
+    border-radius: var(--mantine-radius-md);
+    color: var(--mantine-color-dimmed);
+  }
+  .mobile-bottom-nav-item[data-active] {
+    color: var(--mantine-color-orange-6);
+  }
+  .mobile-bottom-nav-label {
+    font-size: 10px;
+    font-weight: 600;
+  }
+}
+
 .mantine-Table-th {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   color: var(--mantine-color-dimmed);
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+.list-row:last-child {
+  border-bottom: none;
+}
+.list-row-clickable:hover {
+  background: var(--mantine-color-default-hover);
+}
+.list-row-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--mantine-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.list-row-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.list-row-title {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.list-row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+  font-size: var(--mantine-font-size-xs);
+  color: var(--mantine-color-dimmed);
+}
+.list-row-meta-sep {
+  opacity: 0.5;
+}
+.list-row-amount {
+  font-weight: 600;
+  white-space: nowrap;
 }

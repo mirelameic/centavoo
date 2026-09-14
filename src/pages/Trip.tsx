@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   Container,
@@ -9,19 +9,18 @@ import {
   SimpleGrid,
   Card,
   Tabs,
-  Table,
-  Badge,
   Anchor,
   Center,
   Loader,
   ScrollArea,
   Button,
   ActionIcon,
-  Checkbox,
+  Select,
   MultiSelect,
   Box,
   SegmentedControl,
   Pill,
+  UnstyledButton,
   type ComboboxRenderPillInput,
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
@@ -34,25 +33,40 @@ import {
   IconTrash,
   IconCategory,
   IconFileImport,
-  IconChevronUp,
-  IconChevronDown,
-  IconSelector,
+  IconSortAscending,
+  IconSortDescending,
+  IconChartPie,
+  IconTrendingUp,
+  IconCalendar,
+  IconMapPin,
+  IconReceipt2,
+  IconArrowUp,
 } from '@tabler/icons-react';
 import { db } from '../db/db';
 import { computeStats, cityBreakdown, cost } from '../db/stats';
 import { deleteTransaction, deleteTransactions } from '../db/repo';
 import type { Period, Transaction } from '../db/schema';
 import { dateRange, toISO } from '../lib/format';
-import { PERIOD_COLORS } from '../lib/constants';
+import { PERIOD_COLORS, ROW_BREAK } from '../lib/constants';
 import { toCatById } from '../lib/categories';
 import { TransactionForm } from '../components/trip/TransactionForm';
 import { TripForm } from '../components/trip/TripForm';
 import { ImportTransactions } from '../components/trip/ImportTransactions';
-import { CategoryChip, Kpi, LegendList, Section, SplitTag, ToggleLegend } from '../components/trip/primitives';
+import { CategoryChip, Kpi, LegendList, Section, SummaryRow, ToggleLegend } from '../components/trip/primitives';
 import { CategoryOption } from '../components/trip/CategoryOption';
 import { TopTable } from '../components/trip/TopTable';
+import { TxRow } from '../components/trip/TxRow';
 import { CityEditor } from '../components/trip/CityEditor';
 import { useI18n } from '../i18n';
+
+const TAB_ITEMS = [
+  { value: 'summary', label: 'tab.summary', icon: IconChartPie },
+  { value: 'top', label: 'tab.top', icon: IconTrendingUp },
+  { value: 'time', label: 'tab.time', icon: IconCalendar },
+  { value: 'cities', label: 'tab.cities', icon: IconMapPin },
+  { value: 'cats', label: 'tab.cats', icon: IconCategory },
+  { value: 'tx', label: 'tab.transactions', icon: IconReceipt2 },
+] as const;
 
 function renderCappedPill(selected: string[]) {
   return ({ option, onRemove }: ComboboxRenderPillInput<string>) => {
@@ -70,37 +84,6 @@ function renderCappedPill(selected: string[]) {
 
 type TxSortField = 'date' | 'category' | 'city' | 'period' | 'amount';
 
-function SortableTh<F extends string>({
-  field,
-  label,
-  sortField,
-  sortDir,
-  onSort,
-  align = 'left',
-}: {
-  field: F;
-  label: string;
-  sortField: F | null;
-  sortDir: 'asc' | 'desc';
-  onSort: (field: F) => void;
-  align?: 'left' | 'right';
-}) {
-  const active = sortField === field;
-  const Icon = active ? (sortDir === 'asc' ? IconChevronUp : IconChevronDown) : IconSelector;
-  return (
-    <Table.Th
-      ta={align}
-      onClick={() => onSort(field)}
-      style={{ cursor: 'pointer', userSelect: 'none' }}
-    >
-      <Group gap={4} wrap="nowrap" justify={align === 'right' ? 'flex-end' : 'flex-start'}>
-        {label}
-        <Icon size={14} style={{ opacity: active ? 1 : 0.45, flexShrink: 0 }} />
-      </Group>
-    </Table.Th>
-  );
-}
-
 export function Trip() {
   const { t, money, date, locale } = useI18n();
   const { id = '' } = useParams();
@@ -115,6 +98,19 @@ export function Trip() {
   );
   const rules = useLiveQuery(() => db.rules.toArray(), []) ?? [];
 
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab');
+  const openTab = (value: string) => {
+    if (activeTab === value) {
+      navigate(-1);
+    } else if (activeTab) {
+      setSearchParams({ tab: value }, { replace: true });
+    } else {
+      setSearchParams({ tab: value });
+    }
+  };
+  const closeTab = () => navigate(-1);
   const [formOpened, { open: openForm, close: closeForm }] = useDisclosure(false);
   const [tripFormOpened, { open: openTripForm, close: closeTripForm }] = useDisclosure(false);
   const [importOpened, { open: openImport, close: closeImport }] = useDisclosure(false);
@@ -165,6 +161,7 @@ export function Trip() {
     setTxDate(null);
     setTxDateRange([null, null]);
   };
+  const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const toggleSel = (txId: string) =>
     setSelected((s) => {
@@ -173,6 +170,10 @@ export function Trip() {
       else n.add(txId);
       return n;
     });
+  const toggleSelectMode = () => {
+    setSelectMode((m) => !m);
+    setSelected(new Set());
+  };
   const bulkDelete = async () => {
     if (selected.size && window.confirm(t('tx.deleteSelectedConfirm'))) {
       await deleteTransactions([...selected]);
@@ -251,16 +252,6 @@ export function Trip() {
     period: (a, b) => (a.period === b.period ? 0 : a.period === 'BEFORE' ? -1 : 1),
     amount: (a, b) => cost(a) - cost(b),
   };
-  const toggleTxSort = (field: TxSortField) => {
-    if (txSortField !== field) {
-      setTxSortField(field);
-      setTxSortDir('asc');
-    } else if (txSortDir === 'asc') {
-      setTxSortDir('desc');
-    } else {
-      setTxSortField(null);
-    }
-  };
   const filteredTx = (txs ?? [])
     .filter((tx) => {
       if (txPeriodFilter !== 'ALL' && tx.period !== txPeriodFilter) return false;
@@ -286,11 +277,27 @@ export function Trip() {
     });
 
   return (
-    <Container size="lg" px={0}>
-      <Anchor component={Link} to="/" mb="sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-        <IconArrowLeft size={16} /> {t('nav.trips')}
-      </Anchor>
-      <Group justify="space-between" align="flex-end" mb="md">
+    <Container size="lg" px={0} className="trip-page">
+      {activeTab ? (
+        <UnstyledButton
+          onClick={closeTab}
+          aria-label="back-to-trip"
+          mb="sm"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}
+        >
+          <IconArrowLeft size={20} />
+        </UnstyledButton>
+      ) : (
+        <Anchor component={Link} to="/" mb="sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <IconArrowLeft size={16} /> {t('nav.trips')}
+        </Anchor>
+      )}
+      <Group
+        justify="space-between"
+        align="flex-end"
+        mb="md"
+        className={activeTab ? 'hide-when-tab-open' : undefined}
+      >
         <div>
           <Group gap={6}>
             <Title order={2}>{trip.name}</Title>
@@ -316,7 +323,12 @@ export function Trip() {
         </Group>
       </Group>
 
-      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm" mb="lg">
+      <SimpleGrid
+        cols={{ base: 1, sm: 3 }}
+        spacing="sm"
+        mb="lg"
+        className={activeTab ? 'hide-when-tab-open' : undefined}
+      >
         <Kpi label={t('kpi.net')} value={money(stats.net, cur)} />
         <Kpi label={t('kpi.gross')} value={money(stats.gross, cur)} />
         <Kpi label={t('kpi.refunds')} value={money(stats.refunds, cur)} color="teal" />
@@ -325,14 +337,18 @@ export function Trip() {
         <Kpi label={t('kpi.avgPerDay')} value={money(stats.avgPerDay, cur)} />
       </SimpleGrid>
 
-      <Tabs defaultValue="summary">
-        <Tabs.List mb="md" style={{ flexWrap: 'nowrap', overflowX: 'auto' }}>
-          <Tabs.Tab value="summary" style={{ flexShrink: 0 }}>{t('tab.summary')}</Tabs.Tab>
-          <Tabs.Tab value="top" style={{ flexShrink: 0 }}>{t('tab.top')}</Tabs.Tab>
-          <Tabs.Tab value="time" style={{ flexShrink: 0 }}>{t('tab.time')}</Tabs.Tab>
-          <Tabs.Tab value="cities" style={{ flexShrink: 0 }}>{t('tab.cities')}</Tabs.Tab>
-          <Tabs.Tab value="cats" style={{ flexShrink: 0 }}>{t('tab.cats')}</Tabs.Tab>
-          <Tabs.Tab value="tx" style={{ flexShrink: 0 }}>{t('tab.transactions')}</Tabs.Tab>
+      <Tabs
+        value={activeTab}
+        onChange={(v) => v && openTab(v)}
+        variant="pills"
+        radius="xl"
+      >
+        <Tabs.List className="tabs-list-desktop" mb="md" style={{ flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
+          {TAB_ITEMS.map(({ value, label, icon: Icon }) => (
+            <Tabs.Tab key={value} value={value} leftSection={<Icon size={19} />}>
+              {t(label)}
+            </Tabs.Tab>
+          ))}
         </Tabs.List>
 
         <Tabs.Panel value="summary">
@@ -481,30 +497,24 @@ export function Trip() {
                 </Group>
 
                 <Section>{t('sec.cityTable')}</Section>
-                <Table.ScrollContainer minWidth={520}>
-                  <Table>
-                    <Table.Thead>
-                      <Table.Tr>
-                        <Table.Th>{t('table.city')}</Table.Th>
-                        <Table.Th ta="right">{t('col.days')}</Table.Th>
-                        <Table.Th ta="right">{t('col.total')}</Table.Th>
-                        <Table.Th ta="right">{t('col.avgDay')}</Table.Th>
-                        <Table.Th>{t('col.topCat')}</Table.Th>
-                      </Table.Tr>
-                    </Table.Thead>
-                    <Table.Tbody>
-                      {cityBd.cityTable.map((c) => (
-                        <Table.Tr key={c.city}>
-                          <Table.Td>{c.city}</Table.Td>
-                          <Table.Td ta="right">{c.days}</Table.Td>
-                          <Table.Td ta="right">{money(c.total, cur)}</Table.Td>
-                          <Table.Td ta="right">{money(c.avgPerDay, cur)}</Table.Td>
-                          <Table.Td><Text size="sm" c="dimmed">{c.topCategory}</Text></Table.Td>
-                        </Table.Tr>
-                      ))}
-                    </Table.Tbody>
-                  </Table>
-                </Table.ScrollContainer>
+                <div>
+                  {cityBd.cityTable.map((c) => (
+                    <SummaryRow
+                      key={c.city}
+                      leading={c.city}
+                      meta={[
+                        `${c.days} ${t('city.daysN')}`,
+                        `${t('col.avgDay')}: ${money(c.avgPerDay, cur)}`,
+                        ROW_BREAK,
+                        <span key="top" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                          <IconArrowUp size={12} />
+                          {c.topCategory}
+                        </span>,
+                      ]}
+                      amount={money(c.total, cur)}
+                    />
+                  ))}
+                </div>
               </>
             ) : (
               <Text c="dimmed">{t('chart.noCity')}</Text>
@@ -522,30 +532,21 @@ export function Trip() {
         <Tabs.Panel value="cats">
           <Card withBorder padding="lg">
             <Section first>{t('sec.catTable')}</Section>
-            <Table.ScrollContainer minWidth={480}>
-              <Table>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>{t('table.category')}</Table.Th>
-                    <Table.Th ta="right">{t('col.total')}</Table.Th>
-                    <Table.Th ta="right">%</Table.Th>
-                    <Table.Th ta="right">{t('col.count')}</Table.Th>
-                    <Table.Th ta="right">{t('col.avgTicket')}</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {stats.categoryTable.map((c) => (
-                    <Table.Tr key={c.name}>
-                      <Table.Td><CategoryChip color={c.color} name={c.name} icon={c.icon} /></Table.Td>
-                      <Table.Td ta="right">{money(c.total, cur)}</Table.Td>
-                      <Table.Td ta="right"><Text size="sm" c="dimmed">{c.pct}%</Text></Table.Td>
-                      <Table.Td ta="right">{c.count}</Table.Td>
-                      <Table.Td ta="right">{money(c.avgTicket, cur)}</Table.Td>
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
-            </Table.ScrollContainer>
+            <div>
+              {stats.categoryTable.map((c) => (
+                <SummaryRow
+                  key={c.name}
+                  leading={<CategoryChip color={c.color} name={c.name} icon={c.icon} />}
+                  meta={[
+                    `${c.pct}%`,
+                    `${c.count} ${c.count === 1 ? t('col.entry') : t('col.entries')}`,
+                    ROW_BREAK,
+                    `${t('col.avgTicket')}: ${money(c.avgTicket, cur)}`,
+                  ]}
+                  amount={money(c.total, cur)}
+                />
+              ))}
+            </div>
 
             <Section>{t('sec.beforeDuring')}</Section>
             <BarChart
@@ -640,25 +641,76 @@ export function Trip() {
                   />
                 </div>
               </SimpleGrid>
-              <Group justify="space-between" mb="md">
+              <Group justify="space-between" mb="xs" wrap="wrap" gap="xs">
                 <Text size="sm" c="dimmed">
                   {filteredTx.length} {t('tx.filterResultsN')}
                 </Text>
-                {txFiltersActive && (
-                  <Button size="xs" variant="subtle" onClick={clearTxFilters}>
-                    {t('tx.clearFilters')}
+                <Group gap="xs" wrap="nowrap">
+                  {txFiltersActive && (
+                    <Button size="xs" variant="subtle" onClick={clearTxFilters}>
+                      {t('tx.clearFilters')}
+                    </Button>
+                  )}
+                  <Button size="xs" variant={selectMode ? 'light' : 'subtle'} onClick={toggleSelectMode}>
+                    {selectMode ? t('tx.cancelSelect') : t('tx.select')}
                   </Button>
-                )}
+                </Group>
+              </Group>
+              <Group gap={6} mb="md">
+                <Text size="sm" c="dimmed">{t('tx.sortBy')}</Text>
+                <Select
+                  size="xs"
+                  w={150}
+                  value={txSortField ?? ''}
+                  onChange={(v) => {
+                    if (!v) {
+                      setTxSortField(null);
+                    } else if (v !== txSortField) {
+                      setTxSortField(v as TxSortField);
+                      setTxSortDir('asc');
+                    }
+                  }}
+                  data={[
+                    { value: '', label: t('tx.sortDefault') },
+                    { value: 'date', label: t('table.date') },
+                    { value: 'category', label: t('table.category') },
+                    { value: 'city', label: t('table.city') },
+                    { value: 'period', label: t('table.period') },
+                    { value: 'amount', label: t('table.amount') },
+                  ]}
+                />
+                <ActionIcon
+                  variant="default"
+                  disabled={!txSortField}
+                  onClick={() => setTxSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
+                  aria-label="toggle-sort-direction"
+                >
+                  {txSortDir === 'asc' ? <IconSortAscending size={16} /> : <IconSortDescending size={16} />}
+                </ActionIcon>
               </Group>
             </Box>
-            {selected.size > 0 && (
-              <Group justify="space-between" px="md" py="xs">
-                <Text size="sm" fw={600}>{selected.size} {t('tx.selectedN')}</Text>
+            {selectMode && (
+              <Group justify="space-between" px="md" py="xs" style={{ borderBottom: '1px solid var(--mantine-color-default-border)' }}>
+                <Group gap="xs">
+                  <Text size="sm" fw={600}>{selected.size} {t('tx.selectedN')}</Text>
+                  <Button
+                    size="xs"
+                    variant="subtle"
+                    onClick={() =>
+                      setSelected(
+                        selected.size === filteredTx.length ? new Set() : new Set(filteredTx.map((x) => x.id)),
+                      )
+                    }
+                  >
+                    {selected.size === filteredTx.length ? t('tx.clearSelection') : t('tx.selectAll')}
+                  </Button>
+                </Group>
                 <Button
                   size="xs"
                   color="red"
                   variant="light"
                   leftSection={<IconTrash size={16} />}
+                  disabled={!selected.size}
                   onClick={bulkDelete}
                 >
                   {t('tx.deleteSelected')}
@@ -666,88 +718,41 @@ export function Trip() {
               </Group>
             )}
             <ScrollArea h={520}>
-              <Table stickyHeader highlightOnHover>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th w={36}>
-                      <Checkbox
-                        aria-label="select-all"
-                        checked={filteredTx.length > 0 && selected.size === filteredTx.length}
-                        indeterminate={selected.size > 0 && selected.size < filteredTx.length}
-                        onChange={(e) =>
-                          setSelected(
-                            e.currentTarget.checked ? new Set(filteredTx.map((x) => x.id)) : new Set(),
-                          )
-                        }
-                      />
-                    </Table.Th>
-                    <SortableTh field="date" label={t('table.date')} sortField={txSortField} sortDir={txSortDir} onSort={toggleTxSort} />
-                    <Table.Th>{t('table.description')}</Table.Th>
-                    <SortableTh field="category" label={t('table.category')} sortField={txSortField} sortDir={txSortDir} onSort={toggleTxSort} />
-                    <SortableTh field="city" label={t('table.city')} sortField={txSortField} sortDir={txSortDir} onSort={toggleTxSort} />
-                    <SortableTh field="period" label={t('table.period')} sortField={txSortField} sortDir={txSortDir} onSort={toggleTxSort} />
-                    <SortableTh field="amount" label={t('table.amount')} sortField={txSortField} sortDir={txSortDir} onSort={toggleTxSort} align="right" />
-                    <Table.Th />
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {filteredTx.map((tx) => {
-                    const c = cost(tx);
-                    const cat = tx.categoryId ? catById.get(tx.categoryId) : undefined;
-                    return (
-                      <Table.Tr key={tx.id} bg={selected.has(tx.id) ? 'var(--mantine-color-orange-light)' : undefined}>
-                        <Table.Td>
-                          <Checkbox
-                            aria-label="select-row"
-                            checked={selected.has(tx.id)}
-                            onChange={() => toggleSel(tx.id)}
-                          />
-                        </Table.Td>
-                        <Table.Td>{date(tx.date)}</Table.Td>
-                        <Table.Td>
-                          {tx.description}
-                          <SplitTag count={tx.splitCount} />
-                        </Table.Td>
-                        <Table.Td>
-                          {tx.kind === 'IOF_REFUND' ? (
-                            <Badge variant="light" color="gray" size="sm">IOF</Badge>
-                          ) : cat ? (
-                            <CategoryChip color={cat.color} name={cat.name} icon={cat.icon} />
-                          ) : (
-                            <Text size="sm" c="dimmed">—</Text>
-                          )}
-                        </Table.Td>
-                        <Table.Td><Text size="sm" c="dimmed">{(tx.date && cities[tx.date]) || '—'}</Text></Table.Td>
-                        <Table.Td>
-                          <Text size="xs" c="dimmed">
-                            {tx.period === 'BEFORE' ? t('period.before') : t('period.during')}
-                          </Text>
-                        </Table.Td>
-                        <Table.Td ta="right">
-                          <Text c={c < 0 ? 'teal' : undefined}>{money(c, cur)}</Text>
-                          {tx.splitCount > 1 && (
-                            <Text size="xs" c="dimmed">{t('table.full')} {money(tx.amount, cur)}</Text>
-                          )}
-                        </Table.Td>
-                        <Table.Td>
-                          <Group gap={2} wrap="nowrap" justify="flex-end">
-                            <ActionIcon variant="subtle" color="gray" onClick={() => openEdit(tx)} aria-label="edit">
-                              <IconPencil size={16} />
-                            </ActionIcon>
-                            <ActionIcon variant="subtle" color="red" onClick={() => removeTx(tx)} aria-label="delete">
-                              <IconTrash size={16} />
-                            </ActionIcon>
-                          </Group>
-                        </Table.Td>
-                      </Table.Tr>
-                    );
-                  })}
-                </Table.Tbody>
-              </Table>
+              <Box px="md">
+                {filteredTx.map((tx) => (
+                  <TxRow
+                    key={tx.id}
+                    tx={tx}
+                    cat={tx.categoryId ? catById.get(tx.categoryId) : undefined}
+                    cities={cities}
+                    cur={cur}
+                    showPeriod
+                    selecting={selectMode}
+                    selected={selected.has(tx.id)}
+                    onToggleSelect={() => toggleSel(tx.id)}
+                    onEdit={() => openEdit(tx)}
+                    onDelete={() => removeTx(tx)}
+                  />
+                ))}
+              </Box>
             </ScrollArea>
           </Card>
         </Tabs.Panel>
       </Tabs>
+
+      <nav className="glass-panel mobile-bottom-nav">
+        {TAB_ITEMS.map(({ value, label, icon: Icon }) => (
+          <UnstyledButton
+            key={value}
+            className="mobile-bottom-nav-item"
+            data-active={activeTab === value || undefined}
+            onClick={() => openTab(value)}
+          >
+            <Icon size={20} />
+            <Text className="mobile-bottom-nav-label">{t(label)}</Text>
+          </UnstyledButton>
+        ))}
+      </nav>
 
       <TransactionForm
         opened={formOpened}

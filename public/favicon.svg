@@ -7,6 +7,5 @@
     </radialGradient>
   </defs>
   <circle cx="24" cy="24" r="22" fill="url(#coin)"/>
-  <path d="M29.6 16.4a9 9 0 1 0 0 15.2" fill="none" stroke="#3a2413" stroke-width="4" stroke-linecap="round"/>
-  <path d="M10.5 0 L-9 -6 L-3 0 L-9 6 Z" fill="#3a2413" transform="translate(24 24) rotate(-35)"/>
+  <path d="M10 0 L-10 -8 L0 0 L-10 8 Z" fill="#3a2413" transform="translate(24 24) rotate(-25) scale(1.15)"/>
 </svg>

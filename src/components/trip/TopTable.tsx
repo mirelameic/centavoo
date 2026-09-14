@@ -1,8 +1,5 @@
-import { Table, Text } from '@mantine/core';
 import type { Category, CityMap, Transaction } from '../../db/schema';
-import { cost } from '../../db/stats';
-import { useI18n } from '../../i18n';
-import { CategoryChip, SplitTag } from './primitives';
+import { TxRow } from './TxRow';
 
 export function TopTable({
   items,
@@ -15,28 +12,18 @@ export function TopTable({
   cities: CityMap;
   cur: string;
 }) {
-  const { money, date } = useI18n();
   return (
-    <Table.ScrollContainer minWidth={420}>
-      <Table>
-        <Table.Tbody>
-          {items.map((tx) => {
-            const c = tx.categoryId ? catById.get(tx.categoryId) : undefined;
-            return (
-              <Table.Tr key={tx.id}>
-                <Table.Td>
-                  {tx.description}
-                  <SplitTag count={tx.splitCount} />
-                </Table.Td>
-                <Table.Td>{c ? <CategoryChip color={c.color} name={c.name} icon={c.icon} /> : '—'}</Table.Td>
-                <Table.Td><Text size="sm" c="dimmed">{(tx.date && cities[tx.date]) || '—'}</Text></Table.Td>
-                <Table.Td><Text size="sm" c="dimmed">{date(tx.date)}</Text></Table.Td>
-                <Table.Td ta="right" fw={600}>{money(cost(tx), cur)}</Table.Td>
-              </Table.Tr>
-            );
-          })}
-        </Table.Tbody>
-      </Table>
-    </Table.ScrollContainer>
+    <div>
+      {items.map((tx) => (
+        <TxRow
+          key={tx.id}
+          tx={tx}
+          cat={tx.categoryId ? catById.get(tx.categoryId) : undefined}
+          cities={cities}
+          cur={cur}
+          showMeta={false}
+        />
+      ))}
+    </div>
   );
 }

@@ -14,14 +14,7 @@ export function Logo({ size = 28 }: { size?: number }) {
       <circle cx="16" cy="16" r="14.5" fill={`url(#${gradId})`} />
       <circle cx="16" cy="16" r="14.5" fill="none" stroke="#fff3e0" strokeOpacity="0.35" />
       <circle cx="16" cy="16" r="11.2" fill="none" stroke="#fff3e0" strokeOpacity="0.22" />
-      <path
-        d="M19.6 11.4a6 6 0 1 0 0 9.2"
-        fill="none"
-        stroke="#3a2413"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-      />
-      <path d="M7 0 L-6 -4 L-2 0 L-6 4 Z" fill="#3a2413" transform="translate(16 16) rotate(-35)" />
+      <path d="M10 0 L-10 -8 L0 0 L-10 8 Z" fill="#3a2413" transform="translate(16 16) rotate(-25) scale(0.7)" />
     </svg>
   );
 }
