@@ -40,7 +40,7 @@ describe('computeStats — totals', () => {
     tx({ amount: 100, period: 'DURING' }),
     tx({ amount: 50, period: 'BEFORE' }),
     tx({ amount: -30, kind: 'REFUND', period: 'DURING' }),
-    tx({ amount: -10, kind: 'IOF_REFUND', isIof: true, period: 'DURING' }),
+    tx({ amount: -10, kind: 'REFUND', isIof: true, period: 'DURING' }),
   ], []);
 
   it('sums gross from positive costs only', () => expect(s.gross).toBe(150));

@@ -18,7 +18,11 @@ export const theme = createTheme({
     ],
   },
   fontFamily:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    '"Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  headings: {
+    fontFamily: '"Unbounded", -apple-system, BlinkMacSystemFont, sans-serif',
+    fontWeight: '500',
+  },
   components: {
     Card: {
       defaultProps: { className: 'glass-panel' },

@@ -18,6 +18,7 @@ export const en: Record<keyof typeof pt, string> = {
   'form.dates': 'Dates',
   'form.datesPlaceholder': 'start – end',
   'common.cancel': 'Cancel',
+  'common.delete': 'Delete',
   'common.create': 'Create',
   'common.back': 'Back',
 
@@ -30,7 +31,7 @@ export const en: Record<keyof typeof pt, string> = {
   'kpi.avgPerDay': 'Avg/day',
 
   'tab.summary': 'Summary',
-  'tab.top': 'Top Spends',
+  'tab.top': 'Ranking',
   'tab.transactions': 'Transactions',
 
   'chart.before': 'Before',
@@ -157,8 +158,8 @@ export const en: Record<keyof typeof pt, string> = {
   'import.back': 'Back',
   'import.hasHeader': 'First row is a header',
   'import.invertSign': 'Invert value signs',
-  'import.period': 'Period for the imported transactions',
   'import.mapHint': 'Tell us what each column means:',
+  'import.columnN': 'Column {n}',
   'import.colDate': 'Date',
   'import.colDescription': 'Description',
   'import.colAmount': 'Amount',

@@ -10,6 +10,7 @@ import {
   Text,
   Title,
   Button,
+  ActionIcon,
   Badge,
   Modal,
   Center,
@@ -56,11 +57,11 @@ export function Trips() {
 
   return (
     <Container size="lg" px={0}>
-      <Group justify="space-between" mb="lg">
+      <Group gap="md" mb="lg">
         <Title order={2}>{t('trips.title')}</Title>
-        <Button leftSection={<IconPlus size={18} />} onClick={open}>
-          {t('trips.new')}
-        </Button>
+        <ActionIcon size="xl" radius="xl" onClick={open} aria-label={t('trips.new')}>
+          <IconPlus size={20} />
+        </ActionIcon>
       </Group>
 
       {trips && trips.length === 0 && (

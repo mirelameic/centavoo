@@ -4,12 +4,11 @@ import {
   Stack,
   Group,
   Button,
+  Badge,
   Textarea,
   FileButton,
   Select,
   Checkbox,
-  SegmentedControl,
-  Table,
   ScrollArea,
   Text,
   Alert,
@@ -21,12 +20,15 @@ import type { Category, CategoryRule, Kind, Period, Trip } from '../../db/schema
 import { bulkAddTransactions } from '../../db/repo';
 import { suggestCategory } from '../../lib/categorize';
 import { toCatById } from '../../lib/categories';
+import { periodForDate } from '../../lib/format';
 import {
   splitRows,
   parseAmount,
   parseDate,
   guessRoles,
   looksLikeHeaderRow,
+  deriveKind,
+  deriveIsIof,
   type ColumnRole,
   type DelimiterOption,
 } from '../../lib/parseTable';
@@ -56,6 +58,8 @@ interface ParsedRow {
   amount: number | null;
   kind: Kind;
   categoryId: string | null;
+  isIof: boolean;
+  period: Period;
   error: string | null;
 }
 
@@ -69,10 +73,10 @@ function Flow({ onClose, trip, categories, rules }: Omit<Props, 'opened'>) {
   const [rows, setRows] = useState<string[][] | null>(null);
   const [roles, setRoles] = useState<ColumnRole[]>([]);
   const [hasHeader, setHasHeader] = useState(false);
-  const [period, setPeriod] = useState<Period>('DURING');
   const [invertSign, setInvertSign] = useState(false);
   const [excluded, setExcluded] = useState<Set<number>>(new Set());
   const [categoryOverrides, setCategoryOverrides] = useState<Map<number, string | null>>(new Map());
+  const [iofOverrides, setIofOverrides] = useState<Map<number, boolean>>(new Map());
   const [importing, setImporting] = useState(false);
 
   function handleFile(file: File | null) {
@@ -93,6 +97,7 @@ function Flow({ onClose, trip, categories, rules }: Omit<Props, 'opened'>) {
     setHasHeader(looksLikeHeaderRow(parsed, guessedRoles));
     setExcluded(new Set());
     setCategoryOverrides(new Map());
+    setIofOverrides(new Map());
   }
 
   function handleBack() {
@@ -121,21 +126,31 @@ function Flow({ onClose, trip, categories, rules }: Omit<Props, 'opened'>) {
       else if (!description) error = t('import.errDescription');
       else if (dateRaw && date == null) error = t('import.errDate');
 
+      const kind = deriveKind(amount);
+
       const suggested = !error ? suggestCategory(description, rules) : null;
       const categoryId =
-        categoryOverrides.get(i) ??
-        (suggested && categories.some((c) => c.id === suggested) ? suggested : null);
+        kind === 'REFUND'
+          ? null
+          : (categoryOverrides.get(i) ??
+            (suggested && categories.some((c) => c.id === suggested) ? suggested : null));
+
+      const isIof = iofOverrides.get(i) ?? deriveIsIof(kind, description);
+
+      const rowPeriod = periodForDate(date, trip.startDate) ?? 'DURING';
 
       return {
         date,
         description,
         amount,
-        kind: (amount ?? 0) < 0 ? 'REFUND' : 'EXPENSE',
+        kind,
         categoryId,
+        isIof,
+        period: rowPeriod,
         error,
       };
     });
-  }, [dataRows, roles, invertSign, categoryOverrides, categories, rules, t]);
+  }, [dataRows, roles, invertSign, categoryOverrides, iofOverrides, categories, rules, t, trip.startDate]);
 
   const validCount = parsedRows.filter((r, i) => !r.error && !excluded.has(i)).length;
   const errorCount = parsedRows.filter((r) => r.error).length;
@@ -158,13 +173,13 @@ function Flow({ onClose, trip, categories, rules }: Omit<Props, 'opened'>) {
       .filter(({ r, i }) => !r.error && !excluded.has(i))
       .map(({ r }) => ({
         tripId: trip.id,
-        period,
+        period: r.period,
         date: r.date,
         description: r.description,
         amount: r.amount as number,
         categoryId: r.categoryId,
         kind: r.kind,
-        isIof: false,
+        isIof: r.isIof,
         splitCount: 1,
         city: null,
       }));
@@ -242,78 +257,92 @@ function Flow({ onClose, trip, categories, rules }: Omit<Props, 'opened'>) {
 
   return (
     <Stack>
-      <Group grow align="flex-end">
-        <div>
-          <Text size="sm" fw={600} mb={4}>{t('import.period')}</Text>
-          <SegmentedControl
-            fullWidth
-            value={period}
-            onChange={(v) => setPeriod(v as Period)}
-            data={[
-              { label: t('period.before'), value: 'BEFORE' },
-              { label: t('period.during'), value: 'DURING' },
-            ]}
-          />
-        </div>
-        <Stack gap={4}>
-          <Checkbox
-            label={t('import.hasHeader')}
-            checked={hasHeader}
-            onChange={(e) => setHasHeader(e.currentTarget.checked)}
-          />
-          <Checkbox
-            label={t('import.invertSign')}
-            checked={invertSign}
-            onChange={(e) => setInvertSign(e.currentTarget.checked)}
-          />
-        </Stack>
+      <Group gap="xl">
+        <Checkbox
+          label={t('import.hasHeader')}
+          checked={hasHeader}
+          onChange={(e) => setHasHeader(e.currentTarget.checked)}
+        />
+        <Checkbox
+          label={t('import.invertSign')}
+          checked={invertSign}
+          onChange={(e) => setInvertSign(e.currentTarget.checked)}
+        />
       </Group>
 
       <Box>
         <Text size="sm" fw={600} mb={4}>{t('import.mapHint')}</Text>
-        <Group grow>
+        <Group gap="sm" align="flex-start" wrap="wrap">
           {roles.map((role, i) => (
-            <Select
-              key={i}
-              size="xs"
-              allowDeselect={false}
-              value={role}
-              onChange={(v) => setRole(i, (v as ColumnRole) ?? 'ignore')}
-              data={roleOptions}
-            />
+            <Stack key={i} gap={4} miw={110} style={{ flex: '1 1 110px' }}>
+              <Text size="xs" c="dimmed">
+                {t('import.columnN').replace('{n}', String(i + 1))}
+              </Text>
+              <Select
+                size="xs"
+                allowDeselect={false}
+                value={role}
+                onChange={(v) => setRole(i, (v as ColumnRole) ?? 'ignore')}
+                data={roleOptions}
+              />
+              <Text size="xs" c="dimmed" truncate>
+                {dataRows[0]?.[i] || '—'}
+              </Text>
+            </Stack>
           ))}
         </Group>
       </Box>
 
       <ScrollArea h={320}>
-        <Table stickyHeader striped>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th w={36} />
-              <Table.Th>{t('import.colDate')}</Table.Th>
-              <Table.Th>{t('import.colDescription')}</Table.Th>
-              <Table.Th ta="right">{t('import.colAmount')}</Table.Th>
-              <Table.Th>{t('table.category')}</Table.Th>
-              <Table.Th>{t('import.status')}</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {parsedRows.map((r, i) => (
-              <Table.Tr key={i} opacity={r.error || excluded.has(i) ? 0.5 : 1}>
-                <Table.Td>
-                  <Checkbox
-                    aria-label="include-row"
-                    checked={!excluded.has(i)}
-                    disabled={!!r.error}
-                    onChange={() => toggleExcluded(i)}
-                  />
-                </Table.Td>
-                <Table.Td>{r.date ?? '—'}</Table.Td>
-                <Table.Td>{r.description || '—'}</Table.Td>
-                <Table.Td ta="right">{r.amount != null ? r.amount.toFixed(2) : '—'}</Table.Td>
-                <Table.Td>
+        <div>
+          {parsedRows.map((r, i) => (
+            <div
+              key={i}
+              className="list-row"
+              style={{ alignItems: 'flex-start', opacity: r.error || excluded.has(i) ? 0.5 : 1 }}
+            >
+              <Checkbox
+                mt={2}
+                aria-label="include-row"
+                checked={!excluded.has(i)}
+                disabled={!!r.error}
+                onChange={() => toggleExcluded(i)}
+              />
+              <div className="list-row-main">
+                <div className="list-row-title">{r.description || '—'}</div>
+                <div className="list-row-meta">
+                  <span>{r.date ?? '—'}</span>
+                  <span className="list-row-meta-sep">·</span>
+                  <span>{r.period === 'BEFORE' ? t('period.before') : t('period.during')}</span>
+                  <span className="list-row-meta-sep">·</span>
+                  {r.error ? (
+                    <Text span size="xs" c="red">{r.error}</Text>
+                  ) : (
+                    <Text span size="xs" c="teal">{t('import.rowOk')}</Text>
+                  )}
+                </div>
+                {r.kind === 'REFUND' ? (
+                  <Group gap={8} mt={6}>
+                    <Badge variant="light" color={r.isIof ? 'gray' : 'teal'} size="sm">
+                      {r.isIof ? 'IOF' : t('type.refund')}
+                    </Badge>
+                    <Checkbox
+                      size="xs"
+                      label={t('type.iof')}
+                      checked={r.isIof}
+                      disabled={!!r.error}
+                      onChange={(e) => {
+                        const checked = e.currentTarget.checked;
+                        setIofOverrides((prev) => new Map(prev).set(i, checked));
+                      }}
+                    />
+                  </Group>
+                ) : (
                   <Select
+                    mt={6}
                     size="xs"
+                    w={220}
+                    maw="100%"
                     placeholder="—"
                     data={catData}
                     value={r.categoryId}
@@ -322,18 +351,12 @@ function Flow({ onClose, trip, categories, rules }: Omit<Props, 'opened'>) {
                     renderOption={catRenderOption}
                     clearable
                   />
-                </Table.Td>
-                <Table.Td>
-                  {r.error ? (
-                    <Text size="xs" c="red">{r.error}</Text>
-                  ) : (
-                    <Text size="xs" c="teal">{t('import.rowOk')}</Text>
-                  )}
-                </Table.Td>
-              </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
+                )}
+              </div>
+              <Text className="list-row-amount">{r.amount != null ? r.amount.toFixed(2) : '—'}</Text>
+            </div>
+          ))}
+        </div>
       </ScrollArea>
 
       <Group justify="space-between">

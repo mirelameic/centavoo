@@ -16,6 +16,7 @@ export const pt = {
   'form.dates': 'Período',
   'form.datesPlaceholder': 'início – fim',
   'common.cancel': 'Cancelar',
+  'common.delete': 'Excluir',
   'common.create': 'Criar',
   'common.back': 'Voltar',
 
@@ -28,7 +29,7 @@ export const pt = {
   'kpi.avgPerDay': 'Média/dia',
 
   'tab.summary': 'Resumo',
-  'tab.top': 'Maiores Gastos',
+  'tab.top': 'Ranking',
   'tab.transactions': 'Transações',
 
   'chart.before': 'Antes',
@@ -155,8 +156,8 @@ export const pt = {
   'import.back': 'Voltar',
   'import.hasHeader': 'A primeira linha é um cabeçalho',
   'import.invertSign': 'Inverter sinal dos valores',
-  'import.period': 'Período das transações importadas',
   'import.mapHint': 'Diga o que cada coluna significa:',
+  'import.columnN': 'Coluna {n}',
   'import.colDate': 'Data',
   'import.colDescription': 'Descrição',
   'import.colAmount': 'Valor',

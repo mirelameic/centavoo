@@ -4,7 +4,7 @@ import {
   Stack,
   Group,
   Button,
-  SegmentedControl,
+  Checkbox,
   TextInput,
   NumberInput,
   Select,
@@ -14,7 +14,7 @@ import type { Category, CategoryRule, Kind, Period, Transaction, Trip } from '..
 import { addTransaction, updateTransaction } from '../../db/repo';
 import { suggestCategory } from '../../lib/categorize';
 import { toCatById } from '../../lib/categories';
-import { toISO } from '../../lib/format';
+import { periodForDate, toISO } from '../../lib/format';
 import { useI18n } from '../../i18n';
 import { CategoryOption } from './CategoryOption';
 
@@ -45,13 +45,14 @@ function Fields({
 }: Omit<Props, 'opened'>) {
   const { t } = useI18n();
 
-  const [period, setPeriod] = useState<Period>(editing?.period ?? 'DURING');
   const [date, setDate] = useState<string | null>(
     editing ? editing.date ?? null : trip.startDate ?? null,
   );
+  const period: Period = periodForDate(date, trip.startDate) ?? editing?.period ?? 'DURING';
   const [description, setDescription] = useState(editing?.description ?? '');
   const [amount, setAmount] = useState<number | string>(editing ? Math.abs(editing.amount) : '');
   const [type, setType] = useState<Kind>(editing?.kind ?? 'EXPENSE');
+  const [isIof, setIsIof] = useState(editing?.isIof ?? false);
   const [categoryId, setCategoryId] = useState<string | null>(editing?.categoryId ?? null);
   const [splitCount, setSplitCount] = useState<number | string>(editing?.splitCount || 1);
 
@@ -78,9 +79,9 @@ function Fields({
       date: date ?? null,
       description: description.trim(),
       amount: signed,
-      categoryId: type === 'IOF_REFUND' ? null : categoryId,
+      categoryId: type === 'EXPENSE' ? categoryId : null,
       kind: type,
-      isIof: type === 'IOF_REFUND',
+      isIof: type === 'REFUND' && isIof,
       splitCount: Math.max(1, Number(splitCount) || 1),
     };
     if (editing) {
@@ -93,15 +94,6 @@ function Fields({
 
   return (
     <Stack>
-      <SegmentedControl
-        fullWidth
-        value={period}
-        onChange={(v) => setPeriod(v as Period)}
-        data={[
-          { label: t('period.before'), value: 'BEFORE' },
-          { label: t('period.during'), value: 'DURING' },
-        ]}
-      />
       <DatePickerInput
         label={t('table.date')}
         placeholder="—"
@@ -140,13 +132,19 @@ function Fields({
         data={[
           { value: 'EXPENSE', label: t('type.expense') },
           { value: 'REFUND', label: t('type.refund') },
-          { value: 'IOF_REFUND', label: t('type.iof') },
         ]}
         value={type}
         onChange={(v) => setType((v as Kind) ?? 'EXPENSE')}
         allowDeselect={false}
       />
-      {type !== 'IOF_REFUND' && (
+      {type === 'REFUND' && (
+        <Checkbox
+          label={t('type.iof')}
+          checked={isIof}
+          onChange={(e) => setIsIof(e.currentTarget.checked)}
+        />
+      )}
+      {type === 'EXPENSE' && (
         <Select
           label={t('table.category')}
           placeholder="—"

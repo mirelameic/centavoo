@@ -1,5 +1,6 @@
 import { db } from './db';
 import type { Category, CityMap, Transaction, Trip } from './schema';
+import { periodForDate } from '../lib/format';
 
 export const DEFAULT_CATEGORIES: Omit<Category, 'id' | 'tripId'>[] = [
   { name: 'Hospedagem', color: '#0E8C6B', icon: 'bed', sortOrder: 0 },
@@ -10,8 +11,7 @@ export const DEFAULT_CATEGORIES: Omit<Category, 'id' | 'tripId'>[] = [
   { name: 'Brindes', color: '#7D1F44', icon: 'gift', sortOrder: 5 },
   { name: 'Turismo', color: '#8A7220', icon: 'ticket', sortOrder: 6 },
   { name: 'Genéricos de viagem', color: '#7A4A2A', icon: 'luggage', sortOrder: 7 },
-  { name: 'Cannabis', color: '#3D8B4C', icon: 'leaf', sortOrder: 8 },
-  { name: 'Outros', color: '#5C5650', icon: 'bookmark', sortOrder: 9 },
+  { name: 'Outros', color: '#5C5650', icon: 'bookmark', sortOrder: 8 },
 ];
 
 export async function createTrip(
@@ -32,6 +32,17 @@ export async function createTrip(
 }
 
 export const updateTrip = (id: string, patch: Partial<Trip>) => db.trips.update(id, patch);
+
+export async function reassignTransactionPeriods(tripId: string, startDate: string | null): Promise<void> {
+  if (!startDate) return;
+  const txs = await db.transactions.where('tripId').equals(tripId).toArray();
+  await db.transaction('rw', db.transactions, async () => {
+    for (const tx of txs) {
+      const period = periodForDate(tx.date ?? null, startDate);
+      if (period && period !== tx.period) await db.transactions.update(tx.id, { period });
+    }
+  });
+}
 
 export async function deleteTrip(id: string) {
   await db.transaction('rw', [db.trips, db.transactions, db.categories, db.rules], async () => {

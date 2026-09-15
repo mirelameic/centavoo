@@ -23,6 +23,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { IconPlus, IconPencil, IconTrash, IconArrowLeft, IconCheck } from '@tabler/icons-react';
 import { db } from '../db/db';
 import { addCategory, updateCategory, deleteCategory } from '../db/repo';
+import { confirmDelete } from '../lib/confirm';
 import type { Category } from '../db/schema';
 import { COLOR_OPTIONS, ICON_OPTIONS } from '../lib/constants';
 import { CategoryIcon } from '../lib/categoryIcons';
@@ -43,8 +44,8 @@ export function Categories() {
   const openAdd = () => { setEditing(null); open(); };
   const openEdit = (c: Category) => { setEditing(c); open(); };
 
-  async function handleDelete(c: Category) {
-    if (window.confirm(t('cat.deleteConfirm'))) await deleteCategory(c.id);
+  function handleDelete(c: Category) {
+    confirmDelete(t('cat.deleteConfirm'), () => deleteCategory(c.id));
   }
 
   return (
@@ -52,11 +53,11 @@ export function Categories() {
       <Anchor component={Link} to={`/trip/${id}`} mb="sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
         <IconArrowLeft size={16} /> {t('common.back')}
       </Anchor>
-      <Group justify="space-between" mb="lg">
+      <Group gap="md" mb="lg">
         <Title order={2}>{t('cat.title')}</Title>
-        <Button leftSection={<IconPlus size={18} />} onClick={openAdd}>
-          {t('cat.new')}
-        </Button>
+        <ActionIcon size="xl" radius="xl" onClick={openAdd} aria-label={t('cat.new')}>
+          <IconPlus size={20} />
+        </ActionIcon>
       </Group>
 
       {cats && cats.length === 0 && (

@@ -1,5 +1,5 @@
 export type Period = 'BEFORE' | 'DURING';
-export type Kind = 'EXPENSE' | 'REFUND' | 'IOF_REFUND';
+export type Kind = 'EXPENSE' | 'REFUND';
 
 export type CityMap = Record<string, string>;
 

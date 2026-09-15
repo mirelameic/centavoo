@@ -67,7 +67,7 @@ export function computeStats(
 ): TripStats {
   const catById = new Map(cats.map((c) => [c.id, c]));
   const catOf = (t: Transaction) => {
-    if (t.kind === 'IOF_REFUND') return IOF_CAT;
+    if (t.isIof) return IOF_CAT;
     if (!t.categoryId) return NO_CAT;
     return catById.get(t.categoryId) ?? NO_CAT;
   };
@@ -97,7 +97,7 @@ export function computeStats(
     else refunds += c;
     if (t.period === 'BEFORE') before += c;
     else during += c;
-    if (t.kind === 'IOF_REFUND') iofRefund += c;
+    if (t.isIof) iofRefund += c;
     if (t.period === 'DURING' && t.date) days.add(t.date);
 
     if (c > 0) {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { groupCityBlocks, money, moneyParts } from './format';
+import { groupCityBlocks, money, moneyParts, periodForDate } from './format';
 
 describe('money', () => {
   it('always puts one space between symbol and number in pt-BR', () => {
@@ -23,6 +23,25 @@ describe('moneyParts', () => {
 
   it('folds a negative sign into the symbol', () => {
     expect(moneyParts(-30, 'BRL', 'pt-BR')).toEqual({ symbol: '-R$', value: '30,00' });
+  });
+});
+
+describe('periodForDate', () => {
+  it('returns BEFORE when the date is earlier than the trip start', () => {
+    expect(periodForDate('2026-05-10', '2026-05-17')).toBe('BEFORE');
+  });
+  it('returns DURING when the date is on the trip start', () => {
+    expect(periodForDate('2026-05-17', '2026-05-17')).toBe('DURING');
+  });
+  it('returns DURING when the date is after the trip start', () => {
+    expect(periodForDate('2026-06-01', '2026-05-17')).toBe('DURING');
+  });
+  it('returns null when there is no date', () => {
+    expect(periodForDate(null, '2026-05-17')).toBeNull();
+  });
+  it('returns null when the trip has no start date', () => {
+    expect(periodForDate('2026-05-17', null)).toBeNull();
+    expect(periodForDate('2026-05-17', undefined)).toBeNull();
   });
 });
 

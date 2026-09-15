@@ -1,5 +1,5 @@
 import { ActionIcon, Badge, Checkbox, Menu, Text } from '@mantine/core';
-import { IconDotsVertical, IconPencil, IconTrash } from '@tabler/icons-react';
+import { IconArrowBackUp, IconDotsVertical, IconPencil, IconTrash } from '@tabler/icons-react';
 import type { Category, CityMap, Transaction } from '../../db/schema';
 import { cost } from '../../db/stats';
 import { useI18n } from '../../i18n';
@@ -34,7 +34,8 @@ export function TxRow({
   const { t, money, date } = useI18n();
   const amount = cost(tx);
   const cityName = (tx.date && cities[tx.date]) || null;
-  const isIof = tx.kind === 'IOF_REFUND';
+  const isIof = tx.isIof;
+  const isRefund = tx.kind === 'REFUND';
 
   return (
     <div
@@ -47,12 +48,20 @@ export function TxRow({
     >
       <div
         className="list-row-icon"
-        style={{ background: selecting ? undefined : cat ? `${cat.color}26` : 'var(--mantine-color-default-hover)' }}
+        style={{
+          background: selecting
+            ? undefined
+            : isRefund
+              ? 'var(--mantine-color-teal-light)'
+              : cat
+                ? `${cat.color}26`
+                : 'var(--mantine-color-default-hover)',
+        }}
       >
         {selecting ? (
           <Checkbox checked={selected} readOnly tabIndex={-1} style={{ pointerEvents: 'none' }} />
-        ) : isIof ? (
-          <Text size="xs" fw={700} c="dimmed">IOF</Text>
+        ) : isRefund ? (
+          <IconArrowBackUp size={17} color="var(--mantine-color-teal-6)" />
         ) : cat ? (
           <CategoryIcon name={cat.icon} size={17} color={cat.color} />
         ) : (
@@ -67,7 +76,13 @@ export function TxRow({
         </div>
         {showMeta && (
           <div className="list-row-meta">
-            {isIof ? <Badge variant="light" color="gray" size="xs">IOF</Badge> : <span>{cat ? cat.name : '—'}</span>}
+            {isIof ? (
+              <Badge variant="light" color="gray" size="xs">IOF</Badge>
+            ) : isRefund ? (
+              <Badge variant="light" color="teal" size="xs">{t('type.refund')}</Badge>
+            ) : (
+              <span>{cat ? cat.name : '—'}</span>
+            )}
             {cityName && (
               <>
                 <span className="list-row-meta-sep">·</span>

@@ -17,6 +17,7 @@ import { colorForCity } from '../../db/stats';
 import type { CityMap } from '../../db/schema';
 import { setTripCityRange, updateTrip } from '../../db/repo';
 import { dateRange, groupCityBlocks, toISO, type CityBlock } from '../../lib/format';
+import { confirmDelete } from '../../lib/confirm';
 import { useI18n } from '../../i18n';
 import { Dot } from './primitives';
 
@@ -61,20 +62,25 @@ export function CityEditor({
     resetForm();
   };
 
-  const removeBlock = async (b: CityBlock) => {
-    if (!window.confirm(t('city.removeBlockConfirm'))) return;
-    await setTripCityRange(tripId, b.days, '');
-    if (editing === b) resetForm();
+  const removeBlock = (b: CityBlock) => {
+    confirmDelete(t('city.removeBlockConfirm'), async () => {
+      await setTripCityRange(tripId, b.days, '');
+      if (editing === b) resetForm();
+    });
   };
 
   const removeCity = async (city: string) => {
     const daysUsed = days.filter((d) => cities[d] === city);
+    const removeIt = async () => {
+      if (daysUsed.length > 0) await setTripCityRange(tripId, daysUsed, '');
+      await updateTrip(tripId, { cityList: listValue.filter((c) => c !== city) });
+    };
     if (daysUsed.length > 0) {
       const msg = `${city} — ${daysUsed.length} ${t('city.daysN')}. ${t('city.removeUsedWarning')}`;
-      if (!window.confirm(msg)) return;
-      await setTripCityRange(tripId, daysUsed, '');
+      confirmDelete(msg, removeIt);
+    } else {
+      await removeIt();
     }
-    await updateTrip(tripId, { cityList: listValue.filter((c) => c !== city) });
   };
 
   const [addingCity, setAddingCity] = useState(false);

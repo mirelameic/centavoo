@@ -12,6 +12,7 @@ import {
   deleteTransactions,
   addCategory,
   deleteCategory,
+  reassignTransactionPeriods,
 } from './repo';
 
 beforeEach(async () => {
@@ -165,6 +166,42 @@ describe('transactions', () => {
     ]);
     await deleteTransactions(ids);
     expect(await db.transactions.count()).toBe(0);
+  });
+});
+
+describe('reassignTransactionPeriods', () => {
+  it('flips a transaction from during to before when the new start date moves past it', async () => {
+    const tripId = await createTrip({ name: 'Japan', startDate: '2026-05-17', endDate: '2026-06-03' });
+    const duringId = await addTransaction({
+      tripId, period: 'DURING', date: '2026-05-20', description: 'A',
+      amount: 10, categoryId: null, kind: 'EXPENSE', isIof: false, splitCount: 1, city: null,
+    });
+    const beforeId = await addTransaction({
+      tripId, period: 'BEFORE', date: '2026-05-10', description: 'B',
+      amount: 20, categoryId: null, kind: 'EXPENSE', isIof: false, splitCount: 1, city: null,
+    });
+    const noDateId = await addTransaction({
+      tripId, period: 'DURING', date: null, description: 'C',
+      amount: 5, categoryId: null, kind: 'EXPENSE', isIof: false, splitCount: 1, city: null,
+    });
+
+    await reassignTransactionPeriods(tripId, '2026-05-25');
+
+    expect((await db.transactions.get(duringId))?.period).toBe('BEFORE');
+    expect((await db.transactions.get(beforeId))?.period).toBe('BEFORE');
+    expect((await db.transactions.get(noDateId))?.period).toBe('DURING');
+  });
+
+  it('does nothing when the new start date is null', async () => {
+    const tripId = await createTrip({ name: 'Japan' });
+    const id = await addTransaction({
+      tripId, period: 'DURING', date: '2026-05-20', description: 'A',
+      amount: 10, categoryId: null, kind: 'EXPENSE', isIof: false, splitCount: 1, city: null,
+    });
+
+    await reassignTransactionPeriods(tripId, null);
+
+    expect((await db.transactions.get(id))?.period).toBe('DURING');
   });
 });
 

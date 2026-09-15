@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { MantineProvider } from '@mantine/core';
+import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
 import { RouterProvider } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
@@ -19,8 +20,10 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <I18nextProvider i18n={i18n}>
       <MantineProvider theme={theme} defaultColorScheme="auto">
-        <Notifications />
-        <RouterProvider router={router} />
+        <ModalsProvider>
+          <Notifications />
+          <RouterProvider router={router} />
+        </ModalsProvider>
       </MantineProvider>
     </I18nextProvider>
   </StrictMode>,

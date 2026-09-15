@@ -4,7 +4,8 @@ import { Modal, Stack, Group, Button, Divider } from '@mantine/core';
 import type { DateValue } from '@mantine/dates';
 import { IconTrash } from '@tabler/icons-react';
 import type { Trip } from '../../db/schema';
-import { updateTrip, deleteTrip } from '../../db/repo';
+import { updateTrip, deleteTrip, reassignTransactionPeriods } from '../../db/repo';
+import { confirmDelete } from '../../lib/confirm';
 import { toISO } from '../../lib/format';
 import { useI18n } from '../../i18n';
 import { TripIdentityFields } from './TripFields';
@@ -36,21 +37,23 @@ function Fields({ trip, onClose }: Omit<Props, 'opened'>) {
 
   async function handleSave() {
     if (!name.trim()) return;
+    const startDate = toISO(range[0]);
     await updateTrip(trip.id, {
       name: name.trim(),
       destination: destination.trim() || undefined,
-      startDate: toISO(range[0]),
+      startDate,
       endDate: toISO(range[1]),
     });
+    await reassignTransactionPeriods(trip.id, startDate);
     onClose();
   }
 
-  async function handleDelete() {
-    if (window.confirm(t('trip.deleteConfirm'))) {
+  function handleDelete() {
+    confirmDelete(t('trip.deleteConfirm'), async () => {
       await deleteTrip(trip.id);
       onClose();
       navigate('/');
-    }
+    });
   }
 
   return (

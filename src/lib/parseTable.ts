@@ -1,5 +1,15 @@
+import type { Kind } from '../db/schema';
+
 export type ColumnRole = 'date' | 'description' | 'amount' | 'ignore';
 export type DelimiterOption = 'auto' | ',' | ';' | '\t';
+
+export function deriveKind(amount: number | null): Kind {
+  return (amount ?? 0) < 0 ? 'REFUND' : 'EXPENSE';
+}
+
+export function deriveIsIof(kind: Kind, description: string): boolean {
+  return kind === 'REFUND' && description.toLowerCase().includes('iof');
+}
 
 function splitLine(line: string, delimiter: string): string[] {
   const out: string[] = [];

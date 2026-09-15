@@ -1,3 +1,5 @@
+import type { Period } from '../db/schema';
+
 const pad2 = (n: number) => String(n).padStart(2, '0');
 
 export function moneyParts(n: number, currency = 'BRL', locale = 'pt-BR'): { symbol: string; value: string } {
@@ -29,6 +31,14 @@ export function toISO(d: unknown): string | null {
   if (typeof d === 'string') return d.slice(0, 10);
   if (d instanceof Date) return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
   return null;
+}
+
+export function periodForDate(
+  date?: string | null,
+  tripStartDate?: string | null,
+): Period | null {
+  if (!date || !tripStartDate) return null;
+  return date < tripStartDate ? 'BEFORE' : 'DURING';
 }
 
 export function dateRange(start: string, end: string): string[] {

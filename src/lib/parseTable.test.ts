@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { splitRows, parseAmount, parseDate, guessRoles, looksLikeHeaderRow } from './parseTable';
+import {
+  splitRows,
+  parseAmount,
+  parseDate,
+  guessRoles,
+  looksLikeHeaderRow,
+  deriveKind,
+  deriveIsIof,
+} from './parseTable';
 
 describe('splitRows', () => {
   it('auto-detects tab-separated pasted text', () => {
@@ -73,6 +81,26 @@ describe('guessRoles', () => {
       ['13/03/2026', 'Padaria', '12,00'],
     ];
     expect(guessRoles(rows)).toEqual(['date', 'description', 'amount']);
+  });
+});
+
+describe('deriveKind', () => {
+  it('treats a negative amount as a refund', () => expect(deriveKind(-30)).toBe('REFUND'));
+  it('treats a positive amount as an expense', () => expect(deriveKind(30)).toBe('EXPENSE'));
+  it('treats zero as an expense', () => expect(deriveKind(0)).toBe('EXPENSE'));
+  it('treats a missing amount as an expense', () => expect(deriveKind(null)).toBe('EXPENSE'));
+});
+
+describe('deriveIsIof', () => {
+  it('flags a refund whose description mentions IOF, case-insensitively', () => {
+    expect(deriveIsIof('REFUND', 'IOF Compra internacional')).toBe(true);
+    expect(deriveIsIof('REFUND', 'iof brisa de mar')).toBe(true);
+  });
+  it('is false for a refund with no IOF mention', () => {
+    expect(deriveIsIof('REFUND', 'Estorno hotel cancelado')).toBe(false);
+  });
+  it('is always false for an expense, even if it mentions IOF', () => {
+    expect(deriveIsIof('EXPENSE', 'Taxa IOF cartão')).toBe(false);
   });
 });
 

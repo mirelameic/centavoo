@@ -36,7 +36,7 @@ import {
   IconSortAscending,
   IconSortDescending,
   IconChartPie,
-  IconTrendingUp,
+  IconChartBar,
   IconCalendar,
   IconMapPin,
   IconReceipt2,
@@ -48,6 +48,7 @@ import { deleteTransaction, deleteTransactions } from '../db/repo';
 import type { Period, Transaction } from '../db/schema';
 import { dateRange, toISO } from '../lib/format';
 import { PERIOD_COLORS, ROW_BREAK } from '../lib/constants';
+import { confirmDelete } from '../lib/confirm';
 import { toCatById } from '../lib/categories';
 import { TransactionForm } from '../components/trip/TransactionForm';
 import { TripForm } from '../components/trip/TripForm';
@@ -61,7 +62,7 @@ import { useI18n } from '../i18n';
 
 const TAB_ITEMS = [
   { value: 'summary', label: 'tab.summary', icon: IconChartPie },
-  { value: 'top', label: 'tab.top', icon: IconTrendingUp },
+  { value: 'top', label: 'tab.top', icon: IconChartBar },
   { value: 'time', label: 'tab.time', icon: IconCalendar },
   { value: 'cities', label: 'tab.cities', icon: IconMapPin },
   { value: 'cats', label: 'tab.cats', icon: IconCategory },
@@ -117,8 +118,8 @@ export function Trip() {
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
   const openAdd = () => { setEditingTx(null); openForm(); };
   const openEdit = (tx: Transaction) => { setEditingTx(tx); openForm(); };
-  const removeTx = async (tx: Transaction) => {
-    if (window.confirm(t('tx.deleteConfirm'))) await deleteTransaction(tx.id);
+  const removeTx = (tx: Transaction) => {
+    confirmDelete(t('tx.deleteConfirm'), () => deleteTransaction(tx.id));
   };
 
   const [hiddenDaySeries, setHiddenDaySeries] = useState<Set<string>>(new Set());
@@ -174,11 +175,12 @@ export function Trip() {
     setSelectMode((m) => !m);
     setSelected(new Set());
   };
-  const bulkDelete = async () => {
-    if (selected.size && window.confirm(t('tx.deleteSelectedConfirm'))) {
+  const bulkDelete = () => {
+    if (!selected.size) return;
+    confirmDelete(t('tx.deleteSelectedConfirm'), async () => {
       await deleteTransactions([...selected]);
       setSelected(new Set());
-    }
+    });
   };
 
   const stats = useMemo(
