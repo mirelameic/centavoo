@@ -325,6 +325,49 @@ describe('computeStats — city edge cases', () => {
   });
 });
 
+describe('computeStats — cumulative spend', () => {
+  it('runs a total across dated during-period days, ascending', () => {
+    const s = computeStats([
+      tx({ amount: 100, date: '2026-06-21' }),
+      tx({ amount: 50, date: '2026-06-22' }),
+      tx({ amount: 20, date: '2026-06-23' }),
+    ], []);
+    expect(s.cumulativeByDay).toEqual([
+      { date: '21/06', total: 100 },
+      { date: '22/06', total: 150 },
+      { date: '23/06', total: 170 },
+    ]);
+  });
+
+  it('is empty when there are no dated during-period expenses', () => {
+    const s = computeStats([tx({ amount: 100, period: 'BEFORE', date: '2026-06-21' })], []);
+    expect(s.cumulativeByDay).toEqual([]);
+  });
+
+  it('carries a refund into the running total on its day', () => {
+    const s = computeStats([
+      tx({ amount: 100, date: '2026-06-21' }),
+      tx({ amount: -30, kind: 'REFUND', date: '2026-06-22' }),
+    ], []);
+    expect(s.cumulativeByDay).toEqual([
+      { date: '21/06', total: 100 },
+      { date: '22/06', total: 70 },
+    ]);
+  });
+
+  it('sums same-day transactions into a single point before accumulating', () => {
+    const s = computeStats([
+      tx({ amount: 10, date: '2026-06-22' }),
+      tx({ amount: 20, date: '2026-06-22' }),
+      tx({ amount: 5, date: '2026-06-23' }),
+    ], []);
+    expect(s.cumulativeByDay).toEqual([
+      { date: '22/06', total: 30 },
+      { date: '23/06', total: 35 },
+    ]);
+  });
+});
+
 describe('computeStats — known quirks', () => {
   it('keeps null and unknown categoryId as separate "No category" buckets', () => {
     const s = computeStats([

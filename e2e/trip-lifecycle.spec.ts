@@ -12,8 +12,8 @@ test('creates a trip, opens it, then deletes it end-to-end', async ({ page }) =>
   await expectNoHorizontalOverflow(page);
 
   await page.getByLabel('edit-trip').click();
-  page.once('dialog', (d) => d.accept());
   await page.getByRole('button', { name: 'Excluir viagem' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Excluir', exact: true }).click();
 
   await page.waitForURL('/');
   await expect(page.getByText('Playwright Trip')).toHaveCount(0);

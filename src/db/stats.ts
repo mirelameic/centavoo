@@ -33,6 +33,7 @@ export interface TripStats {
   byCategory: CatAgg[];
   usedCategories: { name: string; color: string }[];
   dayData: Record<string, number | string>[];
+  cumulativeByDay: { date: string; total: number }[];
   beforeDuringData: { category: string; before: number; during: number }[];
   byCity: { city: string; amount: number; color: string }[];
   weekdayAmounts: number[];
@@ -81,6 +82,7 @@ export function computeStats(
   const days = new Set<string>();
 
   const byCat = new Map<string, CatAgg>();
+  const dailyDuring = new Map<string, number>();
   const dayMap = new Map<string, Record<string, number>>();
   const bdMap = new Map<string, { before: number; during: number }>();
   const cityMap = new Map<string, number>();
@@ -98,7 +100,10 @@ export function computeStats(
     if (t.period === 'BEFORE') before += c;
     else during += c;
     if (t.isIof) iofRefund += c;
-    if (t.period === 'DURING' && t.date) days.add(t.date);
+    if (t.period === 'DURING' && t.date) {
+      days.add(t.date);
+      dailyDuring.set(t.date, (dailyDuring.get(t.date) ?? 0) + c);
+    }
 
     if (c > 0) {
       const key = t.categoryId ?? cat.name;
@@ -160,6 +165,15 @@ export function computeStats(
     .filter((r) => r.before || r.during)
     .sort((a, b) => b.before + b.during - (a.before + a.during));
 
+  let running = 0;
+  const cumulativeByDay = [...dailyDuring.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, total]) => {
+      running += total;
+      const [, m, d] = date.split('-');
+      return { date: `${d}/${m}`, total: round(running) };
+    });
+
   const byCity = paletteByCity(cityMap);
   const weekdayAmounts = weekday.map((n) => round(n));
 
@@ -198,6 +212,7 @@ export function computeStats(
     byCategory: byCategory.map((c) => ({ ...c, amount: round(c.amount) })),
     usedCategories,
     dayData,
+    cumulativeByDay,
     beforeDuringData,
     byCity,
     weekdayAmounts,

@@ -54,8 +54,14 @@ Layers under `src/db/`:
 
 ## Code style
 
-- No comments except ones that explain a genuinely non-obvious WHY (a real invariant, a workaround, a subtle constraint). Don't add comments that restate what the code does.
+- No comments in code. None — not "why" comments, not explanatory ones, not in app code, not in tests/scripts/config. If something needs explaining, that belongs in the PR description or commit message, never inline. This has been asked for repeatedly — don't reintroduce comments while fixing or writing anything in this repo.
 - Don't introduce new abstractions or folders speculatively — this is a small, single-maintainer app; prefer the flat/by-type structure already in place (see the components note above for why category logic isn't split out).
+
+## Testing discipline
+
+Always check tests around any change, in both directions:
+- **After writing/changing behavior**: add or update tests that cover it (unit tests in `src/**/*.test.ts` for pure logic, e2e specs in `e2e/` for user-facing flows) — don't ship new behavior with no test covering it.
+- **After any change**: run the relevant test command(s) (`npm run lint`, `npx tsc -b`, `npm run test`, and `npm run test:e2e` when UI/flow behavior changed) and confirm they pass before considering the work done. Don't assume something still works — verify it.
 
 ## Git
 

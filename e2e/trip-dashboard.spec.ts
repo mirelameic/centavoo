@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { expectNoHorizontalOverflow } from './support/overflow';
+import { openTab } from './support/nav';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
@@ -13,25 +14,26 @@ test('shows the trip KPIs', async ({ page }) => {
 });
 
 test('resumo tab shows the split savings card', async ({ page }) => {
+  await openTab(page, 'Resumo');
   await expect(page.getByText('Você economizou')).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
 
-test('maiores gastos tab shows the before/during sections', async ({ page }) => {
-  await page.getByRole('tab', { name: 'Maiores Gastos' }).click();
+test('ranking tab shows the before/during sections', async ({ page }) => {
+  await openTab(page, 'Ranking');
   await expect(page.getByText('Maiores gastos · antes')).toBeVisible();
   await expect(page.getByText('Maiores gastos · durante')).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
 
 test('tempo tab shows the weekday chart', async ({ page }) => {
-  await page.getByRole('tab', { name: 'Tempo' }).click();
+  await openTab(page, 'Tempo');
   await expect(page.getByText('Por dia da semana')).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
 
 test('tempo tab: tapping a "Por dia" legend item toggles it off and back on', async ({ page }) => {
-  await page.getByRole('tab', { name: 'Tempo' }).click();
+  await openTab(page, 'Tempo');
   const item = page.getByRole('button', { name: 'toggle-Alimentação' });
   await item.waitFor();
   await expect(item).not.toHaveAttribute('data-hidden');
@@ -42,14 +44,14 @@ test('tempo tab: tapping a "Por dia" legend item toggles it off and back on', as
 });
 
 test('cidades tab is reachable and shows the city table', async ({ page }) => {
-  await page.getByRole('tab', { name: 'Cidades' }).click();
+  await openTab(page, 'Cidades');
   await expect(page.getByText('Resumo por cidade')).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
 
 test('categorias tab shows the category table and the before/during legend toggle', async ({ page }) => {
-  await page.getByRole('tab', { name: 'Categorias' }).click();
-  await expect(page.getByText('Ticket médio')).toBeVisible();
+  await openTab(page, 'Categorias');
+  await expect(page.getByText('Ticket médio').first()).toBeVisible();
   const item = page.getByRole('button', { name: 'toggle-during' });
   await item.waitFor();
   await item.click();
@@ -58,7 +60,7 @@ test('categorias tab shows the category table and the before/during legend toggl
 });
 
 test('transações tab is reachable', async ({ page }) => {
-  await page.getByRole('tab', { name: 'Transações' }).click();
-  await expect(page.getByRole('columnheader', { name: 'Descrição' })).toBeVisible();
+  await openTab(page, 'Transações');
+  await expect(page.getByPlaceholder('Buscar por descrição')).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { expectNoHorizontalOverflow } from './support/overflow';
+import { openTab } from './support/nav';
 
 test('exports a backup file, then imports it back in', async ({ page }) => {
   await page.goto('/');
@@ -12,7 +13,7 @@ test('exports a backup file, then imports it back in', async ({ page }) => {
   // these afterwards — a bare "toast is visible" assertion would not catch
   // any of that.
   await expect(page.getByText('14.874', { exact: false })).toBeVisible();
-  await page.getByRole('tab', { name: 'Transações' }).click();
+  await openTab(page, 'Transações');
   await expect(page.getByText('217 resultado(s)')).toBeVisible();
 
   await page.getByLabel('menu').click();
@@ -40,5 +41,6 @@ test('exports a backup file, then imports it back in', async ({ page }) => {
   // does a bulkPut keyed by id) — confirm the real data actually survived
   // the round trip, not just the success toast firing.
   await expect(page.getByText('217 resultado(s)')).toBeVisible();
+  await page.getByLabel('back-to-trip').click();
   await expect(page.getByText('14.874', { exact: false })).toBeVisible();
 });

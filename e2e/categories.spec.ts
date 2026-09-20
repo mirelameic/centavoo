@@ -50,7 +50,7 @@ test('deletes a category after confirming', async ({ page }) => {
     .locator('div', { hasText: 'Delete Me' })
     .filter({ has: page.getByLabel('delete') })
     .last();
-  page.once('dialog', (d) => d.accept());
   await row.getByLabel('delete').click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Excluir' }).click();
   await expect(page.getByText('Delete Me')).toHaveCount(0);
 });

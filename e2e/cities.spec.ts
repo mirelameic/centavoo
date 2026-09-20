@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { expectNoHorizontalOverflow } from './support/overflow';
+import { openTab } from './support/nav';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
   await page.getByText('Europa 2026').first().click();
   await page.getByRole('heading', { name: 'Europa 2026' }).waitFor();
-  await page.getByRole('tab', { name: 'Cidades' }).click();
+  await openTab(page, 'Cidades');
 });
 
 test('lists the seeded cities and every day covered by a block', async ({ page }) => {
@@ -38,16 +39,14 @@ test('adds a city, then removes it with no confirmation since it has no days ass
   // now resolves to 2 elements — `.first()` keeps this to the visible pill.
   await expect(page.getByText('Madrid', { exact: true }).first()).toBeVisible();
 
-  page.once('dialog', (d) => {
-    throw new Error(`unexpected confirm dialog: ${d.message()}`);
-  });
   await page.getByLabel('Remover Madrid').click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByText('Madrid', { exact: true })).toHaveCount(0);
 });
 
 test('removing a city that is still assigned to days asks for confirmation, then clears them', async ({ page }) => {
-  page.once('dialog', (d) => d.accept());
   await page.getByLabel('Remover SP').click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Excluir' }).click();
   await expect(page.getByText('SP', { exact: true })).toHaveCount(0);
   // SP covered 2 separate single days (17th and 3rd) — both become unassigned.
   await expect(page.getByText(/2 dia\(s\) sem cidade/)).toBeVisible();
@@ -60,8 +59,8 @@ test('editing a block switches the form into edit mode', async ({ page }) => {
 });
 
 test('removing a block clears just those days', async ({ page }) => {
-  page.once('dialog', (d) => d.accept());
   await page.getByLabel('delete-city-block').first().click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Excluir' }).click();
   // The first block in date order is SP's single day (May 17th).
   await expect(page.getByText(/1 dia\(s\) sem cidade/)).toBeVisible();
   await expectNoHorizontalOverflow(page);

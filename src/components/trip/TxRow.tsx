@@ -59,7 +59,13 @@ export function TxRow({
         }}
       >
         {selecting ? (
-          <Checkbox checked={selected} readOnly tabIndex={-1} style={{ pointerEvents: 'none' }} />
+          <Checkbox
+            checked={selected}
+            readOnly
+            tabIndex={-1}
+            aria-label="select-row"
+            style={{ pointerEvents: 'none' }}
+          />
         ) : isRefund ? (
           <IconArrowBackUp size={17} color="var(--mantine-color-teal-6)" />
         ) : cat ? (

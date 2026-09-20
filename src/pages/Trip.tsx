@@ -21,11 +21,12 @@ import {
   SegmentedControl,
   Pill,
   UnstyledButton,
+  TextInput,
   type ComboboxRenderPillInput,
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
-import { DonutChart, BarChart } from '@mantine/charts';
+import { DonutChart, BarChart, AreaChart } from '@mantine/charts';
 import {
   IconArrowLeft,
   IconPlus,
@@ -41,6 +42,7 @@ import {
   IconMapPin,
   IconReceipt2,
   IconArrowUp,
+  IconSearch,
 } from '@tabler/icons-react';
 import { db } from '../db/db';
 import { computeStats, cityBreakdown, cost } from '../db/stats';
@@ -140,6 +142,7 @@ export function Trip() {
     });
 
   const [cityCatFilter, setCityCatFilter] = useState<string[]>([]);
+  const [txSearch, setTxSearch] = useState('');
   const [txCatFilter, setTxCatFilter] = useState<string[]>([]);
   const [txCityFilter, setTxCityFilter] = useState<string[]>([]);
   const [txPeriodFilter, setTxPeriodFilter] = useState<'ALL' | Period>('ALL');
@@ -149,6 +152,7 @@ export function Trip() {
   const [txSortField, setTxSortField] = useState<TxSortField | null>(null);
   const [txSortDir, setTxSortDir] = useState<'asc' | 'desc'>('asc');
   const txFiltersActive =
+    txSearch.trim() !== '' ||
     txCatFilter.length > 0 ||
     txCityFilter.length > 0 ||
     txPeriodFilter !== 'ALL' ||
@@ -156,6 +160,7 @@ export function Trip() {
     txDateRange[0] !== null ||
     txDateRange[1] !== null;
   const clearTxFilters = () => {
+    setTxSearch('');
     setTxCatFilter([]);
     setTxCityFilter([]);
     setTxPeriodFilter('ALL');
@@ -254,8 +259,10 @@ export function Trip() {
     period: (a, b) => (a.period === b.period ? 0 : a.period === 'BEFORE' ? -1 : 1),
     amount: (a, b) => cost(a) - cost(b),
   };
+  const txSearchQuery = txSearch.trim().toLowerCase();
   const filteredTx = (txs ?? [])
     .filter((tx) => {
+      if (txSearchQuery && !tx.description.toLowerCase().includes(txSearchQuery)) return false;
       if (txPeriodFilter !== 'ALL' && tx.period !== txPeriodFilter) return false;
       if (txCatFilter.length && !(tx.categoryId && txCatFilter.includes(tx.categoryId))) return false;
       const txCity = tx.date ? cities[tx.date] : undefined;
@@ -277,6 +284,7 @@ export function Trip() {
       if (a.period !== b.period) return a.period === 'BEFORE' ? -1 : 1;
       return (a.date ?? '').localeCompare(b.date ?? '');
     });
+  const filteredTxTotal = filteredTx.reduce((sum, tx) => sum + cost(tx), 0);
 
   return (
     <Container size="lg" px={0} className="trip-page">
@@ -347,7 +355,7 @@ export function Trip() {
       >
         <Tabs.List className="tabs-list-desktop" mb="md" style={{ flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
           {TAB_ITEMS.map(({ value, label, icon: Icon }) => (
-            <Tabs.Tab key={value} value={value} leftSection={<Icon size={19} />}>
+            <Tabs.Tab key={value} value={value} leftSection={<Icon size={36} />}>
               {t(label)}
             </Tabs.Tab>
           ))}
@@ -461,6 +469,21 @@ export function Trip() {
                 formatter: (v) => (typeof v === 'number' ? Math.round(v).toLocaleString(locale) : v),
               }}
             />
+
+            <Section>{t('sec.cumulative')}</Section>
+            {stats.cumulativeByDay.length ? (
+              <AreaChart
+                h={220}
+                data={stats.cumulativeByDay}
+                dataKey="date"
+                series={[{ name: 'total', color: 'orange.5', label: t('table.amount') }]}
+                valueFormatter={(v) => money(v, cur)}
+                curveType="monotone"
+                withGradient
+              />
+            ) : (
+              <Text c="dimmed">{t('chart.noDated')}</Text>
+            )}
           </Card>
         </Tabs.Panel>
 
@@ -573,6 +596,13 @@ export function Trip() {
         <Tabs.Panel value="tx">
           <Card withBorder padding={0}>
             <Box px="md" pt="md">
+              <TextInput
+                leftSection={<IconSearch size={16} />}
+                placeholder={t('tx.searchPlaceholder')}
+                value={txSearch}
+                onChange={(e) => setTxSearch(e.currentTarget.value)}
+                mb="sm"
+              />
               <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="sm" mb="xs">
                 <div>
                   <Text size="sm" fw={500} mb={4}>{t('tx.filterDate')}</Text>
@@ -645,7 +675,7 @@ export function Trip() {
               </SimpleGrid>
               <Group justify="space-between" mb="xs" wrap="wrap" gap="xs">
                 <Text size="sm" c="dimmed">
-                  {filteredTx.length} {t('tx.filterResultsN')}
+                  {filteredTx.length} {t('tx.filterResultsN')} · {money(filteredTxTotal, cur)}
                 </Text>
                 <Group gap="xs" wrap="nowrap">
                   {txFiltersActive && (
