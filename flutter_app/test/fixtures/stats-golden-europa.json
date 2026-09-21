@@ -1,0 +1,612 @@
+{
+  "stats": {
+    "gross": 25859.66,
+    "refunds": -541.67,
+    "net": 25317.99,
+    "before": 14874.43,
+    "during": 10443.56,
+    "iofRefund": -311.29,
+    "days": 18,
+    "avgPerDay": 580.2,
+    "byCategory": [
+      {
+        "id": "cat_passagem",
+        "name": "Passagem",
+        "color": "#B8860B",
+        "icon": "plane",
+        "amount": 7592.66
+      },
+      {
+        "id": "cat_hospedagem",
+        "name": "Hospedagem",
+        "color": "#0E8C6B",
+        "icon": "bed",
+        "amount": 5897.3
+      },
+      {
+        "id": "cat_compras",
+        "name": "Compras",
+        "color": "#B23368",
+        "icon": "shopping",
+        "amount": 3741.05
+      },
+      {
+        "id": "cat_alimentacao",
+        "name": "Alimentação",
+        "color": "#C1352E",
+        "icon": "food",
+        "amount": 3501.78
+      },
+      {
+        "id": "cat_genericos",
+        "name": "Genéricos de viagem",
+        "color": "#7A4A2A",
+        "icon": "luggage",
+        "amount": 1960.86
+      },
+      {
+        "id": "cat_cannabis",
+        "name": "Cannabis",
+        "color": "#3D8B4C",
+        "icon": "leaf",
+        "amount": 809.16
+      },
+      {
+        "id": "cat_transporte",
+        "name": "Transporte",
+        "color": "#C2540D",
+        "icon": "car",
+        "amount": 774.13
+      },
+      {
+        "id": "cat_brindes",
+        "name": "Brindes",
+        "color": "#7D1F44",
+        "icon": "gift",
+        "amount": 600.26
+      },
+      {
+        "id": "cat_turismo",
+        "name": "Turismo",
+        "color": "#8A7220",
+        "icon": "ticket",
+        "amount": 548.23
+      },
+      {
+        "id": "cat_outros",
+        "name": "Outros",
+        "color": "#5C5650",
+        "icon": "bookmark",
+        "amount": 434.23
+      }
+    ],
+    "usedCategories": [
+      {
+        "name": "Passagem",
+        "color": "#B8860B"
+      },
+      {
+        "name": "Hospedagem",
+        "color": "#0E8C6B"
+      },
+      {
+        "name": "Compras",
+        "color": "#B23368"
+      },
+      {
+        "name": "Alimentação",
+        "color": "#C1352E"
+      },
+      {
+        "name": "Genéricos de viagem",
+        "color": "#7A4A2A"
+      },
+      {
+        "name": "Cannabis",
+        "color": "#3D8B4C"
+      },
+      {
+        "name": "Transporte",
+        "color": "#C2540D"
+      },
+      {
+        "name": "Brindes",
+        "color": "#7D1F44"
+      },
+      {
+        "name": "Turismo",
+        "color": "#8A7220"
+      },
+      {
+        "name": "Outros",
+        "color": "#5C5650"
+      }
+    ],
+    "dayData": [
+      {
+        "date": "17/05",
+        "Transporte": 151.97
+      },
+      {
+        "date": "18/05",
+        "Transporte": 65.9,
+        "Compras": 530.27,
+        "Alimentação": 148.59,
+        "Cannabis": 63.96,
+        "Genéricos de viagem": 121.49
+      },
+      {
+        "date": "19/05",
+        "Alimentação": 423.11,
+        "Transporte": 108.09,
+        "Compras": 197.51,
+        "Turismo": 153.43,
+        "Genéricos de viagem": 52.84
+      },
+      {
+        "date": "20/05",
+        "Alimentação": 132.07,
+        "Brindes": 109.7,
+        "Cannabis": 107.44
+      },
+      {
+        "date": "21/05",
+        "Transporte": 51.07,
+        "Brindes": 101.09,
+        "Alimentação": 84.57
+      },
+      {
+        "date": "22/05",
+        "Transporte": 112.79,
+        "Brindes": 31.34,
+        "Alimentação": 492.68,
+        "Outros": 35.71,
+        "Genéricos de viagem": 37.59,
+        "Turismo": 75.18,
+        "Cannabis": 81.44
+      },
+      {
+        "date": "23/05",
+        "Alimentação": 237.83,
+        "Cannabis": 316.58,
+        "Outros": 25.35,
+        "Genéricos de viagem": 189.87
+      },
+      {
+        "date": "24/05",
+        "Alimentação": 151.31,
+        "Compras": 126.6
+      },
+      {
+        "date": "25/05",
+        "Alimentação": 293.34
+      },
+      {
+        "date": "26/05",
+        "Genéricos de viagem": 109.9,
+        "Alimentação": 170.48
+      },
+      {
+        "date": "27/05",
+        "Outros": 127.27,
+        "Brindes": 96.61,
+        "Compras": 307.04
+      },
+      {
+        "date": "28/05",
+        "Outros": 192.11,
+        "Cannabis": 88.71,
+        "Compras": 547.75,
+        "Brindes": 32.03,
+        "Alimentação": 51.24
+      },
+      {
+        "date": "29/05",
+        "Alimentação": 436.78,
+        "Brindes": 75.9,
+        "Compras": 1141.73
+      },
+      {
+        "date": "30/05",
+        "Alimentação": 286.19,
+        "Cannabis": 151.03,
+        "Brindes": 102.81,
+        "Compras": 513.54,
+        "Genéricos de viagem": 89.98
+      },
+      {
+        "date": "31/05",
+        "Alimentação": 154.21,
+        "Outros": 53.79,
+        "Transporte": 219.88
+      },
+      {
+        "date": "01/06",
+        "Alimentação": 169.14,
+        "Compras": 376.61,
+        "Genéricos de viagem": 63.96
+      },
+      {
+        "date": "02/06",
+        "Alimentação": 270.24,
+        "Brindes": 50.78
+      },
+      {
+        "date": "03/06",
+        "Transporte": 64.43
+      }
+    ],
+    "cumulativeByDay": [
+      {
+        "date": "17/05",
+        "total": 151.97
+      },
+      {
+        "date": "18/05",
+        "total": 1082.18
+      },
+      {
+        "date": "19/05",
+        "total": 1983.47
+      },
+      {
+        "date": "20/05",
+        "total": 2311.66
+      },
+      {
+        "date": "21/05",
+        "total": 2534.29
+      },
+      {
+        "date": "22/05",
+        "total": 3392.91
+      },
+      {
+        "date": "23/05",
+        "total": 4139.62
+      },
+      {
+        "date": "24/05",
+        "total": 4405.67
+      },
+      {
+        "date": "25/05",
+        "total": 4675.38
+      },
+      {
+        "date": "26/05",
+        "total": 4944.01
+      },
+      {
+        "date": "27/05",
+        "total": 5465.03
+      },
+      {
+        "date": "28/05",
+        "total": 6338.47
+      },
+      {
+        "date": "29/05",
+        "total": 7965.88
+      },
+      {
+        "date": "30/05",
+        "total": 9074.41
+      },
+      {
+        "date": "31/05",
+        "total": 9482.54
+      },
+      {
+        "date": "01/06",
+        "total": 10077.14
+      },
+      {
+        "date": "02/06",
+        "total": 10383.84
+      },
+      {
+        "date": "03/06",
+        "total": 10443.56
+      }
+    ],
+    "beforeDuringData": [
+      {
+        "category": "Passagem",
+        "before": 7592.66,
+        "during": 0
+      },
+      {
+        "category": "Hospedagem",
+        "before": 5897.3,
+        "during": 0
+      },
+      {
+        "category": "Compras",
+        "before": 0,
+        "during": 3741.05
+      },
+      {
+        "category": "Alimentação",
+        "before": 0,
+        "during": 3501.78
+      },
+      {
+        "category": "Genéricos de viagem",
+        "before": 1295.23,
+        "during": 665.63
+      },
+      {
+        "category": "Cannabis",
+        "before": 0,
+        "during": 809.16
+      },
+      {
+        "category": "Transporte",
+        "before": 0,
+        "during": 774.13
+      },
+      {
+        "category": "Brindes",
+        "before": 0,
+        "during": 600.26
+      },
+      {
+        "category": "Turismo",
+        "before": 319.62,
+        "during": 228.61
+      },
+      {
+        "category": "Outros",
+        "before": 0,
+        "during": 434.23
+      }
+    ],
+    "byCity": [
+      {
+        "city": "Amsterdam",
+        "amount": 3709.8,
+        "color": "#C1352E"
+      },
+      {
+        "city": "Barcelona",
+        "amount": 3223.8,
+        "color": "#6B8A1E"
+      },
+      {
+        "city": "Santorini",
+        "amount": 2152.18,
+        "color": "#3D8B4C"
+      },
+      {
+        "city": "Atenas",
+        "amount": 1452.67,
+        "color": "#7A4A2A"
+      },
+      {
+        "city": "SP",
+        "amount": 216.4,
+        "color": "#B23368"
+      }
+    ],
+    "weekdayAmounts": [
+      857.76,
+      1833.26,
+      1536.38,
+      944.56,
+      1148.57,
+      2521.14,
+      1913.18
+    ],
+    "cityTable": [
+      {
+        "city": "Amsterdam",
+        "days": 3,
+        "total": 3709.8,
+        "avgPerDay": 1236.6,
+        "topCategory": "Compras"
+      },
+      {
+        "city": "Barcelona",
+        "days": 5,
+        "total": 3223.8,
+        "avgPerDay": 644.76,
+        "topCategory": "Alimentação"
+      },
+      {
+        "city": "Santorini",
+        "days": 5,
+        "total": 2152.18,
+        "avgPerDay": 430.44,
+        "topCategory": "Alimentação"
+      },
+      {
+        "city": "Atenas",
+        "days": 3,
+        "total": 1452.67,
+        "avgPerDay": 484.22,
+        "topCategory": "Alimentação"
+      },
+      {
+        "city": "SP",
+        "days": 2,
+        "total": 216.4,
+        "avgPerDay": 108.2,
+        "topCategory": "Transporte"
+      }
+    ],
+    "categoryTable": [
+      {
+        "name": "Passagem",
+        "color": "#B8860B",
+        "icon": "plane",
+        "total": 7592.66,
+        "pct": 29.36,
+        "count": 5,
+        "avgTicket": 1518.53
+      },
+      {
+        "name": "Hospedagem",
+        "color": "#0E8C6B",
+        "icon": "bed",
+        "total": 5897.3,
+        "pct": 22.81,
+        "count": 5,
+        "avgTicket": 1179.46
+      },
+      {
+        "name": "Compras",
+        "color": "#B23368",
+        "icon": "shopping",
+        "total": 3741.05,
+        "pct": 14.47,
+        "count": 10,
+        "avgTicket": 374.11
+      },
+      {
+        "name": "Alimentação",
+        "color": "#C1352E",
+        "icon": "food",
+        "total": 3501.78,
+        "pct": 13.54,
+        "count": 49,
+        "avgTicket": 71.46
+      },
+      {
+        "name": "Genéricos de viagem",
+        "color": "#7A4A2A",
+        "icon": "luggage",
+        "total": 1960.86,
+        "pct": 7.58,
+        "count": 12,
+        "avgTicket": 163.41
+      },
+      {
+        "name": "Cannabis",
+        "color": "#3D8B4C",
+        "icon": "leaf",
+        "total": 809.16,
+        "pct": 3.13,
+        "count": 7,
+        "avgTicket": 115.59
+      },
+      {
+        "name": "Transporte",
+        "color": "#C2540D",
+        "icon": "car",
+        "total": 774.13,
+        "pct": 2.99,
+        "count": 9,
+        "avgTicket": 86.01
+      },
+      {
+        "name": "Brindes",
+        "color": "#7D1F44",
+        "icon": "gift",
+        "total": 600.26,
+        "pct": 2.32,
+        "count": 12,
+        "avgTicket": 50.02
+      },
+      {
+        "name": "Turismo",
+        "color": "#8A7220",
+        "icon": "ticket",
+        "total": 548.23,
+        "pct": 2.12,
+        "count": 3,
+        "avgTicket": 182.74
+      },
+      {
+        "name": "Outros",
+        "color": "#5C5650",
+        "icon": "bookmark",
+        "total": 434.23,
+        "pct": 1.68,
+        "count": 6,
+        "avgTicket": 72.37
+      }
+    ],
+    "split": {
+      "integral": 37462.32,
+      "share": 25859.66,
+      "savings": 11602.66
+    }
+  },
+  "cityBreakdown": {
+    "byCity": [
+      {
+        "city": "Amsterdam",
+        "amount": 3709.8,
+        "color": "#C1352E"
+      },
+      {
+        "city": "Barcelona",
+        "amount": 3223.8,
+        "color": "#6B8A1E"
+      },
+      {
+        "city": "Santorini",
+        "amount": 2152.18,
+        "color": "#3D8B4C"
+      },
+      {
+        "city": "Atenas",
+        "amount": 1452.67,
+        "color": "#7A4A2A"
+      },
+      {
+        "city": "SP",
+        "amount": 216.4,
+        "color": "#B23368"
+      }
+    ],
+    "cityTable": [
+      {
+        "city": "Amsterdam",
+        "days": 3,
+        "total": 3709.8,
+        "avgPerDay": 1236.6,
+        "topCategory": "Compras"
+      },
+      {
+        "city": "Barcelona",
+        "days": 5,
+        "total": 3223.8,
+        "avgPerDay": 644.76,
+        "topCategory": "Alimentação"
+      },
+      {
+        "city": "Santorini",
+        "days": 5,
+        "total": 2152.18,
+        "avgPerDay": 430.44,
+        "topCategory": "Alimentação"
+      },
+      {
+        "city": "Atenas",
+        "days": 3,
+        "total": 1452.67,
+        "avgPerDay": 484.22,
+        "topCategory": "Alimentação"
+      },
+      {
+        "city": "SP",
+        "days": 2,
+        "total": 216.4,
+        "avgPerDay": 108.2,
+        "topCategory": "Transporte"
+      }
+    ]
+  },
+  "cityBreakdownFiltered": {
+    "filterCategoryIds": [
+      "cat_hospedagem",
+      "cat_passagem"
+    ],
+    "result": {
+      "byCity": [],
+      "cityTable": []
+    }
+  }
+}
