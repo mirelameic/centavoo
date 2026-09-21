@@ -6,6 +6,7 @@ import 'package:centavoo/data/repo.dart';
 import 'package:centavoo/format.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:centavoo/models/trip.dart' as model;
+import 'package:centavoo/theme.dart';
 
 class TripEditForm extends StatefulWidget {
   final AppDatabase db;
@@ -39,9 +40,6 @@ class _TripEditFormState extends State<TripEditForm> {
     super.dispose();
   }
 
-  String _iso(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-
   Future<void> _pickRange() async {
     final picked = await showDateRangePicker(
       context: context,
@@ -55,8 +53,8 @@ class _TripEditFormState extends State<TripEditForm> {
   Future<void> _save() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
-    final startDate = _range == null ? null : _iso(_range!.start);
-    final endDate = _range == null ? null : _iso(_range!.end);
+    final startDate = _range == null ? null : isoDate(_range!.start);
+    final endDate = _range == null ? null : isoDate(_range!.end);
     await updateTripDetails(
       widget.db,
       widget.trip.id,
@@ -90,7 +88,7 @@ class _TripEditFormState extends State<TripEditForm> {
     return AlertDialog(
       title: Text(l10n.tripEdit),
       content: SizedBox(
-        width: (MediaQuery.of(context).size.width - 48).clamp(0, 360).toDouble(),
+        width: dialogWidth(context, 360),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -110,7 +108,7 @@ class _TripEditFormState extends State<TripEditForm> {
               readOnly: true,
               onTap: _pickRange,
               controller: TextEditingController(
-                text: _range == null ? '' : '${fmtDate(_iso(_range!.start))} – ${fmtDate(_iso(_range!.end))}',
+                text: _range == null ? '' : '${fmtDate(isoDate(_range!.start))} – ${fmtDate(isoDate(_range!.end))}',
               ),
               decoration: InputDecoration(labelText: l10n.cityBlockRangeLabel, hintText: l10n.formDatesPlaceholder),
             ),

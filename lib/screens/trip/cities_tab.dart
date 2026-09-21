@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:centavoo/category_icons.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/format.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
@@ -68,9 +67,8 @@ class _CitiesTabState extends State<CitiesTab> {
             runSpacing: 8,
             children: [
               for (final c in widget.cats)
-                FilterChip(
-                  label: Text(c.name),
-                  avatar: Icon(categoryIcon(c.icon) ?? Icons.category_outlined, size: 16, color: hexColor(c.color)),
+                categoryFilterChip(
+                  c,
                   selected: _selectedCatIds.contains(c.id),
                   onSelected: (selected) => setState(() {
                     if (selected) {
@@ -87,28 +85,17 @@ class _CitiesTabState extends State<CitiesTab> {
             Text(l10n.chartNoCity, style: TextStyle(color: hintColor))
           else ...[
             sectionHeader(context, l10n.secByCity, first: true),
-            Wrap(
-              alignment: WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 32,
-              runSpacing: 24,
-              children: [
-                donutChart(
-                  context,
-                  size: _donutSize,
-                  thickness: _donutThickness,
-                  values: [for (final c in cityBd.byCity) c.amount],
-                  colors: [for (final c in cityBd.byCity) hexColor(c.color)],
-                  centerLabel: money(cityTotal, currency: widget.currency),
-                ),
-                legendList(
-                  context,
-                  currency: widget.currency,
-                  rows: [
-                    for (final c in cityBd.byCity)
-                      LegendRow(key: c.city, color: hexColor(c.color), label: c.city, amount: c.amount),
-                  ],
-                ),
+            donutWithLegend(
+              context,
+              size: _donutSize,
+              thickness: _donutThickness,
+              values: [for (final c in cityBd.byCity) c.amount],
+              colors: [for (final c in cityBd.byCity) hexColor(c.color)],
+              centerLabel: money(cityTotal, currency: widget.currency),
+              currency: widget.currency,
+              rows: [
+                for (final c in cityBd.byCity)
+                  LegendRow(key: c.city, color: hexColor(c.color), label: c.city, amount: c.amount),
               ],
             ),
             sectionHeader(context, l10n.secCityTable),

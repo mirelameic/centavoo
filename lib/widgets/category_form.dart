@@ -77,7 +77,7 @@ class _CategoryFormState extends State<CategoryForm> {
     return AlertDialog(
       title: Text(widget.editing != null ? l10n.commonEdit : l10n.catNew),
       content: SizedBox(
-        width: (MediaQuery.of(context).size.width - 48).clamp(0, 340).toDouble(),
+        width: dialogWidth(context, 340),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,

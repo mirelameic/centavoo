@@ -94,6 +94,12 @@ void main() {
     });
   });
 
+  group('isoDate', () {
+    test('formats a DateTime as yyyy-MM-dd, zero-padded', () {
+      expect(isoDate(DateTime(2026, 5, 7)), '2026-05-07');
+    });
+  });
+
   group('dateRange', () {
     test('returns every ISO date from start to end inclusive', () {
       expect(dateRange('2026-05-17', '2026-05-20'), [

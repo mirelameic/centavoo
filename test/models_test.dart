@@ -5,7 +5,7 @@ import 'package:centavoo/models/transaction.dart';
 import 'package:centavoo/models/category_rule.dart';
 
 void main() {
-  test('Trip holds every field from schema.ts', () {
+  test('Trip holds every declared field', () {
     final trip = Trip(
       id: 't1',
       name: 'Japan',
@@ -13,7 +13,6 @@ void main() {
       startDate: '2026-01-01',
       endDate: '2026-01-10',
       currency: 'BRL',
-      notes: 'notes',
       cities: {'2026-01-01': 'Tokyo'},
       cityList: ['Tokyo'],
       createdAt: '2026-01-01T00:00:00Z',
@@ -28,13 +27,13 @@ void main() {
     expect(trip.cities, <String, String>{});
   });
 
-  test('Category holds every field from schema.ts', () {
+  test('Category holds every declared field', () {
     final cat = Category(id: 'c1', tripId: 't1', name: 'Food', color: '#fff', icon: 'food', sortOrder: 0);
     expect(cat.icon, 'food');
     expect(cat.sortOrder, 0);
   });
 
-  test('Transaction holds every field from schema.ts', () {
+  test('Transaction holds every declared field', () {
     final tx = Transaction(
       id: 'tx1',
       tripId: 't1',
@@ -46,15 +45,13 @@ void main() {
       kind: kindExpense,
       isIof: false,
       splitCount: 1,
-      city: 'Tokyo',
-      rawText: 'raw',
       createdAt: '2026-01-01T00:00:00Z',
     );
     expect(tx.period, periodDuring);
     expect(tx.kind, kindExpense);
   });
 
-  test('CategoryRule holds every field from schema.ts', () {
+  test('CategoryRule holds every declared field', () {
     final rule = CategoryRule(id: 1, keyword: 'sushi', categoryId: 'c1', priority: 1);
     expect(rule.id, 1);
     expect(rule.keyword, 'sushi');

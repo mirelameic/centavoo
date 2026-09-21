@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:centavoo/category_icons.dart';
 import 'package:centavoo/confirm.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/repo.dart';
@@ -8,7 +7,7 @@ import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:centavoo/models/category.dart';
 import 'package:centavoo/models/transaction.dart';
 import 'package:centavoo/stats/stats.dart';
-import 'package:centavoo/theme.dart';
+import 'package:centavoo/widgets/trip/primitives.dart';
 import 'package:centavoo/widgets/trip/tx_row.dart';
 
 typedef _SortField = String;
@@ -119,8 +118,8 @@ class _TransactionsTabState extends State<TransactionsTab> {
       }
       if (_dateFilter != null) {
         if (tx.date == null) return false;
-        final start = _iso(_dateFilter!.start);
-        final end = _iso(_dateFilter!.end);
+        final start = isoDate(_dateFilter!.start);
+        final end = isoDate(_dateFilter!.end);
         if (tx.date!.compareTo(start) < 0 || tx.date!.compareTo(end) > 0) {
           return false;
         }
@@ -157,9 +156,6 @@ class _TransactionsTabState extends State<TransactionsTab> {
     }.where((c) => c.isNotEmpty).toList()..sort();
     return options;
   }
-
-  String _iso(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
   Future<void> _pickDateFilter() async {
     final picked = await showDateRangePicker(
@@ -255,18 +251,13 @@ class _TransactionsTabState extends State<TransactionsTab> {
                 label: Text(
                   _dateFilter == null
                       ? '${l10n.txFilterDate}: ${l10n.txFilterDatePlaceholder}'
-                      : '${l10n.txFilterDate}: ${fmtDate(_iso(_dateFilter!.start))} – ${fmtDate(_iso(_dateFilter!.end))}',
+                      : '${l10n.txFilterDate}: ${fmtDate(isoDate(_dateFilter!.start))} – ${fmtDate(isoDate(_dateFilter!.end))}',
                 ),
                 onPressed: _pickDateFilter,
               ),
               for (final c in widget.cats)
-                FilterChip(
-                  label: Text(c.name),
-                  avatar: Icon(
-                    categoryIcon(c.icon) ?? Icons.category_outlined,
-                    size: 16,
-                    color: hexColor(c.color),
-                  ),
+                categoryFilterChip(
+                  c,
                   selected: _catFilter.contains(c.id),
                   onSelected: (v) => setState(
                     () => v ? _catFilter.add(c.id) : _catFilter.remove(c.id),

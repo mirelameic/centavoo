@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/logo.png" alt="Centavoo" width="360" />
+</p>
+
 Personal app to record and analyze travel expenses per trip. Each trip stores its transactions split by **period** (before / during), **category**, and **city**, with charts and other analysis.
 
 - **Stack:** Flutter · Drift (SQLite) · flutter_localizations (pt / en).

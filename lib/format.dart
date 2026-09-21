@@ -39,14 +39,14 @@ String? periodForDate(String? date, String? tripStartDate) {
   return date.compareTo(tripStartDate) < 0 ? periodBefore : periodDuring;
 }
 
-String _isoDate(DateTime d) =>
+String isoDate(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
 List<String> dateRange(String start, String end) {
   final out = <String>[];
   final endDate = DateTime.parse('${end}T00:00:00');
   for (var d = DateTime.parse('${start}T00:00:00'); !d.isAfter(endDate); d = d.add(const Duration(days: 1))) {
-    out.add(_isoDate(d));
+    out.add(isoDate(d));
   }
   return out;
 }
@@ -62,7 +62,7 @@ class CityBlock {
 
 bool _isNextDay(String a, String b) {
   final d = DateTime.parse('${a}T00:00:00').add(const Duration(days: 1));
-  return _isoDate(d) == b;
+  return isoDate(d) == b;
 }
 
 List<CityBlock> groupCityBlocks(List<String> days, Map<String, String> cities) {

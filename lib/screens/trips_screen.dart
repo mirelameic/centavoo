@@ -314,8 +314,6 @@ class _NewTripDialogState extends State<_NewTripDialog> {
     if (picked != null) setState(() => _range = picked);
   }
 
-  String _isoDate(DateTime d) => '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-
   Future<void> _create() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
@@ -323,8 +321,8 @@ class _NewTripDialogState extends State<_NewTripDialog> {
       widget.db,
       name: name,
       destination: _destinationController.text.trim().isEmpty ? null : _destinationController.text.trim(),
-      startDate: _range == null ? null : _isoDate(_range!.start),
-      endDate: _range == null ? null : _isoDate(_range!.end),
+      startDate: _range == null ? null : isoDate(_range!.start),
+      endDate: _range == null ? null : isoDate(_range!.end),
     );
     if (mounted) Navigator.of(context).pop();
   }
@@ -335,7 +333,7 @@ class _NewTripDialogState extends State<_NewTripDialog> {
     return AlertDialog(
       title: Text(l10n.tripsNew),
       content: SizedBox(
-        width: (MediaQuery.of(context).size.width - 48).clamp(0, 360).toDouble(),
+        width: dialogWidth(context, 360),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -355,7 +353,7 @@ class _NewTripDialogState extends State<_NewTripDialog> {
               readOnly: true,
               onTap: _pickRange,
               controller: TextEditingController(
-                text: _range == null ? '' : '${fmtDate(_isoDate(_range!.start))} – ${fmtDate(_isoDate(_range!.end))}',
+                text: _range == null ? '' : '${fmtDate(isoDate(_range!.start))} – ${fmtDate(isoDate(_range!.end))}',
               ),
               decoration: InputDecoration(labelText: l10n.formDates, hintText: l10n.formDatesPlaceholder),
             ),

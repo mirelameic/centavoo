@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/seed.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
@@ -23,16 +24,29 @@ class _CentavooAppState extends State<CentavooApp> {
   bool _ready = false;
   String? _error;
   late final GoRouter _router;
+  Locale _locale = const Locale('pt', 'BR');
+  ThemeMode _themeMode = ThemeMode.system;
 
   @override
   void initState() {
     super.initState();
     _router = buildRouter();
-    ensureSeeded(widget.database, loadJson: widget.loadSeedJson).then((_) {
+    _bootstrap();
+  }
+
+  Future<void> _bootstrap() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedLocale = prefs.getString(localePrefsKey);
+      if (savedLocale == 'en') _locale = const Locale('en');
+      final savedThemeMode = prefs.getString(themeModePrefsKey);
+      if (savedThemeMode == 'dark') _themeMode = ThemeMode.dark;
+      if (savedThemeMode == 'light') _themeMode = ThemeMode.light;
+      await ensureSeeded(widget.database, loadJson: widget.loadSeedJson);
       if (mounted) setState(() => _ready = true);
-    }).catchError((e) {
+    } catch (e) {
       if (mounted) setState(() => _error = e.toString());
-    });
+    }
   }
 
   @override
@@ -50,8 +64,8 @@ class _CentavooAppState extends State<CentavooApp> {
     return MultiProvider(
       providers: [
         Provider<AppDatabase>.value(value: widget.database),
-        ChangeNotifierProvider<ThemeController>(create: (_) => ThemeController()),
-        ChangeNotifierProvider<LocaleController>(create: (_) => LocaleController()),
+        ChangeNotifierProvider<ThemeController>(create: (_) => ThemeController(mode: _themeMode)),
+        ChangeNotifierProvider<LocaleController>(create: (_) => LocaleController(locale: _locale)),
       ],
       child: Consumer2<ThemeController, LocaleController>(
         builder: (context, themeController, localeController, _) => MaterialApp.router(

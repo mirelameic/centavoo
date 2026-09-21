@@ -23,28 +23,17 @@ class SummaryTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Wrap(
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 32,
-            runSpacing: 24,
-            children: [
-              donutChart(
-                context,
-                size: _donutSize,
-                thickness: _donutThickness,
-                values: [for (final c in stats.byCategory) c.amount],
-                colors: [for (final c in stats.byCategory) hexColor(c.color)],
-                centerLabel: money(stats.gross, currency: currency),
-              ),
-              legendList(
-                context,
-                currency: currency,
-                rows: [
-                  for (final c in stats.byCategory)
-                    LegendRow(key: c.name, color: hexColor(c.color), label: c.name, icon: c.icon, amount: c.amount),
-                ],
-              ),
+          donutWithLegend(
+            context,
+            size: _donutSize,
+            thickness: _donutThickness,
+            values: [for (final c in stats.byCategory) c.amount],
+            colors: [for (final c in stats.byCategory) hexColor(c.color)],
+            centerLabel: money(stats.gross, currency: currency),
+            currency: currency,
+            rows: [
+              for (final c in stats.byCategory)
+                LegendRow(key: c.name, color: hexColor(c.color), label: c.name, icon: c.icon, amount: c.amount),
             ],
           ),
           if (hasSplit) ...[
@@ -100,7 +89,8 @@ class _SplitCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return highlightCard(
+      context,
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(

@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:centavoo/categorize.dart';
-import 'package:centavoo/category_icons.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/repo.dart';
 import 'package:centavoo/format.dart';
@@ -11,6 +10,7 @@ import 'package:centavoo/models/category_rule.dart';
 import 'package:centavoo/models/transaction.dart';
 import 'package:centavoo/models/trip.dart' as model;
 import 'package:centavoo/theme.dart';
+import 'package:centavoo/widgets/trip/primitives.dart';
 
 class TransactionForm extends StatefulWidget {
   final AppDatabase db;
@@ -139,7 +139,7 @@ class _TransactionFormState extends State<TransactionForm> {
     return AlertDialog(
       title: Text(widget.editing != null ? l10n.txEdit : l10n.txNew),
       content: SizedBox(
-        width: (MediaQuery.of(context).size.width - 48).clamp(0, 360).toDouble(),
+        width: dialogWidth(context, 360),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -206,18 +206,7 @@ class _TransactionFormState extends State<TransactionForm> {
                   decoration: InputDecoration(labelText: l10n.tableCategory, hintText: '—'),
                   items: [
                     const DropdownMenuItem(value: null, child: Text('—')),
-                    for (final c in widget.categories)
-                      DropdownMenuItem(
-                        value: c.id,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(categoryIcon(c.icon) ?? Icons.category_outlined, size: 16, color: hexColor(c.color)),
-                            const SizedBox(width: 8),
-                            Text(c.name),
-                          ],
-                        ),
-                      ),
+                    for (final c in widget.categories) categoryDropdownItem(c),
                   ],
                   onChanged: (v) => setState(() => _categoryId = v),
                 ),

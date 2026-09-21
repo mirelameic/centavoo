@@ -115,29 +115,10 @@ class _BeforeDuringChart extends StatelessWidget {
             ),
           ),
           titlesData: FlTitlesData(
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 64,
-                getTitlesWidget: (value, meta) =>
-                    Text(money(value, currency: currency), style: const TextStyle(fontSize: 10)),
-              ),
-            ),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  final i = value.toInt();
-                  if (i < 0 || i >= data.length || i % labelInterval != 0) return const SizedBox.shrink();
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(data[i].category, style: const TextStyle(fontSize: 10)),
-                  );
-                },
-              ),
-            ),
+            rightTitles: hiddenAxis,
+            topTitles: hiddenAxis,
+            leftTitles: moneyLeftAxis(currency: currency),
+            bottomTitles: sparseBottomAxis([for (final d in data) d.category], interval: labelInterval),
           ),
         ),
       ),

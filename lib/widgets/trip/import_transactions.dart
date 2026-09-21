@@ -4,7 +4,6 @@ import 'package:drift/drift.dart' show Value;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:centavoo/categorize.dart';
-import 'package:centavoo/category_icons.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/repo.dart';
 import 'package:centavoo/format.dart';
@@ -15,6 +14,7 @@ import 'package:centavoo/models/transaction.dart';
 import 'package:centavoo/models/trip.dart' as model;
 import 'package:centavoo/parse_table.dart';
 import 'package:centavoo/theme.dart';
+import 'package:centavoo/widgets/trip/primitives.dart';
 
 class ImportTransactions extends StatefulWidget {
   final AppDatabase db;
@@ -208,11 +208,10 @@ class _ImportTransactionsState extends State<ImportTransactions> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final dialogWidth = (MediaQuery.of(context).size.width - 48).clamp(0, 600).toDouble();
     return AlertDialog(
       title: Text(l10n.txImportTitle),
       content: SizedBox(
-        width: dialogWidth,
+        width: dialogWidth(context, 600),
         child: _rows == null ? _pasteStep(context, l10n) : _previewStep(context, l10n),
       ),
       actions: _rows == null
@@ -500,17 +499,7 @@ class _ImportTransactionsState extends State<ImportTransactions> {
                           items: [
                             const DropdownMenuItem(value: null, child: Text('—')),
                             for (final c in widget.categories)
-                              DropdownMenuItem(
-                                value: c.id,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(categoryIcon(c.icon) ?? Icons.category_outlined, size: 14, color: hexColor(c.color)),
-                                    const SizedBox(width: 6),
-                                    Text(c.name, style: const TextStyle(fontSize: 13)),
-                                  ],
-                                ),
-                              ),
+                              categoryDropdownItem(c, iconSize: 14, spacing: 6, textStyle: const TextStyle(fontSize: 13)),
                           ],
                           onChanged: r.error != null ? null : (v) => setState(() => _categoryOverrides[i] = v),
                         ),

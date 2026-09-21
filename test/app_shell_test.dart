@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:centavoo/theme.dart';
 import 'package:centavoo/theme_controller.dart';
 import 'package:centavoo/locale_controller.dart';
@@ -28,6 +29,10 @@ Widget wrap(Widget child, {ThemeController? themeController}) {
 }
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   testWidgets('shows the CENTAVOO wordmark and the child content', (tester) async {
     await tester.pumpWidget(wrap(const Text('body content')));
     expect(find.text('CENTAVOO'), findsOneWidget);
@@ -76,6 +81,31 @@ void main() {
 
     final englishRow = find.ancestor(of: find.text('English'), matching: find.byType(Row)).first;
     expect(find.descendant(of: englishRow, matching: find.byIcon(Icons.check)), findsOneWidget);
+  });
+
+  testWidgets('tapping a language entry persists the choice', (tester) async {
+    await tester.pumpWidget(wrap(const SizedBox.shrink()));
+
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('English'));
+    await tester.pumpAndSettle();
+
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString(localePrefsKey), 'en');
+  });
+
+  testWidgets('tapping the theme entry persists the choice', (tester) async {
+    final controller = ThemeController(mode: ThemeMode.light);
+    await tester.pumpWidget(wrap(const SizedBox.shrink(), themeController: controller));
+
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tema escuro'));
+    await tester.pumpAndSettle();
+
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString(themeModePrefsKey), 'dark');
   });
 
   testWidgets('switching to English actually re-renders visible menu text in English', (tester) async {

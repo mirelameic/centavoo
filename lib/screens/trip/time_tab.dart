@@ -150,30 +150,10 @@ class _DayBarChart extends StatelessWidget {
             ),
           ),
           titlesData: FlTitlesData(
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 64,
-                interval: axisInterval,
-                getTitlesWidget: (value, meta) =>
-                    Text(money(value, currency: currency), style: const TextStyle(fontSize: 10)),
-              ),
-            ),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  final i = value.toInt();
-                  if (i < 0 || i >= dayData.length || i % labelInterval != 0) return const SizedBox.shrink();
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(dayData[i].date, style: const TextStyle(fontSize: 10)),
-                  );
-                },
-              ),
-            ),
+            rightTitles: hiddenAxis,
+            topTitles: hiddenAxis,
+            leftTitles: moneyLeftAxis(currency: currency, interval: axisInterval),
+            bottomTitles: sparseBottomAxis([for (final d in dayData) d.date], interval: labelInterval),
           ),
         ),
       ),
@@ -215,9 +195,9 @@ class _WeekdayBarChart extends StatelessWidget {
             ),
           ),
           titlesData: FlTitlesData(
-            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            leftTitles: hiddenAxis,
+            rightTitles: hiddenAxis,
+            topTitles: hiddenAxis,
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
@@ -283,30 +263,10 @@ class _CumulativeAreaChart extends StatelessWidget {
           gridData: const FlGridData(drawVerticalLine: false),
           borderData: FlBorderData(show: false),
           titlesData: FlTitlesData(
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 64,
-                interval: axisInterval,
-                getTitlesWidget: (value, meta) =>
-                    Text(money(value, currency: currency), style: const TextStyle(fontSize: 10)),
-              ),
-            ),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  final i = value.toInt();
-                  if (i < 0 || i >= points.length || i % labelInterval != 0) return const SizedBox.shrink();
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(points[i].date, style: const TextStyle(fontSize: 10)),
-                  );
-                },
-              ),
-            ),
+            rightTitles: hiddenAxis,
+            topTitles: hiddenAxis,
+            leftTitles: moneyLeftAxis(currency: currency, interval: axisInterval),
+            bottomTitles: sparseBottomAxis([for (final p in points) p.date], interval: labelInterval),
           ),
           lineBarsData: [
             LineChartBarData(

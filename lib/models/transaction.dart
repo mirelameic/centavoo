@@ -14,8 +14,6 @@ class Transaction {
   final String kind;
   final bool isIof;
   final int splitCount;
-  final String? city;
-  final String? rawText;
   final String createdAt;
 
   Transaction({
@@ -29,8 +27,6 @@ class Transaction {
     required this.kind,
     required this.isIof,
     required this.splitCount,
-    this.city,
-    this.rawText,
     required this.createdAt,
   });
 }

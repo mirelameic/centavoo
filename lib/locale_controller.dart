@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:centavoo/format.dart' as format;
+
+const localePrefsKey = 'locale';
 
 class LocaleController extends ChangeNotifier {
   Locale locale;
@@ -12,5 +15,6 @@ class LocaleController extends ChangeNotifier {
     locale = code == 'en' ? const Locale('en') : const Locale('pt', 'BR');
     format.appLocale = code == 'en' ? 'en' : 'pt_BR';
     notifyListeners();
+    SharedPreferences.getInstance().then((prefs) => prefs.setString(localePrefsKey, code));
   }
 }

@@ -31,7 +31,6 @@ Future<String> createTrip(
   String? startDate,
   String? endDate,
   String currency = 'BRL',
-  String? notes,
 }) async {
   final id = _newId('trip');
   final existingOrders = await (db.selectOnly(db.tripsTable)..addColumns([db.tripsTable.sortOrder]))
@@ -45,7 +44,6 @@ Future<String> createTrip(
         startDate: Value(startDate),
         endDate: Value(endDate),
         currency: currency,
-        notes: Value(notes),
         createdAt: DateTime.now().toIso8601String(),
         sortOrder: Value(minOrder),
       ));

@@ -14,7 +14,6 @@ Transaction tx({
   String kind = kindExpense,
   bool isIof = false,
   int splitCount = 1,
-  String? city,
   String createdAt = '2026-01-01T00:00:00Z',
 }) {
   return Transaction(
@@ -28,7 +27,6 @@ Transaction tx({
     kind: kind,
     isIof: isIof,
     splitCount: splitCount,
-    city: city,
     createdAt: createdAt,
   );
 }

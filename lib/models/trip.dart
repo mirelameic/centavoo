@@ -7,7 +7,6 @@ class Trip {
   final String? startDate;
   final String? endDate;
   final String currency;
-  final String? notes;
   final CityMap cities;
   final List<String>? cityList;
   final String createdAt;
@@ -19,7 +18,6 @@ class Trip {
     this.startDate,
     this.endDate,
     required this.currency,
-    this.notes,
     CityMap? cities,
     this.cityList,
     required this.createdAt,

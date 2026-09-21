@@ -20,7 +20,7 @@ Future<void> _applySeed(AppDatabase db, Map<String, dynamic> data) async {
           TripsTableCompanion.insert(
             id: t['id'], name: t['name'], destination: Value(t['destination']),
             startDate: Value(t['startDate']), endDate: Value(t['endDate']),
-            currency: t['currency'], notes: Value(t['notes']),
+            currency: t['currency'],
             citiesJson: Value(jsonEncode(t['cities'] ?? {})),
             createdAt: t['createdAt'],
           ),
@@ -32,7 +32,7 @@ Future<void> _applySeed(AppDatabase db, Map<String, dynamic> data) async {
             date: Value(t['date']), description: t['description'],
             amount: (t['amount'] as num).toDouble(), categoryId: Value(t['categoryId']),
             kind: t['kind'], isIof: t['isIof'], splitCount: t['splitCount'],
-            city: Value(t['city']), createdAt: t['createdAt'],
+            createdAt: t['createdAt'],
           ),
       ]);
     });

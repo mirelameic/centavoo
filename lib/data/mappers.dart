@@ -13,7 +13,6 @@ model.Trip tripFromRow(TripRow row) {
     startDate: row.startDate,
     endDate: row.endDate,
     currency: row.currency,
-    notes: row.notes,
     cities: Map<String, String>.from(jsonDecode(row.citiesJson) as Map),
     cityList: row.cityListJson == null ? null : List<String>.from(jsonDecode(row.cityListJson!) as List),
     createdAt: row.createdAt,
@@ -43,8 +42,6 @@ model.Transaction transactionFromRow(TransactionRow row) {
     kind: row.kind,
     isIof: row.isIof,
     splitCount: row.splitCount,
-    city: row.city,
-    rawText: row.rawText,
     createdAt: row.createdAt,
   );
 }

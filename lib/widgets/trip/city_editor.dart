@@ -47,9 +47,6 @@ class _CityEditorState extends State<CityEditor> {
     return distinct;
   }
 
-  String _iso(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-
   void _resetForm() {
     setState(() {
       _editing = null;
@@ -83,7 +80,7 @@ class _CityEditorState extends State<CityEditor> {
     if (_editing != null) {
       await setTripCityRange(widget.db, widget.tripId, _editing!.days, '');
     }
-    await setTripCityRange(widget.db, widget.tripId, dateRange(_iso(range.start), _iso(range.end)), city);
+    await setTripCityRange(widget.db, widget.tripId, dateRange(isoDate(range.start), isoDate(range.end)), city);
     _resetForm();
   }
 
@@ -221,7 +218,7 @@ class _CityEditorState extends State<CityEditor> {
                   child: Text(
                     _formRange == null
                         ? l10n.formDatesPlaceholder
-                        : '${fmtDate(_iso(_formRange!.start))} – ${fmtDate(_iso(_formRange!.end))}',
+                        : '${fmtDate(isoDate(_formRange!.start))} – ${fmtDate(isoDate(_formRange!.end))}',
                   ),
                 ),
               ),

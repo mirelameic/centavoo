@@ -2,6 +2,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:centavoo/category_icons.dart';
 import 'package:centavoo/format.dart';
+import 'package:centavoo/models/category.dart';
+import 'package:centavoo/theme.dart';
 
 class LegendRow {
   final String key;
@@ -15,6 +17,63 @@ class LegendRow {
 
 Widget categoryDot(Color color) {
   return Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle));
+}
+
+const hiddenAxis = AxisTitles(sideTitles: SideTitles(showTitles: false));
+
+AxisTitles moneyLeftAxis({required String currency, double reservedSize = 64, double? interval}) {
+  return AxisTitles(
+    sideTitles: SideTitles(
+      showTitles: true,
+      reservedSize: reservedSize,
+      interval: interval,
+      getTitlesWidget: (value, meta) => Text(money(value, currency: currency), style: const TextStyle(fontSize: 10)),
+    ),
+  );
+}
+
+AxisTitles sparseBottomAxis(List<String> labels, {int interval = 1}) {
+  return AxisTitles(
+    sideTitles: SideTitles(
+      showTitles: true,
+      getTitlesWidget: (value, meta) {
+        final i = value.toInt();
+        if (i < 0 || i >= labels.length || i % interval != 0) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(labels[i], style: const TextStyle(fontSize: 10)),
+        );
+      },
+    ),
+  );
+}
+
+DropdownMenuItem<String> categoryDropdownItem(
+  Category category, {
+  double iconSize = 16,
+  double spacing = 8,
+  TextStyle? textStyle,
+}) {
+  return DropdownMenuItem(
+    value: category.id,
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(categoryIcon(category.icon) ?? Icons.category_outlined, size: iconSize, color: hexColor(category.color)),
+        SizedBox(width: spacing),
+        Text(category.name, style: textStyle),
+      ],
+    ),
+  );
+}
+
+Widget categoryFilterChip(Category category, {required bool selected, required ValueChanged<bool> onSelected}) {
+  return FilterChip(
+    label: Text(category.name),
+    avatar: Icon(categoryIcon(category.icon) ?? Icons.category_outlined, size: 16, color: hexColor(category.color)),
+    selected: selected,
+    onSelected: onSelected,
+  );
 }
 
 Widget categoryChip(BuildContext context, {required Color color, required String name, String? icon}) {
@@ -176,5 +235,27 @@ Widget legendList(BuildContext context, {required String currency, required List
           ),
       ],
     ),
+  );
+}
+
+Widget donutWithLegend(
+  BuildContext context, {
+  required double size,
+  required double thickness,
+  required List<double> values,
+  required List<Color> colors,
+  required String centerLabel,
+  required String currency,
+  required List<LegendRow> rows,
+}) {
+  return Wrap(
+    alignment: WrapAlignment.center,
+    crossAxisAlignment: WrapCrossAlignment.center,
+    spacing: 32,
+    runSpacing: 24,
+    children: [
+      donutChart(context, size: size, thickness: thickness, values: values, colors: colors, centerLabel: centerLabel),
+      legendList(context, currency: currency, rows: rows),
+    ],
   );
 }

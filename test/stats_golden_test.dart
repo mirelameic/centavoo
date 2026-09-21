@@ -25,8 +25,6 @@ Transaction transactionFromJson(Map<String, dynamic> j) => Transaction(
       kind: j['kind'],
       isIof: j['isIof'],
       splitCount: j['splitCount'],
-      city: j['city'],
-      rawText: j['rawText'],
       createdAt: j['createdAt'],
     );
 

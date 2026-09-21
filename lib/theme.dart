@@ -34,6 +34,9 @@ const borderRadiusLg = BorderRadius.all(radiusLg);
 
 Color hexColor(String hex) => Color(int.parse(hex.replaceFirst('#', 'FF'), radix: 16));
 
+double dialogWidth(BuildContext context, double max) =>
+    (MediaQuery.of(context).size.width - 48).clamp(0, max).toDouble();
+
 Widget highlightCard(BuildContext context, {required Widget child}) {
   if (Theme.of(context).brightness == Brightness.dark) return Card(child: child);
   return Card(
