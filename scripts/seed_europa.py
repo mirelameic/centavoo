@@ -2,8 +2,9 @@
 """
 Seed the "Europa 2025" trip from gastos-europa.xlsx.
 
-Reads the two sheets of the spreadsheet and generates `public/europa.json`,
-which the app imports to populate the local database (Dexie / IndexedDB).
+Reads the two sheets of the spreadsheet and generates `assets/europa.json`,
+which the app imports to populate the local database on first launch (or
+when this file's `version` field increases).
 
 Fidelity: on the `during` sheet, each expense's category is encoded in the FONT
 COLOR of the description cell. Each color sums exactly to its category total in
@@ -28,7 +29,7 @@ import openpyxl.utils as U
 # --- paths --------------------------------------------------------------------
 ROOT = Path(__file__).resolve().parent.parent
 XLSX = Path.home() / "Desktop" / "gastos-europa.xlsx"
-OUT = ROOT / "public" / "europa.json"
+OUT = ROOT / "assets" / "europa.json"
 
 TRIP_ID = "trip_europa_2025"  # internal id (kept stable for upsert); display name is 2026
 YEAR = 2026
