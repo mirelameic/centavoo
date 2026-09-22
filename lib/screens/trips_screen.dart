@@ -121,7 +121,7 @@ class _TripsScreenState extends State<TripsScreen> {
                                             child: _TripCard(
                                               trip: trips[i],
                                               net: netByTrip[trips[i].id] ?? 0,
-                                              onTap: () => context.go('/trip/${trips[i].id}'),
+                                              onTap: () => context.push('/trip/${trips[i].id}'),
                                               onLongPress: () => _showTripActions(
                                                 context,
                                                 db,

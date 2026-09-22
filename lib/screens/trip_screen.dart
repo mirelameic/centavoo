@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -88,12 +89,17 @@ class _TripScreenState extends State<TripScreen> {
 
   void _initStreams() {
     final db = context.read<AppDatabase>();
-    _tripStream = (db.select(db.tripsTable)..where((t) => t.id.equals(widget.tripId))).watchSingleOrNull();
-    _categoriesStream = (db.select(db.categoriesTable)
-          ..where((c) => c.tripId.equals(widget.tripId))
-          ..orderBy([(c) => OrderingTerm.asc(c.sortOrder)]))
-        .watch();
-    _transactionsStream = (db.select(db.transactionsTable)..where((t) => t.tripId.equals(widget.tripId))).watch();
+    _tripStream = (db.select(
+      db.tripsTable,
+    )..where((t) => t.id.equals(widget.tripId))).watchSingleOrNull();
+    _categoriesStream =
+        (db.select(db.categoriesTable)
+              ..where((c) => c.tripId.equals(widget.tripId))
+              ..orderBy([(c) => OrderingTerm.asc(c.sortOrder)]))
+            .watch();
+    _transactionsStream = (db.select(
+      db.transactionsTable,
+    )..where((t) => t.tripId.equals(widget.tripId))).watch();
     _rulesStream = db.select(db.categoryRulesTable).watch();
   }
 
@@ -114,7 +120,10 @@ class _TripScreenState extends State<TripScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(l10n.tripNotFound),
-                TextButton(onPressed: () => context.go('/'), child: Text(l10n.commonBack)),
+                TextButton(
+                  onPressed: () => context.go('/'),
+                  child: Text(l10n.commonBack),
+                ),
               ],
             ),
           );
@@ -123,18 +132,24 @@ class _TripScreenState extends State<TripScreen> {
         return StreamBuilder<List<CategoryRow>>(
           stream: _categoriesStream,
           builder: (context, catSnap) {
-            final cats = (catSnap.data ?? const <CategoryRow>[]).map(categoryFromRow).toList();
+            final cats = (catSnap.data ?? const <CategoryRow>[])
+                .map(categoryFromRow)
+                .toList();
             return StreamBuilder<List<TransactionRow>>(
               stream: _transactionsStream,
               builder: (context, txSnap) {
-                final txs = (txSnap.data ?? const <TransactionRow>[]).map(transactionFromRow).toList();
+                final txs = (txSnap.data ?? const <TransactionRow>[])
+                    .map(transactionFromRow)
+                    .toList();
                 final stats = computeStats(txs, cats, trip.cities);
                 final hasSplit = txs.any((tx) => tx.splitCount > 1);
                 final catById = {for (final c in cats) c.id: c};
                 return StreamBuilder<List<CategoryRuleRow>>(
                   stream: _rulesStream,
                   builder: (context, ruleSnap) {
-                    final rules = (ruleSnap.data ?? const <CategoryRuleRow>[]).map(categoryRuleFromRow).toList();
+                    final rules = (ruleSnap.data ?? const <CategoryRuleRow>[])
+                        .map(categoryRuleFromRow)
+                        .toList();
                     return _TripBody(
                       trip: trip,
                       stats: stats,
@@ -152,7 +167,6 @@ class _TripScreenState extends State<TripScreen> {
       },
     );
   }
-
 }
 
 class _TripBody extends StatefulWidget {
@@ -179,7 +193,8 @@ class _TripBody extends StatefulWidget {
 class _TripBodyState extends State<_TripBody> {
   String? _activeTab;
 
-  void _openTab(String value) => setState(() => _activeTab = _activeTab == value ? null : value);
+  void _openTab(String value) =>
+      setState(() => _activeTab = _activeTab == value ? null : value);
   void _closeTab() => setState(() => _activeTab = null);
 
   @override
@@ -192,73 +207,110 @@ class _TripBodyState extends State<_TripBody> {
     final rules = widget.rules;
     final tabOpen = _activeTab != null;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isMobile = constraints.maxWidth < _mobileBreakpoint;
-        final hideHeaderAndKpi = isMobile && tabOpen;
-        final l10n = AppLocalizations.of(context)!;
+    return PopScope(
+      canPop: !tabOpen,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _closeTab();
+      },
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isMobile = constraints.maxWidth < _mobileBreakpoint;
+          final hideHeaderAndKpi = isMobile && tabOpen;
+          final l10n = AppLocalizations.of(context)!;
 
-        return Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: tabOpen
-                        ? Align(
-                            alignment: Alignment.centerLeft,
-                            child: IconButton(
-                              onPressed: _closeTab,
-                              icon: const Icon(Icons.arrow_back),
-                              visualDensity: VisualDensity.compact,
-                            ),
-                          )
-                        : InkWell(
-                            onTap: () => context.go('/'),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.arrow_back, size: 16),
-                                  const SizedBox(width: 4),
-                                  Text(l10n.navTrips),
-                                ],
+          return Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: tabOpen
+                          ? Align(
+                              alignment: Alignment.centerLeft,
+                              child: IconButton(
+                                onPressed: _closeTab,
+                                icon: const Icon(Icons.arrow_back),
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            )
+                          : InkWell(
+                              onTap: () => context.canPop()
+                                  ? context.pop()
+                                  : context.go('/'),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.arrow_back, size: 16),
+                                    const SizedBox(width: 4),
+                                    Text(l10n.navTrips),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                  ),
-                  if (!hideHeaderAndKpi)
+                    ),
+                    if (!hideHeaderAndKpi)
+                      SliverToBoxAdapter(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _TripHeader(
+                              trip: trip,
+                              categories: catById.values.toList(),
+                              rules: rules,
+                            ),
+                            const SizedBox(height: 16),
+                            _KpiGrid(stats: stats, currency: trip.currency),
+                            const SizedBox(height: 16),
+                          ],
+                        ),
+                      ),
+                    if (!isMobile)
+                      SliverToBoxAdapter(
+                        child: _DesktopTabsRow(
+                          activeTab: _activeTab,
+                          onTap: _openTab,
+                        ),
+                      ),
+                    if (tabOpen)
+                      _tabContentSliver(
+                        context,
+                        stats,
+                        trip,
+                        hasSplit,
+                        txs,
+                        catById,
+                        rules,
+                      ),
                     SliverToBoxAdapter(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _TripHeader(trip: trip, categories: catById.values.toList(), rules: rules),
-                          const SizedBox(height: 16),
-                          _KpiGrid(stats: stats, currency: trip.currency),
-                          const SizedBox(height: 16),
-                        ],
+                      child: SizedBox(
+                        height: isMobile
+                            ? 76 + MediaQuery.of(context).padding.bottom
+                            : 0,
                       ),
                     ),
-                  if (!isMobile) SliverToBoxAdapter(child: _DesktopTabsRow(activeTab: _activeTab, onTap: _openTab)),
-                  if (tabOpen) _tabContentSliver(context, stats, trip, hasSplit, txs, catById, rules),
-                  SliverToBoxAdapter(
-                    child: SizedBox(height: isMobile ? 76 + MediaQuery.of(context).padding.bottom : 0),
+                  ],
+                ),
+              ),
+              if (isMobile)
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  bottom: 16 + MediaQuery.of(context).padding.bottom,
+                  child: _MobileBottomNav(
+                    activeTab: _activeTab,
+                    onTap: _openTab,
                   ),
-                ],
-              ),
-            ),
-            if (isMobile)
-              Positioned(
-                left: 16,
-                right: 16,
-                bottom: 16 + MediaQuery.of(context).padding.bottom,
-                child: _MobileBottomNav(activeTab: _activeTab, onTap: _openTab),
-              ),
-          ],
-        );
-      },
+                ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -271,7 +323,15 @@ class _TripBodyState extends State<_TripBody> {
     Map<String, Category> catById,
     List<CategoryRule> rules,
   ) {
-    final content = _tabContent(context, stats, trip, hasSplit, txs, catById, rules);
+    final content = _tabContent(
+      context,
+      stats,
+      trip,
+      hasSplit,
+      txs,
+      catById,
+      rules,
+    );
     return _activeTab == 'tx' ? content : SliverToBoxAdapter(child: content);
   }
 
@@ -288,9 +348,18 @@ class _TripBodyState extends State<_TripBody> {
       case null:
         return const SizedBox.shrink();
       case 'summary':
-        return SummaryTab(stats: stats, currency: trip.currency, hasSplit: hasSplit);
+        return SummaryTab(
+          stats: stats,
+          currency: trip.currency,
+          hasSplit: hasSplit,
+        );
       case 'top':
-        return RankingTab(txs: txs, catById: catById, cities: trip.cities, currency: trip.currency);
+        return RankingTab(
+          txs: txs,
+          catById: catById,
+          cities: trip.cities,
+          currency: trip.currency,
+        );
       case 'time':
         return TimeTab(stats: stats, currency: trip.currency);
       case 'cities':
@@ -328,7 +397,9 @@ class _TripBodyState extends State<_TripBody> {
           ),
         );
       default:
-        return _TabPlaceholder(label: _tabLabel(AppLocalizations.of(context)!, _activeTab!));
+        return _TabPlaceholder(
+          label: _tabLabel(AppLocalizations.of(context)!, _activeTab!),
+        );
     }
   }
 }
@@ -337,7 +408,11 @@ class _TripHeader extends StatelessWidget {
   final model.Trip trip;
   final List<Category> categories;
   final List<CategoryRule> rules;
-  const _TripHeader({required this.trip, required this.categories, required this.rules});
+  const _TripHeader({
+    required this.trip,
+    required this.categories,
+    required this.rules,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -351,7 +426,8 @@ class _TripHeader extends StatelessWidget {
             Flexible(
               child: Text(
                 trip.name,
-                style: unboundedStyle(weight: FontWeight.w500).copyWith(fontSize: 26, height: 1.35),
+                style: unboundedStyle(weight: FontWeight.w500)
+                    .copyWith(fontSize: 26, height: 1.35),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -359,7 +435,8 @@ class _TripHeader extends StatelessWidget {
             IconButton(
               onPressed: () => showDialog(
                 context: context,
-                builder: (_) => TripEditForm(db: context.read<AppDatabase>(), trip: trip),
+                builder: (_) =>
+                    TripEditForm(db: context.read<AppDatabase>(), trip: trip),
               ),
               icon: const Icon(Icons.edit_outlined, size: 18),
               tooltip: 'edit-trip',
@@ -367,7 +444,8 @@ class _TripHeader extends StatelessWidget {
             ),
           ],
         ),
-        if (trip.destination != null) Text(trip.destination!, style: TextStyle(color: hintColor)),
+        if (trip.destination != null)
+          Text(trip.destination!, style: TextStyle(color: hintColor)),
         Text(
           '${fmtDate(trip.startDate)} – ${fmtDate(trip.endDate)}',
           style: TextStyle(color: hintColor, fontSize: 14),
@@ -378,7 +456,7 @@ class _TripHeader extends StatelessWidget {
           runSpacing: 8,
           children: [
             OutlinedButton.icon(
-              onPressed: () => context.go('/trip/${trip.id}/categories'),
+              onPressed: () => context.push('/trip/${trip.id}/categories'),
               icon: const Icon(Icons.category_outlined, size: 18),
               label: Text(l10n.menuCategories),
             ),
@@ -425,24 +503,48 @@ class _KpiGrid extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final items = [
       (l10n.kpiNet.toUpperCase(), money(stats.net, currency: currency), null),
-      (l10n.kpiGross.toUpperCase(), money(stats.gross, currency: currency), null),
-      (l10n.kpiRefunds.toUpperCase(), money(stats.refunds, currency: currency), const Color(0xFF12B886)),
-      (l10n.kpiBefore.toUpperCase(), money(stats.before, currency: currency), null),
-      (l10n.kpiDuring.toUpperCase(), money(stats.during, currency: currency), null),
-      (l10n.kpiAvgPerDay.toUpperCase(), money(stats.avgPerDay, currency: currency), null),
+      (
+        l10n.kpiGross.toUpperCase(),
+        money(stats.gross, currency: currency),
+        null,
+      ),
+      (
+        l10n.kpiRefunds.toUpperCase(),
+        money(stats.refunds, currency: currency),
+        const Color(0xFF12B886),
+      ),
+      (
+        l10n.kpiBefore.toUpperCase(),
+        money(stats.before, currency: currency),
+        null,
+      ),
+      (
+        l10n.kpiDuring.toUpperCase(),
+        money(stats.during, currency: currency),
+        null,
+      ),
+      (
+        l10n.kpiAvgPerDay.toUpperCase(),
+        money(stats.avgPerDay, currency: currency),
+        null,
+      ),
     ];
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final columns = constraints.maxWidth >= 768 ? 3 : 1;
         final gap = 8.0;
-        final cardWidth = (constraints.maxWidth - gap * (columns - 1)) / columns;
+        final cardWidth =
+            (constraints.maxWidth - gap * (columns - 1)) / columns;
         return Wrap(
           spacing: gap,
           runSpacing: gap,
           children: [
             for (final (label, value, color) in items)
-              SizedBox(width: cardWidth, child: _KpiCard(label: label, value: value, color: color)),
+              SizedBox(
+                width: cardWidth,
+                child: _KpiCard(label: label, value: value, color: color),
+              ),
           ],
         );
       },
@@ -468,10 +570,21 @@ class _KpiCard extends StatelessWidget {
           children: [
             Text(
               label,
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).hintColor),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).hintColor,
+              ),
             ),
             const SizedBox(height: 4),
-            Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: color)),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
           ],
         ),
       ),
@@ -481,7 +594,9 @@ class _KpiCard extends StatelessWidget {
 
 Widget _glassBar({required BuildContext context, required Widget child}) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  final tint = (isDark ? darkSurfaces[7] : Colors.white).withValues(alpha: isDark ? 0.6 : 0.8);
+  final tint = (isDark ? darkSurfaces[7] : Colors.white).withValues(
+    alpha: isDark ? 0.6 : 0.8,
+  );
   final bar = ClipRRect(
     borderRadius: BorderRadius.circular(28),
     child: BackdropFilter(
@@ -500,7 +615,13 @@ Widget _glassBar({required BuildContext context, required Widget child}) {
   return DecoratedBox(
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(28),
-      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 16, offset: const Offset(0, 4))],
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.1),
+          blurRadius: 16,
+          offset: const Offset(0, 4),
+        ),
+      ],
     ),
     child: bar,
   );
@@ -567,15 +688,24 @@ class _MobileBottomNav extends StatelessWidget {
                   onTap: () => onTap(item.value),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 2,
+                    ),
                     decoration: BoxDecoration(
-                      color: activeTab == item.value ? primary.withValues(alpha: 0.15) : Colors.transparent,
+                      color: activeTab == item.value
+                          ? primary.withValues(alpha: 0.15)
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(item.icon, size: 20, color: activeTab == item.value ? primary : hintColor),
+                        Icon(
+                          item.icon,
+                          size: 20,
+                          color: activeTab == item.value ? primary : hintColor,
+                        ),
                         const SizedBox(height: 2),
                         FittedBox(
                           fit: BoxFit.scaleDown,
@@ -584,8 +714,12 @@ class _MobileBottomNav extends StatelessWidget {
                             maxLines: 1,
                             style: TextStyle(
                               fontSize: 10,
-                              color: activeTab == item.value ? primary : hintColor,
-                              fontWeight: activeTab == item.value ? FontWeight.w600 : FontWeight.normal,
+                              color: activeTab == item.value
+                                  ? primary
+                                  : hintColor,
+                              fontWeight: activeTab == item.value
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
                             ),
                           ),
                         ),
@@ -607,6 +741,8 @@ class _TabPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text(label, style: TextStyle(color: Theme.of(context).hintColor)));
+    return Center(
+      child: Text(label, style: TextStyle(color: Theme.of(context).hintColor)),
+    );
   }
 }

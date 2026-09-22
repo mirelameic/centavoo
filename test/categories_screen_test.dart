@@ -39,6 +39,50 @@ void main() {
     await db.close();
   });
 
+  testWidgets('tapping "Voltar" pops back when reached via push, instead of resetting the stack', (tester) async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    final tripId = await createTrip(db, name: 'Japan');
+    final router = GoRouter(
+      initialLocation: '/trip/$tripId',
+      routes: [
+        GoRoute(path: '/trip/:id', builder: (context, state) => const Scaffold(body: Text('trip screen'))),
+        GoRoute(
+          path: '/trip/:id/categories',
+          builder: (context, state) => Scaffold(body: CategoriesScreen(tripId: tripId)),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      Provider<AppDatabase>.value(
+        value: db,
+        child: MaterialApp.router(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+    router.push('/trip/$tripId/categories');
+    await tester.pumpAndSettle();
+    expect(router.canPop(), isTrue);
+
+    await tester.tap(find.text('Voltar'));
+    await tester.pumpAndSettle();
+
+    expect(router.routerDelegate.currentConfiguration.uri.toString(), '/trip/$tripId');
+    expect(router.canPop(), isFalse);
+    await db.close();
+  });
+
+  testWidgets('tapping "Voltar" still reaches the trip screen when categories was opened directly', (tester) async {
+    final tripId = 'direct-trip';
+    final db = await pump(tester, tripId);
+    final router = GoRouter.of(tester.element(find.text('Voltar')));
+
+    await tester.tap(find.text('Voltar'));
+    await tester.pump();
+
+    expect(router.routerDelegate.currentConfiguration.uri.toString(), '/trip/$tripId');
+    await db.close();
+  });
+
   testWidgets('lists existing categories with their color and icon', (tester) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     final tripId = await createTrip(db, name: 'Japan');

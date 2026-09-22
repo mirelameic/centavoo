@@ -103,6 +103,35 @@ void main() {
     await db.close();
   });
 
+  testWidgets('the system back gesture closes an open tab instead of leaving the trip screen', (tester) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    final tripId = await createTrip(db, name: 'Japan', startDate: '2026-05-17', endDate: '2026-06-03');
+
+    await tester.pumpWidget(
+      Provider<AppDatabase>.value(value: db, child: MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, home: Scaffold(body: TripScreen(tripId: tripId)))),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Resumo'));
+    await tester.pumpAndSettle();
+    expect(find.text('LÍQUIDO'), findsNothing);
+
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator).first);
+    final popped = await navigator.maybePop();
+    await tester.pumpAndSettle();
+
+    expect(popped, isTrue);
+    expect(find.text('LÍQUIDO'), findsOneWidget);
+    expect(find.byType(TripScreen), findsOneWidget);
+
+    await db.close();
+  });
+
   testWidgets('tapping each tab in the desktop tab row shows that tab\'s content', (tester) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     final tripId = await createTrip(db, name: 'Japan', startDate: '2026-05-17', endDate: '2026-06-03');
@@ -191,9 +220,41 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(find.widgetWithText(OutlinedButton, 'Categorias'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    expect(router.routerDelegate.currentConfiguration.uri.toString(), '/trip/$tripId/categories');
+    expect(router.routerDelegate.currentConfiguration.matches.last.matchedLocation, '/trip/$tripId/categories');
+    expect(router.canPop(), isTrue);
+    await db.close();
+  });
+
+  testWidgets('tapping "← Viagens" pops back to the trips list instead of resetting the stack', (tester) async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    final tripId = await createTrip(db, name: 'Japan', startDate: '2026-05-17', endDate: '2026-06-03');
+
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(path: '/', builder: (context, state) => const Scaffold(body: Text('trips screen'))),
+        GoRoute(path: '/trip/:id', builder: (context, state) => Scaffold(body: TripScreen(tripId: tripId))),
+      ],
+    );
+
+    await tester.pumpWidget(
+      Provider<AppDatabase>.value(
+        value: db,
+        child: MaterialApp.router(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+    router.push('/trip/$tripId');
+    await tester.pumpAndSettle();
+    expect(router.canPop(), isTrue);
+
+    await tester.tap(find.text('Viagens'));
+    await tester.pumpAndSettle();
+
+    expect(router.routerDelegate.currentConfiguration.uri.toString(), '/');
+    expect(router.canPop(), isFalse);
     await db.close();
   });
 }

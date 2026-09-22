@@ -120,9 +120,10 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Japan'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    expect(router.routerDelegate.currentConfiguration.uri.toString(), '/trip/$tripId');
+    expect(router.routerDelegate.currentConfiguration.matches.last.matchedLocation, '/trip/$tripId');
+    expect(router.canPop(), isTrue);
     await db.close();
   });
 

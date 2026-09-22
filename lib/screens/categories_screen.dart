@@ -63,7 +63,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   InkWell(
-                    onTap: () => context.go('/trip/${widget.tripId}'),
+                    onTap: () => context.canPop() ? context.pop() : context.go('/trip/${widget.tripId}'),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: Row(
