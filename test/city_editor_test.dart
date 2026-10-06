@@ -1,12 +1,14 @@
 import 'dart:convert';
+
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
-import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/repo.dart';
 import 'package:centavoo/widgets/trip/city_editor.dart';
+
+import 'helpers.dart';
 
 Future<AppDatabase> pump(
   WidgetTester tester, {
@@ -16,13 +18,15 @@ Future<AppDatabase> pump(
   List<String>? cityList,
 }) async {
   final db = AppDatabase.forTesting(NativeDatabase.memory());
-  await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, 
-    home: Scaffold(
-      body: SingleChildScrollView(
-        child: CityEditor(db: db, tripId: tripId, days: days, cities: cities, cityList: cityList),
+  await tester.pumpWidget(
+    ptApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: CityEditor(db: db, tripId: tripId, days: days, cities: cities, cityList: cityList),
+        ),
       ),
     ),
-  ));
+  );
   await tester.pumpAndSettle();
   return db;
 }
@@ -69,11 +73,13 @@ void main() {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     final tripId = await createTrip(db, name: 'Japan');
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, 
-      home: Scaffold(
-        body: CityEditor(db: db, tripId: tripId, days: const [], cities: const {}, cityList: const ['Lisboa']),
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: CityEditor(db: db, tripId: tripId, days: const [], cities: const {}, cityList: const ['Lisboa']),
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Adicionar cidade'));
@@ -91,11 +97,13 @@ void main() {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     final tripId = await createTrip(db, name: 'Japan');
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(
-        body: CityEditor(db: db, tripId: tripId, days: const [], cities: const {}, cityList: const ['Lisboa']),
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: CityEditor(db: db, tripId: tripId, days: const [], cities: const {}, cityList: const ['Lisboa']),
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Adicionar cidade'));
@@ -114,11 +122,19 @@ void main() {
     final tripId = await createTrip(db, name: 'Japan');
     await updateTripCityList(db, tripId, ['Lisboa', 'Porto']);
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, 
-      home: Scaffold(
-        body: CityEditor(db: db, tripId: tripId, days: const [], cities: const {}, cityList: const ['Lisboa', 'Porto']),
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: CityEditor(
+            db: db,
+            tripId: tripId,
+            days: const [],
+            cities: const {},
+            cityList: const ['Lisboa', 'Porto'],
+          ),
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Remover Porto'));
@@ -135,17 +151,19 @@ void main() {
     await setTripCityRange(db, tripId, ['2026-05-17'], 'Lisboa');
     await updateTripCityList(db, tripId, ['Lisboa']);
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(
-        body: CityEditor(
-          db: db,
-          tripId: tripId,
-          days: const ['2026-05-17'],
-          cities: const {'2026-05-17': 'Lisboa'},
-          cityList: const ['Lisboa'],
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: CityEditor(
+            db: db,
+            tripId: tripId,
+            days: const ['2026-05-17'],
+            cities: const {'2026-05-17': 'Lisboa'},
+            cityList: const ['Lisboa'],
+          ),
         ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Remover Lisboa'));
@@ -167,18 +185,20 @@ void main() {
     final tripId = await createTrip(db, name: 'Japan');
     await setTripCityRange(db, tripId, ['2026-05-17', '2026-05-18'], 'Lisboa');
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, 
-      home: Scaffold(
-        body: SingleChildScrollView(
-          child: CityEditor(
-            db: db,
-            tripId: tripId,
-            days: const ['2026-05-17', '2026-05-18'],
-            cities: const {'2026-05-17': 'Lisboa', '2026-05-18': 'Lisboa'},
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: CityEditor(
+              db: db,
+              tripId: tripId,
+              days: const ['2026-05-17', '2026-05-18'],
+              cities: const {'2026-05-17': 'Lisboa', '2026-05-18': 'Lisboa'},
+            ),
           ),
         ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('edit-city-block'));
@@ -200,16 +220,13 @@ void main() {
     final tripId = await createTrip(db, name: 'Japan');
     await setTripCityRange(db, tripId, ['2026-05-17'], 'Lisboa');
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, 
-      home: Scaffold(
-        body: CityEditor(
-          db: db,
-          tripId: tripId,
-          days: const ['2026-05-17'],
-          cities: const {'2026-05-17': 'Lisboa'},
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: CityEditor(db: db, tripId: tripId, days: const ['2026-05-17'], cities: const {'2026-05-17': 'Lisboa'}),
         ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('delete-city-block'));

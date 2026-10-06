@@ -5,10 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/seed.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
-import 'package:centavoo/router.dart';
-import 'package:centavoo/theme.dart';
-import 'package:centavoo/theme_controller.dart';
-import 'package:centavoo/locale_controller.dart';
+import 'package:centavoo/core/router.dart';
+import 'package:centavoo/core/theme.dart';
+import 'package:centavoo/core/theme_controller.dart';
+import 'package:centavoo/core/locale_controller.dart';
 
 class CentavooApp extends StatefulWidget {
   final AppDatabase database;

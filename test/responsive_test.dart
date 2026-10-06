@@ -1,6 +1,5 @@
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
-import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +15,7 @@ import 'package:centavoo/widgets/trip/trip_edit_form.dart';
 import 'package:centavoo/widgets/trip/transaction_form.dart';
 
 import 'transactions_tab_test.dart' show tx, cat;
+import 'helpers.dart';
 
 const _narrowWidth = 360.0;
 
@@ -27,12 +27,7 @@ void _useNarrowPhone(WidgetTester tester) {
 }
 
 Widget _wrap(Widget child) {
-  return MaterialApp(
-    locale: const Locale('pt', 'BR'),
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    home: Scaffold(body: child),
-  );
+  return ptApp(home: Scaffold(body: child));
 }
 
 void main() {
@@ -61,10 +56,20 @@ void main() {
         startDate: '2026-05-17',
         endDate: '2026-06-03',
       );
-      await addTransaction(db, TransactionsTableCompanion.insert(
-        id: '', tripId: tripId, period: 'DURING', description: 'Hotel', amount: 123456.78,
-        kind: 'EXPENSE', isIof: false, splitCount: 1, createdAt: '',
-      ));
+      await addTransaction(
+        db,
+        TransactionsTableCompanion.insert(
+          id: '',
+          tripId: tripId,
+          period: 'DURING',
+          description: 'Hotel',
+          amount: 123456.78,
+          kind: 'EXPENSE',
+          isIof: false,
+          splitCount: 1,
+          createdAt: '',
+        ),
+      );
 
       await tester.pumpWidget(Provider<AppDatabase>.value(value: db, child: _wrap(const TripsScreen())));
       await tester.pumpAndSettle();
@@ -92,7 +97,12 @@ void main() {
       final db = AppDatabase.forTesting(NativeDatabase.memory());
       final tripId = await createTrip(db, name: 'Japan');
 
-      await tester.pumpWidget(Provider<AppDatabase>.value(value: db, child: _wrap(CategoriesScreen(tripId: tripId))));
+      await tester.pumpWidget(
+        Provider<AppDatabase>.value(
+          value: db,
+          child: _wrap(CategoriesScreen(tripId: tripId)),
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
@@ -103,9 +113,19 @@ void main() {
       _useNarrowPhone(tester);
       final db = AppDatabase.forTesting(NativeDatabase.memory());
       final tripId = await createTrip(db, name: 'Japan');
-      await addCategory(db, tripId: tripId, name: 'Uma categoria com um nome extremamente longo e detalhado', color: '#0E8C6B');
+      await addCategory(
+        db,
+        tripId: tripId,
+        name: 'Uma categoria com um nome extremamente longo e detalhado',
+        color: '#0E8C6B',
+      );
 
-      await tester.pumpWidget(Provider<AppDatabase>.value(value: db, child: _wrap(CategoriesScreen(tripId: tripId))));
+      await tester.pumpWidget(
+        Provider<AppDatabase>.value(
+          value: db,
+          child: _wrap(CategoriesScreen(tripId: tripId)),
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
@@ -116,8 +136,13 @@ void main() {
       _useNarrowPhone(tester);
       final db = AppDatabase.forTesting(NativeDatabase.memory());
       final trip = model.Trip(
-        id: 't1', name: 'Japan', destination: null, startDate: null, endDate: null,
-        currency: 'BRL', cities: const {}, createdAt: '2026-01-01T00:00:00Z',
+        id: 't1',
+        name: 'Japan',
+        destination: null,
+        startDate: null,
+        endDate: null,
+        currency: 'BRL',
+        cities: const {},
       );
 
       await tester.pumpWidget(_wrap(TripEditForm(db: db, trip: trip)));
@@ -142,8 +167,13 @@ void main() {
       _useNarrowPhone(tester);
       final db = AppDatabase.forTesting(NativeDatabase.memory());
       final trip = model.Trip(
-        id: 't1', name: 'Japan', destination: null, startDate: '2026-01-01', endDate: '2026-01-10',
-        currency: 'BRL', cities: const {}, createdAt: '2026-01-01T00:00:00Z',
+        id: 't1',
+        name: 'Japan',
+        destination: null,
+        startDate: '2026-01-01',
+        endDate: '2026-01-10',
+        currency: 'BRL',
+        cities: const {},
       );
       final categories = [
         Category(id: 'c1', tripId: 't1', name: 'Transporte', color: '#0E8C6B', sortOrder: 0),
@@ -166,9 +196,22 @@ void main() {
       ];
       final cats = [cat('c1', 'Transporte')];
 
-      await tester.pumpWidget(_wrap(CustomScrollView(slivers: [
-        TransactionsTab(db: db, txs: txs, catById: {'c1': cats[0]}, cats: cats, cities: const {}, currency: 'BRL'),
-      ])));
+      await tester.pumpWidget(
+        _wrap(
+          CustomScrollView(
+            slivers: [
+              TransactionsTab(
+                db: db,
+                txs: txs,
+                catById: {'c1': cats[0]},
+                cats: cats,
+                cities: const {},
+                currency: 'BRL',
+              ),
+            ],
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 

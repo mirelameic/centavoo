@@ -3,10 +3,10 @@ import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:centavoo/format.dart';
+import 'package:centavoo/logic/format.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
-import 'package:centavoo/stats/stats.dart';
-import 'package:centavoo/theme.dart';
+import 'package:centavoo/logic/stats.dart';
+import 'package:centavoo/core/theme.dart';
 import 'package:centavoo/widgets/trip/primitives.dart';
 
 const _weekdayOrder = [1, 2, 3, 4, 5, 6, 0];
@@ -73,7 +73,12 @@ class _TimeTabState extends State<TimeTab> {
           if (stats.dayData.isEmpty)
             Text(l10n.chartNoDated, style: TextStyle(color: hintColor))
           else ...[
-            _DayBarChart(dayData: stats.dayData, series: daySeries, hidden: _hiddenDaySeries, currency: widget.currency),
+            _DayBarChart(
+              dayData: stats.dayData,
+              series: daySeries,
+              hidden: _hiddenDaySeries,
+              currency: widget.currency,
+            ),
             if (daySeries.isNotEmpty)
               toggleLegend(
                 context,
@@ -119,14 +124,19 @@ class _DayBarChart extends StatelessWidget {
         cumulative += v;
       }
       if (cumulative > maxY) maxY = cumulative;
-      groups.add(BarChartGroupData(x: i, barRods: [
-        BarChartRodData(
-          toY: cumulative,
-          rodStackItems: stackItems,
-          width: 14,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+      groups.add(
+        BarChartGroupData(
+          x: i,
+          barRods: [
+            BarChartRodData(
+              toY: cumulative,
+              rodStackItems: stackItems,
+              width: 14,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+            ),
+          ],
         ),
-      ]));
+      );
     }
     final labelInterval = (dayData.length / 8).ceil().clamp(1, dayData.length);
     final axisMax = maxY == 0 ? 1.0 : maxY * 1.1;
@@ -212,10 +222,7 @@ class _WeekdayBarChart extends StatelessWidget {
                       children: [
                         Text(labels[i]),
                         const SizedBox(height: 2),
-                        Text(
-                          numberFormat.format(values[i].round()),
-                          style: TextStyle(fontSize: 9, color: hintColor),
-                        ),
+                        Text(numberFormat.format(values[i].round()), style: TextStyle(fontSize: 9, color: hintColor)),
                       ],
                     ),
                   );
@@ -225,14 +232,17 @@ class _WeekdayBarChart extends StatelessWidget {
           ),
           barGroups: [
             for (var i = 0; i < values.length; i++)
-              BarChartGroupData(x: i, barRods: [
-                BarChartRodData(
-                  toY: values[i],
-                  color: _orange,
-                  width: 22,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
-                ),
-              ]),
+              BarChartGroupData(
+                x: i,
+                barRods: [
+                  BarChartRodData(
+                    toY: values[i],
+                    color: _orange,
+                    width: 22,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                  ),
+                ],
+              ),
           ],
         ),
       ),

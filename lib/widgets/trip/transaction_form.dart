@@ -1,15 +1,16 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
-import 'package:centavoo/categorize.dart';
+import 'package:centavoo/logic/categorize.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/repo.dart';
-import 'package:centavoo/format.dart';
+import 'package:centavoo/logic/format.dart';
+import 'package:centavoo/widgets/date_pickers.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:centavoo/models/category.dart';
 import 'package:centavoo/models/category_rule.dart';
 import 'package:centavoo/models/transaction.dart';
 import 'package:centavoo/models/trip.dart' as model;
-import 'package:centavoo/theme.dart';
+import 'package:centavoo/core/theme.dart';
 import 'package:centavoo/widgets/trip/primitives.dart';
 
 class TransactionForm extends StatefulWidget {
@@ -36,6 +37,7 @@ class _TransactionFormState extends State<TransactionForm> {
   late final TextEditingController _descriptionController;
   late final TextEditingController _amountController;
   late final TextEditingController _splitController;
+  final _dateController = TextEditingController();
   String? _date;
   String _kind = kindExpense;
   bool _isIof = false;
@@ -48,10 +50,13 @@ class _TransactionFormState extends State<TransactionForm> {
     _date = editing != null ? editing.date : widget.trip.startDate;
     _descriptionController = TextEditingController(text: editing?.description ?? '');
     _amountController = TextEditingController(text: editing != null ? editing.amount.abs().toStringAsFixed(2) : '');
-    _splitController = TextEditingController(text: (editing != null && editing.splitCount > 1) ? '${editing.splitCount}' : '1');
+    _splitController = TextEditingController(
+      text: (editing != null && editing.splitCount > 1) ? '${editing.splitCount}' : '1',
+    );
     _kind = editing?.kind ?? kindExpense;
     _isIof = editing?.isIof ?? false;
     _categoryId = editing?.categoryId;
+    _dateController.text = _date == null ? '' : fmtDate(_date);
   }
 
   @override
@@ -59,6 +64,7 @@ class _TransactionFormState extends State<TransactionForm> {
     _descriptionController.dispose();
     _amountController.dispose();
     _splitController.dispose();
+    _dateController.dispose();
     super.dispose();
   }
 
@@ -68,23 +74,19 @@ class _TransactionFormState extends State<TransactionForm> {
 
   void _suggestFromDescription() {
     if (_categoryId == null && _descriptionController.text.trim().isNotEmpty) {
-      final suggested = suggestCategory(_descriptionController.text, widget.rules);
-      if (suggested != null && widget.categories.any((c) => c.id == suggested)) {
+      final suggested = suggestCategory(_descriptionController.text, widget.rules, widget.categories);
+      if (suggested != null) {
         setState(() => _categoryId = suggested);
       }
     }
   }
 
   Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _date != null ? DateTime.parse(_date!) : DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-    );
+    final picked = await pickDate(context, initial: _date != null ? DateTime.parse(_date!) : null);
     if (picked != null) {
       setState(() {
-        _date = '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+        _date = isoDate(picked);
+        _dateController.text = fmtDate(_date);
       });
     }
   }
@@ -148,7 +150,7 @@ class _TransactionFormState extends State<TransactionForm> {
               TextField(
                 readOnly: true,
                 onTap: _pickDate,
-                controller: TextEditingController(text: _date == null ? '' : fmtDate(_date)),
+                controller: _dateController,
                 decoration: InputDecoration(labelText: l10n.tableDate, hintText: '—'),
               ),
               const SizedBox(height: 12),
@@ -167,7 +169,10 @@ class _TransactionFormState extends State<TransactionForm> {
                     child: TextField(
                       controller: _amountController,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: InputDecoration(labelText: l10n.tableAmount, prefixText: widget.trip.currency == 'BRL' ? 'R\$ ' : ''),
+                      decoration: InputDecoration(
+                        labelText: l10n.tableAmount,
+                        prefixText: '${currencySymbol(widget.trip.currency)} ',
+                      ),
                       onChanged: (_) => setState(() {}),
                     ),
                   ),

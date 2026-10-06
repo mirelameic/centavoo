@@ -1,9 +1,9 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:centavoo/format.dart';
+import 'package:centavoo/logic/format.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
-import 'package:centavoo/stats/stats.dart';
-import 'package:centavoo/theme.dart';
+import 'package:centavoo/logic/stats.dart';
+import 'package:centavoo/core/theme.dart';
 import 'package:centavoo/widgets/trip/primitives.dart';
 
 final _beforeColor = hexColor('#B8860B');
@@ -86,11 +86,15 @@ class _BeforeDuringChart extends StatelessWidget {
       final row = data[i];
       final rods = <BarChartRodData>[];
       if (!hidden.contains('before')) {
-        rods.add(BarChartRodData(toY: row.before, color: _beforeColor, width: 10, borderRadius: BorderRadius.circular(4)));
+        rods.add(
+          BarChartRodData(toY: row.before, color: _beforeColor, width: 10, borderRadius: BorderRadius.circular(4)),
+        );
         if (row.before > maxY) maxY = row.before;
       }
       if (!hidden.contains('during')) {
-        rods.add(BarChartRodData(toY: row.during, color: _duringColor, width: 10, borderRadius: BorderRadius.circular(4)));
+        rods.add(
+          BarChartRodData(toY: row.during, color: _duringColor, width: 10, borderRadius: BorderRadius.circular(4)),
+        );
         if (row.during > maxY) maxY = row.during;
       }
       groups.add(BarChartGroupData(x: i, barRods: rods, barsSpace: 4));

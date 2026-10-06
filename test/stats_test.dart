@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:centavoo/models/transaction.dart';
 import 'package:centavoo/models/category.dart';
-import 'package:centavoo/stats/stats.dart';
+import 'package:centavoo/logic/stats.dart';
 
 Transaction tx({
   String id = 'tx',
@@ -14,7 +14,6 @@ Transaction tx({
   String kind = kindExpense,
   bool isIof = false,
   int splitCount = 1,
-  String createdAt = '2026-01-01T00:00:00Z',
 }) {
   return Transaction(
     id: id,
@@ -27,7 +26,6 @@ Transaction tx({
     kind: kind,
     isIof: isIof,
     splitCount: splitCount,
-    createdAt: createdAt,
   );
 }
 
@@ -143,10 +141,7 @@ void main() {
       tx(amount: -10, kind: kindRefund, date: '2026-06-23'),
     ], []);
 
-    test('counts distinct during-dated days (refund days included)', () {
-      expect(s.days, 3);
-    });
-    test('avgPerDay = during net / days', () {
+    test('avgPerDay = during net / distinct during-dated days (refund days included)', () {
       expect(s.avgPerDay, 36.67);
     });
     test('buckets expenses by weekday (Sunday = index 0)', () {
@@ -161,14 +156,18 @@ void main() {
     });
   });
 
-  group('computeStats — by city', () {
+  group('cityBreakdown — by city', () {
     final cities = {'2026-06-21': 'Paris', '2026-06-22': 'Lyon', '2026-06-23': 'Paris'};
-    final s = computeStats([
-      tx(amount: 100, categoryId: 'c1', date: '2026-06-21'),
-      tx(amount: 50, categoryId: 'c1', date: '2026-06-23'),
-      tx(amount: 80, categoryId: 'c1', date: '2026-06-22'),
-      tx(amount: 40, categoryId: 'c1', date: '2026-06-24'),
-    ], [cat('c1', 'Food')], cities);
+    final s = cityBreakdown(
+      [
+        tx(amount: 100, categoryId: 'c1', date: '2026-06-21'),
+        tx(amount: 50, categoryId: 'c1', date: '2026-06-23'),
+        tx(amount: 80, categoryId: 'c1', date: '2026-06-22'),
+        tx(amount: 40, categoryId: 'c1', date: '2026-06-24'),
+      ],
+      [cat('c1', 'Food')],
+      cities,
+    );
 
     test('totals by city (desc), colored by name', () {
       expect(s.byCity.map((c) => [c.city, c.amount, c.color]).toList(), [
@@ -196,10 +195,9 @@ void main() {
       final s = computeStats([], []);
       expect(s.gross, 0);
       expect(s.net, 0);
-      expect(s.days, 0);
       expect(s.avgPerDay, 0);
       expect(s.byCategory, <CatAgg>[]);
-      expect(s.byCity, isEmpty);
+      expect(cityBreakdown([], [], {}).byCity, isEmpty);
       expect(s.split.integral, 0);
       expect(s.split.share, 0);
       expect(s.split.savings, 0);
@@ -245,7 +243,7 @@ void main() {
         [cat('c1', 'Food')],
       );
       expect(s.before, 100);
-      expect(s.days, 0);
+      expect(s.avgPerDay, 0);
       expect(s.dayData, isEmpty);
       expect(s.weekdayAmounts.reduce((a, b) => a + b), 0);
       expect(s.beforeDuringData.map((b) => [b.category, b.before, b.during]).toList(), [
@@ -271,7 +269,6 @@ void main() {
         tx(amount: 10, date: '2026-06-22'),
         tx(amount: -40, kind: kindRefund, date: '2026-06-22'),
       ], []);
-      expect(s.days, 1);
       expect(s.during, -30);
       expect(s.avgPerDay, -30);
     });
@@ -296,9 +293,9 @@ void main() {
     });
   });
 
-  group('computeStats — city edge cases', () {
+  group('cityBreakdown — city edge cases', () {
     test('treats an empty-string city mapping as no city', () {
-      final s = computeStats([tx(amount: 50, date: '2026-06-21')], [], {'2026-06-21': ''});
+      final s = cityBreakdown([tx(amount: 50, date: '2026-06-21')], [], {'2026-06-21': ''});
       expect(s.byCity, isEmpty);
     });
 
@@ -310,22 +307,14 @@ void main() {
         cities[date] = 'City$i';
         txs.add(tx(amount: 110.0 - i, date: date));
       }
-      final s = computeStats(txs, [], cities);
+      final s = cityBreakdown(txs, [], cities);
       expect(s.byCity, hasLength(11));
     });
 
     test('keeps a city\'s color tied to its name, not its spend rank', () {
       final cities = {'2026-03-01': 'Paris', '2026-03-02': 'Lyon'};
-      final a = computeStats(
-        [tx(amount: 100, date: '2026-03-01'), tx(amount: 10, date: '2026-03-02')],
-        [],
-        cities,
-      );
-      final b = computeStats(
-        [tx(amount: 10, date: '2026-03-01'), tx(amount: 100, date: '2026-03-02')],
-        [],
-        cities,
-      );
+      final a = cityBreakdown([tx(amount: 100, date: '2026-03-01'), tx(amount: 10, date: '2026-03-02')], [], cities);
+      final b = cityBreakdown([tx(amount: 10, date: '2026-03-01'), tx(amount: 100, date: '2026-03-02')], [], cities);
       String? colorOf(List<dynamic> rows, String city) =>
           rows.cast<dynamic>().firstWhere((r) => r.city == city, orElse: () => null)?.color;
       expect(colorOf(a.byCity, 'Paris'), colorOf(b.byCity, 'Paris'));
@@ -378,10 +367,7 @@ void main() {
 
   group('computeStats — known quirks', () {
     test('keeps null and unknown categoryId as separate "No category" buckets', () {
-      final s = computeStats([
-        tx(amount: 20, categoryId: null),
-        tx(amount: 10, categoryId: 'ghost'),
-      ], []);
+      final s = computeStats([tx(amount: 20, categoryId: null), tx(amount: 10, categoryId: 'ghost')], []);
       expect(s.byCategory, hasLength(2));
       expect(s.byCategory.every((c) => c.name == 'No category'), true);
       expect(s.byCategory.map((c) => c.amount).toList(), [20, 10]);
@@ -418,12 +404,51 @@ void main() {
     });
 
     test('shows "—" as top category when the spend has no category', () {
-      final result = cityBreakdown(
-        [tx(amount: 30, date: '2026-06-21')],
-        [],
-        {'2026-06-21': 'Paris'},
-      );
+      final result = cityBreakdown([tx(amount: 30, date: '2026-06-21')], [], {'2026-06-21': 'Paris'});
       expect(result.cityTable[0].topCategory, '—');
+    });
+  });
+
+  group('computeStats — labels and trip length', () {
+    test('uses the given labels for uncategorized expenses and IOF', () {
+      final s = computeStats(
+        [tx(amount: 30), tx(amount: 20, categoryId: 'missing')],
+        [],
+        noCategoryLabel: 'Sem categoria',
+        iofLabel: 'Reembolso de IOF',
+      );
+      expect(s.byCategory.map((c) => c.name).toSet(), {'Sem categoria'});
+      expect(s.categoryTable.map((c) => c.name).toSet(), {'Sem categoria'});
+    });
+
+    test('averages during spend over the whole trip when tripDays is given', () {
+      final s = computeStats(
+        [tx(amount: 100, date: '2026-06-21'), tx(amount: 50, date: '2026-06-22')],
+        [],
+        tripDays: 5,
+      );
+      expect(s.avgPerDay, 30);
+    });
+
+    test('never averages over fewer days than had spending', () {
+      final s = computeStats(
+        [tx(amount: 100, date: '2026-06-21'), tx(amount: 50, date: '2026-06-22'), tx(amount: 30, date: '2026-06-30')],
+        [],
+        tripDays: 2,
+      );
+      expect(s.avgPerDay, 60);
+    });
+
+    test('falls back to days with spending when tripDays is null', () {
+      final s = computeStats([tx(amount: 100, date: '2026-06-21'), tx(amount: 50, date: '2026-06-22')], []);
+      expect(s.avgPerDay, 75);
+    });
+  });
+
+  group('cityBreakdown — labels', () {
+    test('uses the given label for uncategorized spend in the top category column', () {
+      final r = cityBreakdown([tx(amount: 10, date: '2026-06-21')], [], {'2026-06-21': 'Paris'}, null, 'Sem categoria');
+      expect(r.cityTable.single.topCategory, 'Sem categoria');
     });
   });
 }

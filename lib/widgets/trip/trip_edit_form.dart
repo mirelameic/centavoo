@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:centavoo/confirm.dart';
+import 'package:centavoo/widgets/confirm.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/repo.dart';
-import 'package:centavoo/format.dart';
+import 'package:centavoo/logic/format.dart';
+import 'package:centavoo/widgets/date_pickers.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:centavoo/models/trip.dart' as model;
-import 'package:centavoo/theme.dart';
+import 'package:centavoo/core/theme.dart';
+import 'package:centavoo/widgets/currency_dropdown.dart';
 
 class TripEditForm extends StatefulWidget {
   final AppDatabase db;
@@ -21,7 +23,9 @@ class TripEditForm extends StatefulWidget {
 class _TripEditFormState extends State<TripEditForm> {
   late final TextEditingController _nameController;
   late final TextEditingController _destinationController;
+  final _rangeController = TextEditingController();
   DateTimeRange? _range;
+  late String _currency;
 
   @override
   void initState() {
@@ -31,23 +35,28 @@ class _TripEditFormState extends State<TripEditForm> {
     _range = (widget.trip.startDate != null && widget.trip.endDate != null)
         ? DateTimeRange(start: DateTime.parse(widget.trip.startDate!), end: DateTime.parse(widget.trip.endDate!))
         : null;
+    _rangeController.text = _rangeLabel(_range);
+    _currency = widget.trip.currency;
   }
+
+  String _rangeLabel(DateTimeRange? range) => range == null ? '' : fmtPickedRange(range);
 
   @override
   void dispose() {
     _nameController.dispose();
     _destinationController.dispose();
+    _rangeController.dispose();
     super.dispose();
   }
 
   Future<void> _pickRange() async {
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-      initialDateRange: _range,
-    );
-    if (picked != null) setState(() => _range = picked);
+    final picked = await pickDateRange(context, initial: _range);
+    if (picked != null) {
+      setState(() {
+        _range = picked;
+        _rangeController.text = _rangeLabel(picked);
+      });
+    }
   }
 
   Future<void> _save() async {
@@ -62,6 +71,7 @@ class _TripEditFormState extends State<TripEditForm> {
       destination: _destinationController.text.trim().isEmpty ? null : _destinationController.text.trim(),
       startDate: startDate,
       endDate: endDate,
+      currency: _currency,
     );
     await reassignTransactionPeriods(widget.db, widget.trip.id, startDate);
     if (mounted) Navigator.of(context).pop();
@@ -69,17 +79,13 @@ class _TripEditFormState extends State<TripEditForm> {
 
   Future<void> _delete() async {
     final l10n = AppLocalizations.of(context)!;
-    await confirmDelete(
-      context,
-      l10n.tripDeleteConfirm,
-      () async {
-        await deleteTrip(widget.db, widget.trip.id);
-        if (mounted) {
-          Navigator.of(context).pop();
-          context.go('/');
-        }
-      },
-    );
+    await confirmDelete(context, l10n.tripDeleteConfirm, () async {
+      await deleteTrip(widget.db, widget.trip.id);
+      if (mounted) {
+        Navigator.of(context).pop();
+        context.go('/');
+      }
+    });
   }
 
   @override
@@ -107,10 +113,14 @@ class _TripEditFormState extends State<TripEditForm> {
             TextField(
               readOnly: true,
               onTap: _pickRange,
-              controller: TextEditingController(
-                text: _range == null ? '' : '${fmtDate(isoDate(_range!.start))} – ${fmtDate(isoDate(_range!.end))}',
-              ),
+              controller: _rangeController,
               decoration: InputDecoration(labelText: l10n.cityBlockRangeLabel, hintText: l10n.formDatesPlaceholder),
+            ),
+            const SizedBox(height: 12),
+            currencyDropdown(
+              label: l10n.formCurrency,
+              value: _currency,
+              onChanged: (v) => setState(() => _currency = v),
             ),
             const SizedBox(height: 16),
             const Divider(),
@@ -129,10 +139,7 @@ class _TripEditFormState extends State<TripEditForm> {
       ),
       actions: [
         TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.commonCancel)),
-        ElevatedButton(
-          onPressed: _nameController.text.trim().isEmpty ? null : _save,
-          child: Text(l10n.commonSave),
-        ),
+        ElevatedButton(onPressed: _nameController.text.trim().isEmpty ? null : _save, child: Text(l10n.commonSave)),
       ],
     );
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:centavoo/format.dart' as format;
+import 'package:centavoo/logic/format.dart' as format;
 
 const localePrefsKey = 'locale';
 

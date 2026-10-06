@@ -1,6 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:centavoo/models/transaction.dart' show kindExpense, kindRefund;
-import 'package:centavoo/parse_table.dart';
+import 'package:centavoo/logic/parse_table.dart';
 
 void main() {
   group('splitRows', () {
@@ -53,6 +55,16 @@ void main() {
     test('parses a trailing minus sign', () => expect(parseAmount('12,50-'), -12.5));
     test('treats a lone 3-digit-group comma as thousands, not decimals', () => expect(parseAmount('1,234'), 1234));
     test('treats a lone 3-digit-group dot as thousands, not decimals', () => expect(parseAmount('1.234'), 1234));
+    test('treats a lone comma with one decimal digit as the decimal separator', () {
+      expect(parseAmount('1,5'), 1.5);
+      expect(parseAmount('12,5'), 12.5);
+      expect(parseAmount('R\$ 7,9'), 7.9);
+    });
+    test(
+      'treats a lone comma with more than three decimals as the decimal separator',
+      () => expect(parseAmount('0,1234'), 0.1234),
+    );
+    test('still treats repeated comma groups as thousands', () => expect(parseAmount('1,234,567'), 1234567));
     test('returns null for empty or non-numeric text', () {
       expect(parseAmount(''), isNull);
       expect(parseAmount('abc'), isNull);
@@ -113,6 +125,16 @@ void main() {
         ['13/03/2026', 'Padaria', '12,00'],
       ];
       expect(looksLikeHeaderRow(rows, [colDate, colDescription, colAmount]), isFalse);
+    });
+  });
+
+  group('decodeTextBytes', () {
+    test('decodes UTF-8 text', () => expect(decodeTextBytes(utf8.encode('Açaí;12,50')), 'Açaí;12,50'));
+    test('strips a UTF-8 byte order mark', () {
+      expect(decodeTextBytes([0xEF, 0xBB, 0xBF, ...utf8.encode('Pão;3,00')]), 'Pão;3,00');
+    });
+    test('falls back to Latin-1 for bytes that are not valid UTF-8', () {
+      expect(decodeTextBytes(latin1.encode('Padaria São João;12,00')), 'Padaria São João;12,00');
     });
   });
 }

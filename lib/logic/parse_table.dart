@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:centavoo/models/transaction.dart' show kindExpense, kindRefund;
 
 const colDate = 'date';
@@ -10,10 +12,18 @@ const delimiterComma = ',';
 const delimiterSemicolon = ';';
 const delimiterTab = '\t';
 
+String decodeTextBytes(List<int> bytes) {
+  final body = bytes.length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF ? bytes.sublist(3) : bytes;
+  try {
+    return utf8.decode(body);
+  } on FormatException {
+    return latin1.decode(body);
+  }
+}
+
 String deriveKind(double? amount) => (amount ?? 0) < 0 ? kindRefund : kindExpense;
 
-bool deriveIsIof(String kind, String description) =>
-    kind == kindRefund && description.toLowerCase().contains('iof');
+bool deriveIsIof(String kind, String description) => kind == kindRefund && description.toLowerCase().contains('iof');
 
 List<String> _splitLine(String line, String delimiter) {
   final out = <String>[];
@@ -69,11 +79,7 @@ String _detectDelimiter(List<String> lines) {
 }
 
 List<List<String>> splitRows(String text, {String delimiter = delimiterAuto}) {
-  final lines = text
-      .replaceAll(RegExp(r'\r\n?'), '\n')
-      .split('\n')
-      .where((l) => l.trim().isNotEmpty)
-      .toList();
+  final lines = text.replaceAll(RegExp(r'\r\n?'), '\n').split('\n').where((l) => l.trim().isNotEmpty).toList();
   if (lines.isEmpty) return [];
 
   final delim = delimiter == delimiterAuto ? _detectDelimiter(lines) : delimiter;
@@ -112,7 +118,7 @@ double? parseAmount(String raw) {
   } else if (lastComma != -1) {
     final decimals = s.length - lastComma - 1;
     final commaCount = RegExp(',').allMatches(s).length;
-    final isDecimal = decimals == 2 && commaCount == 1;
+    final isDecimal = commaCount == 1 && decimals != 3;
     normalized = isDecimal ? s.replaceAll(',', '.') : s.replaceAll(',', '');
   } else if (lastDot != -1) {
     final decimals = s.length - lastDot - 1;
@@ -155,8 +161,7 @@ List<String> guessRoles(List<List<String>> rows) {
   final width = rows.isNotEmpty ? rows[0].length : 0;
   final roles = List<String>.filled(width, colIgnore);
 
-  int scoreCol(int col, bool Function(String) test) =>
-      rows.fold(0, (n, r) => n + (test(r[col]) ? 1 : 0));
+  int scoreCol(int col, bool Function(String) test) => rows.fold(0, (n, r) => n + (test(r[col]) ? 1 : 0));
 
   var dateCol = -1;
   var dateScore = 0;

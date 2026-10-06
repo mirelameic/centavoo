@@ -13,9 +13,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get appTitle => 'Centavoo';
 
   @override
-  String get loading => 'Preparando seus dados…';
-
-  @override
   String get error => 'Erro ao carregar os dados.';
 
   @override
@@ -55,6 +52,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get formDates => 'Período';
 
   @override
+  String get formCurrency => 'Moeda';
+
+  @override
   String get formDatesPlaceholder => 'início – fim';
 
   @override
@@ -82,6 +82,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get kpiRefunds => 'Reembolsos';
 
   @override
+  String get kpiIofRefunds => 'Reembolsos de IOF';
+
+  @override
   String get kpiBefore => 'Antes';
 
   @override
@@ -91,6 +94,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get kpiAvgPerDay => 'Média/dia';
 
   @override
+  String get statsNoCategory => 'Sem categoria';
+
+  @override
+  String get statsIofRefund => 'Reembolso de IOF';
+
+  @override
   String get tabSummary => 'Resumo';
 
   @override
@@ -98,12 +107,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get tabTransactions => 'Transações';
-
-  @override
-  String get chartBefore => 'Antes';
-
-  @override
-  String get chartDuring => 'Durante';
 
   @override
   String get chartNoDated => 'Sem gastos com data neste período.';
@@ -148,12 +151,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get cityUnassignedN => 'dia(s) sem cidade';
 
   @override
-  String get cityRemoveBlockConfirm =>
-      'Remover este período? Os dias ficam sem cidade.';
+  String get cityRemoveBlockConfirm => 'Remover este período? Os dias ficam sem cidade.';
 
   @override
-  String get cityRemoveUsedWarning =>
-      'Remover mesmo assim vai deixar esses dias sem cidade. Continuar?';
+  String get cityRemoveUsedWarning => 'Remover mesmo assim vai deixar esses dias sem cidade. Continuar?';
 
   @override
   String get txDeleteSelected => 'Excluir selecionadas';
@@ -172,27 +173,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get txFilterDatePlaceholder => 'qualquer data';
-
-  @override
-  String get txDateModeDay => 'Dia';
-
-  @override
-  String get txDateModeRange => 'Período';
-
-  @override
-  String get txFilterCategory => 'Categoria';
-
-  @override
-  String get txFilterCategoryPlaceholder => 'todas as categorias';
-
-  @override
-  String get txFilterCity => 'Cidade';
-
-  @override
-  String get txFilterCityPlaceholder => 'todas as cidades';
-
-  @override
-  String get txFilterPeriod => 'Período';
 
   @override
   String get txPeriodAll => 'Todos';
@@ -309,8 +289,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get catEmpty => 'Nenhuma categoria.';
 
   @override
-  String get catDeleteConfirm =>
-      'Excluir categoria? As transações dela ficam sem categoria.';
+  String get catDeleteConfirm => 'Excluir categoria? As transações dela ficam sem categoria.';
 
   @override
   String get backupExportedOk => 'Backup exportado.';
@@ -374,25 +353,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get cityFilter => 'Filtrar por categoria';
 
   @override
-  String get cityFilterPlaceholder => 'todas as categorias';
-
-  @override
   String get secSplit => 'Você dividiu × sua parte';
 
   @override
-  String get colDays => 'Dias';
-
-  @override
-  String get colTotal => 'Total';
-
-  @override
   String get colAvgDay => 'Média/dia';
-
-  @override
-  String get colTopCat => 'Top categoria';
-
-  @override
-  String get colCount => 'Nº';
 
   @override
   String get colEntry => 'transação';
@@ -432,8 +396,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get txImportPasteLabel => 'Cole os dados aqui';
 
   @override
-  String get txImportPastePlaceholder =>
-      '12/03/2026\tUber\t45,90\n13/03/2026\tPadaria\t12,00';
+  String get txImportPastePlaceholder => '12/03/2026\tUber\t45,90\n13/03/2026\tPadaria\t12,00';
 
   @override
   String get txImportUploadButton => 'Ou escolher um arquivo (.csv)';
@@ -457,8 +420,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get txImportContinue => 'Continuar';
 
   @override
-  String get txImportNoRows =>
-      'Não encontrei nenhuma linha de dados. Verifique o texto colado ou o arquivo.';
+  String get txImportNoRows => 'Não encontrei nenhuma linha de dados. Verifique o texto colado ou o arquivo.';
 
   @override
   String get txImportBack => 'Voltar';
@@ -484,6 +446,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get txImportRowOk => 'ok';
 
   @override
+  String get txImportRowDuplicate => 'já importada';
+
+  @override
   String get txImportErrAmount => 'valor inválido';
 
   @override
@@ -497,6 +462,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get txImportRowsSkipped => 'com problema (não serão importadas)';
+
+  @override
+  String get txImportRowsDuplicate => 'já importadas (desmarcadas)';
 
   @override
   String get txImportConfirmButton => 'Importar';
@@ -516,9 +484,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get appTitle => 'Centavoo';
 
   @override
-  String get loading => 'Preparando seus dados…';
-
-  @override
   String get error => 'Erro ao carregar os dados.';
 
   @override
@@ -558,6 +523,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get formDates => 'Período';
 
   @override
+  String get formCurrency => 'Moeda';
+
+  @override
   String get formDatesPlaceholder => 'início – fim';
 
   @override
@@ -585,6 +553,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get kpiRefunds => 'Reembolsos';
 
   @override
+  String get kpiIofRefunds => 'Reembolsos de IOF';
+
+  @override
   String get kpiBefore => 'Antes';
 
   @override
@@ -594,6 +565,12 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get kpiAvgPerDay => 'Média/dia';
 
   @override
+  String get statsNoCategory => 'Sem categoria';
+
+  @override
+  String get statsIofRefund => 'Reembolso de IOF';
+
+  @override
   String get tabSummary => 'Resumo';
 
   @override
@@ -601,12 +578,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get tabTransactions => 'Transações';
-
-  @override
-  String get chartBefore => 'Antes';
-
-  @override
-  String get chartDuring => 'Durante';
 
   @override
   String get chartNoDated => 'Sem gastos com data neste período.';
@@ -651,12 +622,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get cityUnassignedN => 'dia(s) sem cidade';
 
   @override
-  String get cityRemoveBlockConfirm =>
-      'Remover este período? Os dias ficam sem cidade.';
+  String get cityRemoveBlockConfirm => 'Remover este período? Os dias ficam sem cidade.';
 
   @override
-  String get cityRemoveUsedWarning =>
-      'Remover mesmo assim vai deixar esses dias sem cidade. Continuar?';
+  String get cityRemoveUsedWarning => 'Remover mesmo assim vai deixar esses dias sem cidade. Continuar?';
 
   @override
   String get txDeleteSelected => 'Excluir selecionadas';
@@ -675,27 +644,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get txFilterDatePlaceholder => 'qualquer data';
-
-  @override
-  String get txDateModeDay => 'Dia';
-
-  @override
-  String get txDateModeRange => 'Período';
-
-  @override
-  String get txFilterCategory => 'Categoria';
-
-  @override
-  String get txFilterCategoryPlaceholder => 'todas as categorias';
-
-  @override
-  String get txFilterCity => 'Cidade';
-
-  @override
-  String get txFilterCityPlaceholder => 'todas as cidades';
-
-  @override
-  String get txFilterPeriod => 'Período';
 
   @override
   String get txPeriodAll => 'Todos';
@@ -812,8 +760,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get catEmpty => 'Nenhuma categoria.';
 
   @override
-  String get catDeleteConfirm =>
-      'Excluir categoria? As transações dela ficam sem categoria.';
+  String get catDeleteConfirm => 'Excluir categoria? As transações dela ficam sem categoria.';
 
   @override
   String get backupExportedOk => 'Backup exportado.';
@@ -877,25 +824,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get cityFilter => 'Filtrar por categoria';
 
   @override
-  String get cityFilterPlaceholder => 'todas as categorias';
-
-  @override
   String get secSplit => 'Você dividiu × sua parte';
 
   @override
-  String get colDays => 'Dias';
-
-  @override
-  String get colTotal => 'Total';
-
-  @override
   String get colAvgDay => 'Média/dia';
-
-  @override
-  String get colTopCat => 'Top categoria';
-
-  @override
-  String get colCount => 'Nº';
 
   @override
   String get colEntry => 'transação';
@@ -935,8 +867,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get txImportPasteLabel => 'Cole os dados aqui';
 
   @override
-  String get txImportPastePlaceholder =>
-      '12/03/2026\tUber\t45,90\n13/03/2026\tPadaria\t12,00';
+  String get txImportPastePlaceholder => '12/03/2026\tUber\t45,90\n13/03/2026\tPadaria\t12,00';
 
   @override
   String get txImportUploadButton => 'Ou escolher um arquivo (.csv)';
@@ -960,8 +891,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get txImportContinue => 'Continuar';
 
   @override
-  String get txImportNoRows =>
-      'Não encontrei nenhuma linha de dados. Verifique o texto colado ou o arquivo.';
+  String get txImportNoRows => 'Não encontrei nenhuma linha de dados. Verifique o texto colado ou o arquivo.';
 
   @override
   String get txImportBack => 'Voltar';
@@ -987,6 +917,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get txImportRowOk => 'ok';
 
   @override
+  String get txImportRowDuplicate => 'já importada';
+
+  @override
   String get txImportErrAmount => 'valor inválido';
 
   @override
@@ -1000,6 +933,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get txImportRowsSkipped => 'com problema (não serão importadas)';
+
+  @override
+  String get txImportRowsDuplicate => 'já importadas (desmarcadas)';
 
   @override
   String get txImportConfirmButton => 'Importar';

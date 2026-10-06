@@ -11,7 +11,8 @@ class ThemeController extends ChangeNotifier {
   void toggle(Brightness current) {
     mode = current == Brightness.dark ? ThemeMode.light : ThemeMode.dark;
     notifyListeners();
-    SharedPreferences.getInstance()
-        .then((prefs) => prefs.setString(themeModePrefsKey, mode == ThemeMode.dark ? 'dark' : 'light'));
+    SharedPreferences.getInstance().then(
+      (prefs) => prefs.setString(themeModePrefsKey, mode == ThemeMode.dark ? 'dark' : 'light'),
+    );
   }
 }

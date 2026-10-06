@@ -9,7 +9,6 @@ class Trip {
   final String currency;
   final CityMap cities;
   final List<String>? cityList;
-  final String createdAt;
 
   Trip({
     required this.id,
@@ -20,6 +19,5 @@ class Trip {
     required this.currency,
     CityMap? cities,
     this.cityList,
-    required this.createdAt,
   }) : cities = cities ?? {};
 }

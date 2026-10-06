@@ -71,15 +71,6 @@ class $TripsTableTable extends TripsTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
-  @override
-  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
-    'notes',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _citiesJsonMeta = const VerificationMeta(
     'citiesJson',
   );
@@ -134,7 +125,6 @@ class $TripsTableTable extends TripsTable
     startDate,
     endDate,
     currency,
-    notes,
     citiesJson,
     cityListJson,
     createdAt,
@@ -193,12 +183,6 @@ class $TripsTableTable extends TripsTable
       );
     } else if (isInserting) {
       context.missing(_currencyMeta);
-    }
-    if (data.containsKey('notes')) {
-      context.handle(
-        _notesMeta,
-        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
-      );
     }
     if (data.containsKey('cities_json')) {
       context.handle(
@@ -262,10 +246,6 @@ class $TripsTableTable extends TripsTable
         DriftSqlType.string,
         data['${effectivePrefix}currency'],
       )!,
-      notes: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}notes'],
-      ),
       citiesJson: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}cities_json'],
@@ -298,7 +278,6 @@ class TripRow extends DataClass implements Insertable<TripRow> {
   final String? startDate;
   final String? endDate;
   final String currency;
-  final String? notes;
   final String citiesJson;
   final String? cityListJson;
   final String createdAt;
@@ -310,7 +289,6 @@ class TripRow extends DataClass implements Insertable<TripRow> {
     this.startDate,
     this.endDate,
     required this.currency,
-    this.notes,
     required this.citiesJson,
     this.cityListJson,
     required this.createdAt,
@@ -331,9 +309,6 @@ class TripRow extends DataClass implements Insertable<TripRow> {
       map['end_date'] = Variable<String>(endDate);
     }
     map['currency'] = Variable<String>(currency);
-    if (!nullToAbsent || notes != null) {
-      map['notes'] = Variable<String>(notes);
-    }
     map['cities_json'] = Variable<String>(citiesJson);
     if (!nullToAbsent || cityListJson != null) {
       map['city_list_json'] = Variable<String>(cityListJson);
@@ -357,9 +332,6 @@ class TripRow extends DataClass implements Insertable<TripRow> {
           ? const Value.absent()
           : Value(endDate),
       currency: Value(currency),
-      notes: notes == null && nullToAbsent
-          ? const Value.absent()
-          : Value(notes),
       citiesJson: Value(citiesJson),
       cityListJson: cityListJson == null && nullToAbsent
           ? const Value.absent()
@@ -381,7 +353,6 @@ class TripRow extends DataClass implements Insertable<TripRow> {
       startDate: serializer.fromJson<String?>(json['startDate']),
       endDate: serializer.fromJson<String?>(json['endDate']),
       currency: serializer.fromJson<String>(json['currency']),
-      notes: serializer.fromJson<String?>(json['notes']),
       citiesJson: serializer.fromJson<String>(json['citiesJson']),
       cityListJson: serializer.fromJson<String?>(json['cityListJson']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
@@ -398,7 +369,6 @@ class TripRow extends DataClass implements Insertable<TripRow> {
       'startDate': serializer.toJson<String?>(startDate),
       'endDate': serializer.toJson<String?>(endDate),
       'currency': serializer.toJson<String>(currency),
-      'notes': serializer.toJson<String?>(notes),
       'citiesJson': serializer.toJson<String>(citiesJson),
       'cityListJson': serializer.toJson<String?>(cityListJson),
       'createdAt': serializer.toJson<String>(createdAt),
@@ -413,7 +383,6 @@ class TripRow extends DataClass implements Insertable<TripRow> {
     Value<String?> startDate = const Value.absent(),
     Value<String?> endDate = const Value.absent(),
     String? currency,
-    Value<String?> notes = const Value.absent(),
     String? citiesJson,
     Value<String?> cityListJson = const Value.absent(),
     String? createdAt,
@@ -425,7 +394,6 @@ class TripRow extends DataClass implements Insertable<TripRow> {
     startDate: startDate.present ? startDate.value : this.startDate,
     endDate: endDate.present ? endDate.value : this.endDate,
     currency: currency ?? this.currency,
-    notes: notes.present ? notes.value : this.notes,
     citiesJson: citiesJson ?? this.citiesJson,
     cityListJson: cityListJson.present ? cityListJson.value : this.cityListJson,
     createdAt: createdAt ?? this.createdAt,
@@ -441,7 +409,6 @@ class TripRow extends DataClass implements Insertable<TripRow> {
       startDate: data.startDate.present ? data.startDate.value : this.startDate,
       endDate: data.endDate.present ? data.endDate.value : this.endDate,
       currency: data.currency.present ? data.currency.value : this.currency,
-      notes: data.notes.present ? data.notes.value : this.notes,
       citiesJson: data.citiesJson.present
           ? data.citiesJson.value
           : this.citiesJson,
@@ -462,7 +429,6 @@ class TripRow extends DataClass implements Insertable<TripRow> {
           ..write('startDate: $startDate, ')
           ..write('endDate: $endDate, ')
           ..write('currency: $currency, ')
-          ..write('notes: $notes, ')
           ..write('citiesJson: $citiesJson, ')
           ..write('cityListJson: $cityListJson, ')
           ..write('createdAt: $createdAt, ')
@@ -479,7 +445,6 @@ class TripRow extends DataClass implements Insertable<TripRow> {
     startDate,
     endDate,
     currency,
-    notes,
     citiesJson,
     cityListJson,
     createdAt,
@@ -495,7 +460,6 @@ class TripRow extends DataClass implements Insertable<TripRow> {
           other.startDate == this.startDate &&
           other.endDate == this.endDate &&
           other.currency == this.currency &&
-          other.notes == this.notes &&
           other.citiesJson == this.citiesJson &&
           other.cityListJson == this.cityListJson &&
           other.createdAt == this.createdAt &&
@@ -509,7 +473,6 @@ class TripsTableCompanion extends UpdateCompanion<TripRow> {
   final Value<String?> startDate;
   final Value<String?> endDate;
   final Value<String> currency;
-  final Value<String?> notes;
   final Value<String> citiesJson;
   final Value<String?> cityListJson;
   final Value<String> createdAt;
@@ -522,7 +485,6 @@ class TripsTableCompanion extends UpdateCompanion<TripRow> {
     this.startDate = const Value.absent(),
     this.endDate = const Value.absent(),
     this.currency = const Value.absent(),
-    this.notes = const Value.absent(),
     this.citiesJson = const Value.absent(),
     this.cityListJson = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -536,7 +498,6 @@ class TripsTableCompanion extends UpdateCompanion<TripRow> {
     this.startDate = const Value.absent(),
     this.endDate = const Value.absent(),
     required String currency,
-    this.notes = const Value.absent(),
     this.citiesJson = const Value.absent(),
     this.cityListJson = const Value.absent(),
     required String createdAt,
@@ -553,7 +514,6 @@ class TripsTableCompanion extends UpdateCompanion<TripRow> {
     Expression<String>? startDate,
     Expression<String>? endDate,
     Expression<String>? currency,
-    Expression<String>? notes,
     Expression<String>? citiesJson,
     Expression<String>? cityListJson,
     Expression<String>? createdAt,
@@ -567,7 +527,6 @@ class TripsTableCompanion extends UpdateCompanion<TripRow> {
       if (startDate != null) 'start_date': startDate,
       if (endDate != null) 'end_date': endDate,
       if (currency != null) 'currency': currency,
-      if (notes != null) 'notes': notes,
       if (citiesJson != null) 'cities_json': citiesJson,
       if (cityListJson != null) 'city_list_json': cityListJson,
       if (createdAt != null) 'created_at': createdAt,
@@ -583,7 +542,6 @@ class TripsTableCompanion extends UpdateCompanion<TripRow> {
     Value<String?>? startDate,
     Value<String?>? endDate,
     Value<String>? currency,
-    Value<String?>? notes,
     Value<String>? citiesJson,
     Value<String?>? cityListJson,
     Value<String>? createdAt,
@@ -597,7 +555,6 @@ class TripsTableCompanion extends UpdateCompanion<TripRow> {
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       currency: currency ?? this.currency,
-      notes: notes ?? this.notes,
       citiesJson: citiesJson ?? this.citiesJson,
       cityListJson: cityListJson ?? this.cityListJson,
       createdAt: createdAt ?? this.createdAt,
@@ -627,9 +584,6 @@ class TripsTableCompanion extends UpdateCompanion<TripRow> {
     if (currency.present) {
       map['currency'] = Variable<String>(currency.value);
     }
-    if (notes.present) {
-      map['notes'] = Variable<String>(notes.value);
-    }
     if (citiesJson.present) {
       map['cities_json'] = Variable<String>(citiesJson.value);
     }
@@ -657,7 +611,6 @@ class TripsTableCompanion extends UpdateCompanion<TripRow> {
           ..write('startDate: $startDate, ')
           ..write('endDate: $endDate, ')
           ..write('currency: $currency, ')
-          ..write('notes: $notes, ')
           ..write('citiesJson: $citiesJson, ')
           ..write('cityListJson: $cityListJson, ')
           ..write('createdAt: $createdAt, ')
@@ -1173,26 +1126,6 @@ class $TransactionsTableTable extends TransactionsTable
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _cityMeta = const VerificationMeta('city');
-  @override
-  late final GeneratedColumn<String> city = GeneratedColumn<String>(
-    'city',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _rawTextMeta = const VerificationMeta(
-    'rawText',
-  );
-  @override
-  late final GeneratedColumn<String> rawText = GeneratedColumn<String>(
-    'raw_text',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -1216,8 +1149,6 @@ class $TransactionsTableTable extends TransactionsTable
     kind,
     isIof,
     splitCount,
-    city,
-    rawText,
     createdAt,
   ];
   @override
@@ -1308,18 +1239,6 @@ class $TransactionsTableTable extends TransactionsTable
     } else if (isInserting) {
       context.missing(_splitCountMeta);
     }
-    if (data.containsKey('city')) {
-      context.handle(
-        _cityMeta,
-        city.isAcceptableOrUnknown(data['city']!, _cityMeta),
-      );
-    }
-    if (data.containsKey('raw_text')) {
-      context.handle(
-        _rawTextMeta,
-        rawText.isAcceptableOrUnknown(data['raw_text']!, _rawTextMeta),
-      );
-    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -1377,14 +1296,6 @@ class $TransactionsTableTable extends TransactionsTable
         DriftSqlType.int,
         data['${effectivePrefix}split_count'],
       )!,
-      city: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}city'],
-      ),
-      rawText: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}raw_text'],
-      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}created_at'],
@@ -1409,8 +1320,6 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
   final String kind;
   final bool isIof;
   final int splitCount;
-  final String? city;
-  final String? rawText;
   final String createdAt;
   const TransactionRow({
     required this.id,
@@ -1423,8 +1332,6 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     required this.kind,
     required this.isIof,
     required this.splitCount,
-    this.city,
-    this.rawText,
     required this.createdAt,
   });
   @override
@@ -1444,12 +1351,6 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     map['kind'] = Variable<String>(kind);
     map['is_iof'] = Variable<bool>(isIof);
     map['split_count'] = Variable<int>(splitCount);
-    if (!nullToAbsent || city != null) {
-      map['city'] = Variable<String>(city);
-    }
-    if (!nullToAbsent || rawText != null) {
-      map['raw_text'] = Variable<String>(rawText);
-    }
     map['created_at'] = Variable<String>(createdAt);
     return map;
   }
@@ -1468,10 +1369,6 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       kind: Value(kind),
       isIof: Value(isIof),
       splitCount: Value(splitCount),
-      city: city == null && nullToAbsent ? const Value.absent() : Value(city),
-      rawText: rawText == null && nullToAbsent
-          ? const Value.absent()
-          : Value(rawText),
       createdAt: Value(createdAt),
     );
   }
@@ -1492,8 +1389,6 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       kind: serializer.fromJson<String>(json['kind']),
       isIof: serializer.fromJson<bool>(json['isIof']),
       splitCount: serializer.fromJson<int>(json['splitCount']),
-      city: serializer.fromJson<String?>(json['city']),
-      rawText: serializer.fromJson<String?>(json['rawText']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
     );
   }
@@ -1511,8 +1406,6 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       'kind': serializer.toJson<String>(kind),
       'isIof': serializer.toJson<bool>(isIof),
       'splitCount': serializer.toJson<int>(splitCount),
-      'city': serializer.toJson<String?>(city),
-      'rawText': serializer.toJson<String?>(rawText),
       'createdAt': serializer.toJson<String>(createdAt),
     };
   }
@@ -1528,8 +1421,6 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     String? kind,
     bool? isIof,
     int? splitCount,
-    Value<String?> city = const Value.absent(),
-    Value<String?> rawText = const Value.absent(),
     String? createdAt,
   }) => TransactionRow(
     id: id ?? this.id,
@@ -1542,8 +1433,6 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     kind: kind ?? this.kind,
     isIof: isIof ?? this.isIof,
     splitCount: splitCount ?? this.splitCount,
-    city: city.present ? city.value : this.city,
-    rawText: rawText.present ? rawText.value : this.rawText,
     createdAt: createdAt ?? this.createdAt,
   );
   TransactionRow copyWithCompanion(TransactionsTableCompanion data) {
@@ -1564,8 +1453,6 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
       splitCount: data.splitCount.present
           ? data.splitCount.value
           : this.splitCount,
-      city: data.city.present ? data.city.value : this.city,
-      rawText: data.rawText.present ? data.rawText.value : this.rawText,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -1583,8 +1470,6 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
           ..write('kind: $kind, ')
           ..write('isIof: $isIof, ')
           ..write('splitCount: $splitCount, ')
-          ..write('city: $city, ')
-          ..write('rawText: $rawText, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -1602,8 +1487,6 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
     kind,
     isIof,
     splitCount,
-    city,
-    rawText,
     createdAt,
   );
   @override
@@ -1620,8 +1503,6 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
           other.kind == this.kind &&
           other.isIof == this.isIof &&
           other.splitCount == this.splitCount &&
-          other.city == this.city &&
-          other.rawText == this.rawText &&
           other.createdAt == this.createdAt);
 }
 
@@ -1636,8 +1517,6 @@ class TransactionsTableCompanion extends UpdateCompanion<TransactionRow> {
   final Value<String> kind;
   final Value<bool> isIof;
   final Value<int> splitCount;
-  final Value<String?> city;
-  final Value<String?> rawText;
   final Value<String> createdAt;
   final Value<int> rowid;
   const TransactionsTableCompanion({
@@ -1651,8 +1530,6 @@ class TransactionsTableCompanion extends UpdateCompanion<TransactionRow> {
     this.kind = const Value.absent(),
     this.isIof = const Value.absent(),
     this.splitCount = const Value.absent(),
-    this.city = const Value.absent(),
-    this.rawText = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1667,8 +1544,6 @@ class TransactionsTableCompanion extends UpdateCompanion<TransactionRow> {
     required String kind,
     required bool isIof,
     required int splitCount,
-    this.city = const Value.absent(),
-    this.rawText = const Value.absent(),
     required String createdAt,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -1691,8 +1566,6 @@ class TransactionsTableCompanion extends UpdateCompanion<TransactionRow> {
     Expression<String>? kind,
     Expression<bool>? isIof,
     Expression<int>? splitCount,
-    Expression<String>? city,
-    Expression<String>? rawText,
     Expression<String>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -1707,8 +1580,6 @@ class TransactionsTableCompanion extends UpdateCompanion<TransactionRow> {
       if (kind != null) 'kind': kind,
       if (isIof != null) 'is_iof': isIof,
       if (splitCount != null) 'split_count': splitCount,
-      if (city != null) 'city': city,
-      if (rawText != null) 'raw_text': rawText,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1725,8 +1596,6 @@ class TransactionsTableCompanion extends UpdateCompanion<TransactionRow> {
     Value<String>? kind,
     Value<bool>? isIof,
     Value<int>? splitCount,
-    Value<String?>? city,
-    Value<String?>? rawText,
     Value<String>? createdAt,
     Value<int>? rowid,
   }) {
@@ -1741,8 +1610,6 @@ class TransactionsTableCompanion extends UpdateCompanion<TransactionRow> {
       kind: kind ?? this.kind,
       isIof: isIof ?? this.isIof,
       splitCount: splitCount ?? this.splitCount,
-      city: city ?? this.city,
-      rawText: rawText ?? this.rawText,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -1781,12 +1648,6 @@ class TransactionsTableCompanion extends UpdateCompanion<TransactionRow> {
     if (splitCount.present) {
       map['split_count'] = Variable<int>(splitCount.value);
     }
-    if (city.present) {
-      map['city'] = Variable<String>(city.value);
-    }
-    if (rawText.present) {
-      map['raw_text'] = Variable<String>(rawText.value);
-    }
     if (createdAt.present) {
       map['created_at'] = Variable<String>(createdAt.value);
     }
@@ -1809,8 +1670,6 @@ class TransactionsTableCompanion extends UpdateCompanion<TransactionRow> {
           ..write('kind: $kind, ')
           ..write('isIof: $isIof, ')
           ..write('splitCount: $splitCount, ')
-          ..write('city: $city, ')
-          ..write('rawText: $rawText, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -1859,6 +1718,17 @@ class $CategoryRulesTableTable extends CategoryRulesTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _categoryNameMeta = const VerificationMeta(
+    'categoryName',
+  );
+  @override
+  late final GeneratedColumn<String> categoryName = GeneratedColumn<String>(
+    'category_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _priorityMeta = const VerificationMeta(
     'priority',
   );
@@ -1871,7 +1741,13 @@ class $CategoryRulesTableTable extends CategoryRulesTable
     requiredDuringInsert: true,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, keyword, categoryId, priority];
+  List<GeneratedColumn> get $columns => [
+    id,
+    keyword,
+    categoryId,
+    categoryName,
+    priority,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1903,6 +1779,15 @@ class $CategoryRulesTableTable extends CategoryRulesTable
     } else if (isInserting) {
       context.missing(_categoryIdMeta);
     }
+    if (data.containsKey('category_name')) {
+      context.handle(
+        _categoryNameMeta,
+        categoryName.isAcceptableOrUnknown(
+          data['category_name']!,
+          _categoryNameMeta,
+        ),
+      );
+    }
     if (data.containsKey('priority')) {
       context.handle(
         _priorityMeta,
@@ -1932,6 +1817,10 @@ class $CategoryRulesTableTable extends CategoryRulesTable
         DriftSqlType.string,
         data['${effectivePrefix}category_id'],
       )!,
+      categoryName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_name'],
+      ),
       priority: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}priority'],
@@ -1949,11 +1838,13 @@ class CategoryRuleRow extends DataClass implements Insertable<CategoryRuleRow> {
   final int id;
   final String keyword;
   final String categoryId;
+  final String? categoryName;
   final int priority;
   const CategoryRuleRow({
     required this.id,
     required this.keyword,
     required this.categoryId,
+    this.categoryName,
     required this.priority,
   });
   @override
@@ -1962,6 +1853,9 @@ class CategoryRuleRow extends DataClass implements Insertable<CategoryRuleRow> {
     map['id'] = Variable<int>(id);
     map['keyword'] = Variable<String>(keyword);
     map['category_id'] = Variable<String>(categoryId);
+    if (!nullToAbsent || categoryName != null) {
+      map['category_name'] = Variable<String>(categoryName);
+    }
     map['priority'] = Variable<int>(priority);
     return map;
   }
@@ -1971,6 +1865,9 @@ class CategoryRuleRow extends DataClass implements Insertable<CategoryRuleRow> {
       id: Value(id),
       keyword: Value(keyword),
       categoryId: Value(categoryId),
+      categoryName: categoryName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(categoryName),
       priority: Value(priority),
     );
   }
@@ -1984,6 +1881,7 @@ class CategoryRuleRow extends DataClass implements Insertable<CategoryRuleRow> {
       id: serializer.fromJson<int>(json['id']),
       keyword: serializer.fromJson<String>(json['keyword']),
       categoryId: serializer.fromJson<String>(json['categoryId']),
+      categoryName: serializer.fromJson<String?>(json['categoryName']),
       priority: serializer.fromJson<int>(json['priority']),
     );
   }
@@ -1994,6 +1892,7 @@ class CategoryRuleRow extends DataClass implements Insertable<CategoryRuleRow> {
       'id': serializer.toJson<int>(id),
       'keyword': serializer.toJson<String>(keyword),
       'categoryId': serializer.toJson<String>(categoryId),
+      'categoryName': serializer.toJson<String?>(categoryName),
       'priority': serializer.toJson<int>(priority),
     };
   }
@@ -2002,11 +1901,13 @@ class CategoryRuleRow extends DataClass implements Insertable<CategoryRuleRow> {
     int? id,
     String? keyword,
     String? categoryId,
+    Value<String?> categoryName = const Value.absent(),
     int? priority,
   }) => CategoryRuleRow(
     id: id ?? this.id,
     keyword: keyword ?? this.keyword,
     categoryId: categoryId ?? this.categoryId,
+    categoryName: categoryName.present ? categoryName.value : this.categoryName,
     priority: priority ?? this.priority,
   );
   CategoryRuleRow copyWithCompanion(CategoryRulesTableCompanion data) {
@@ -2016,6 +1917,9 @@ class CategoryRuleRow extends DataClass implements Insertable<CategoryRuleRow> {
       categoryId: data.categoryId.present
           ? data.categoryId.value
           : this.categoryId,
+      categoryName: data.categoryName.present
+          ? data.categoryName.value
+          : this.categoryName,
       priority: data.priority.present ? data.priority.value : this.priority,
     );
   }
@@ -2026,13 +1930,15 @@ class CategoryRuleRow extends DataClass implements Insertable<CategoryRuleRow> {
           ..write('id: $id, ')
           ..write('keyword: $keyword, ')
           ..write('categoryId: $categoryId, ')
+          ..write('categoryName: $categoryName, ')
           ..write('priority: $priority')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, keyword, categoryId, priority);
+  int get hashCode =>
+      Object.hash(id, keyword, categoryId, categoryName, priority);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2040,6 +1946,7 @@ class CategoryRuleRow extends DataClass implements Insertable<CategoryRuleRow> {
           other.id == this.id &&
           other.keyword == this.keyword &&
           other.categoryId == this.categoryId &&
+          other.categoryName == this.categoryName &&
           other.priority == this.priority);
 }
 
@@ -2047,17 +1954,20 @@ class CategoryRulesTableCompanion extends UpdateCompanion<CategoryRuleRow> {
   final Value<int> id;
   final Value<String> keyword;
   final Value<String> categoryId;
+  final Value<String?> categoryName;
   final Value<int> priority;
   const CategoryRulesTableCompanion({
     this.id = const Value.absent(),
     this.keyword = const Value.absent(),
     this.categoryId = const Value.absent(),
+    this.categoryName = const Value.absent(),
     this.priority = const Value.absent(),
   });
   CategoryRulesTableCompanion.insert({
     this.id = const Value.absent(),
     required String keyword,
     required String categoryId,
+    this.categoryName = const Value.absent(),
     required int priority,
   }) : keyword = Value(keyword),
        categoryId = Value(categoryId),
@@ -2066,12 +1976,14 @@ class CategoryRulesTableCompanion extends UpdateCompanion<CategoryRuleRow> {
     Expression<int>? id,
     Expression<String>? keyword,
     Expression<String>? categoryId,
+    Expression<String>? categoryName,
     Expression<int>? priority,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (keyword != null) 'keyword': keyword,
       if (categoryId != null) 'category_id': categoryId,
+      if (categoryName != null) 'category_name': categoryName,
       if (priority != null) 'priority': priority,
     });
   }
@@ -2080,12 +1992,14 @@ class CategoryRulesTableCompanion extends UpdateCompanion<CategoryRuleRow> {
     Value<int>? id,
     Value<String>? keyword,
     Value<String>? categoryId,
+    Value<String?>? categoryName,
     Value<int>? priority,
   }) {
     return CategoryRulesTableCompanion(
       id: id ?? this.id,
       keyword: keyword ?? this.keyword,
       categoryId: categoryId ?? this.categoryId,
+      categoryName: categoryName ?? this.categoryName,
       priority: priority ?? this.priority,
     );
   }
@@ -2102,6 +2016,9 @@ class CategoryRulesTableCompanion extends UpdateCompanion<CategoryRuleRow> {
     if (categoryId.present) {
       map['category_id'] = Variable<String>(categoryId.value);
     }
+    if (categoryName.present) {
+      map['category_name'] = Variable<String>(categoryName.value);
+    }
     if (priority.present) {
       map['priority'] = Variable<int>(priority.value);
     }
@@ -2114,6 +2031,7 @@ class CategoryRulesTableCompanion extends UpdateCompanion<CategoryRuleRow> {
           ..write('id: $id, ')
           ..write('keyword: $keyword, ')
           ..write('categoryId: $categoryId, ')
+          ..write('categoryName: $categoryName, ')
           ..write('priority: $priority')
           ..write(')'))
         .toString();
@@ -2160,7 +2078,6 @@ typedef $$TripsTableTableCreateCompanionBuilder = TripsTableCompanion Function({
   Value<String?> startDate,
   Value<String?> endDate,
   required String currency,
-  Value<String?> notes,
   Value<String> citiesJson,
   Value<String?> cityListJson,
   required String createdAt,
@@ -2174,7 +2091,6 @@ typedef $$TripsTableTableUpdateCompanionBuilder = TripsTableCompanion Function({
   Value<String?> startDate,
   Value<String?> endDate,
   Value<String> currency,
-  Value<String?> notes,
   Value<String> citiesJson,
   Value<String?> cityListJson,
   Value<String> createdAt,
@@ -2218,11 +2134,6 @@ class $$TripsTableTableFilterComposer
 
   ColumnFilters<String> get currency => $composableBuilder(
     column: $table.currency,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get notes => $composableBuilder(
-    column: $table.notes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2286,11 +2197,6 @@ class $$TripsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get notes => $composableBuilder(
-    column: $table.notes,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get citiesJson => $composableBuilder(
     column: $table.citiesJson,
     builder: (column) => ColumnOrderings(column),
@@ -2340,9 +2246,6 @@ class $$TripsTableTableAnnotationComposer
 
   GeneratedColumn<String> get currency =>
       $composableBuilder(column: $table.currency, builder: (column) => column);
-
-  GeneratedColumn<String> get notes =>
-      $composableBuilder(column: $table.notes, builder: (column) => column);
 
   GeneratedColumn<String> get citiesJson => $composableBuilder(
     column: $table.citiesJson,
@@ -2395,7 +2298,6 @@ class $$TripsTableTableTableManager
                 Value<String?> startDate = const Value.absent(),
                 Value<String?> endDate = const Value.absent(),
                 Value<String> currency = const Value.absent(),
-                Value<String?> notes = const Value.absent(),
                 Value<String> citiesJson = const Value.absent(),
                 Value<String?> cityListJson = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
@@ -2408,7 +2310,6 @@ class $$TripsTableTableTableManager
                 startDate: startDate,
                 endDate: endDate,
                 currency: currency,
-                notes: notes,
                 citiesJson: citiesJson,
                 cityListJson: cityListJson,
                 createdAt: createdAt,
@@ -2423,7 +2324,6 @@ class $$TripsTableTableTableManager
                 Value<String?> startDate = const Value.absent(),
                 Value<String?> endDate = const Value.absent(),
                 required String currency,
-                Value<String?> notes = const Value.absent(),
                 Value<String> citiesJson = const Value.absent(),
                 Value<String?> cityListJson = const Value.absent(),
                 required String createdAt,
@@ -2436,7 +2336,6 @@ class $$TripsTableTableTableManager
                 startDate: startDate,
                 endDate: endDate,
                 currency: currency,
-                notes: notes,
                 citiesJson: citiesJson,
                 cityListJson: cityListJson,
                 createdAt: createdAt,
@@ -2716,8 +2615,6 @@ typedef $$TransactionsTableTableCreateCompanionBuilder =
       required String kind,
       required bool isIof,
       required int splitCount,
-      Value<String?> city,
-      Value<String?> rawText,
       required String createdAt,
       Value<int> rowid,
     });
@@ -2733,8 +2630,6 @@ typedef $$TransactionsTableTableUpdateCompanionBuilder =
       Value<String> kind,
       Value<bool> isIof,
       Value<int> splitCount,
-      Value<String?> city,
-      Value<String?> rawText,
       Value<String> createdAt,
       Value<int> rowid,
     });
@@ -2795,16 +2690,6 @@ class $$TransactionsTableTableFilterComposer
 
   ColumnFilters<int> get splitCount => $composableBuilder(
     column: $table.splitCount,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get city => $composableBuilder(
-    column: $table.city,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get rawText => $composableBuilder(
-    column: $table.rawText,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2873,16 +2758,6 @@ class $$TransactionsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get city => $composableBuilder(
-    column: $table.city,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get rawText => $composableBuilder(
-    column: $table.rawText,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -2933,12 +2808,6 @@ class $$TransactionsTableTableAnnotationComposer
     column: $table.splitCount,
     builder: (column) => column,
   );
-
-  GeneratedColumn<String> get city =>
-      $composableBuilder(column: $table.city, builder: (column) => column);
-
-  GeneratedColumn<String> get rawText =>
-      $composableBuilder(column: $table.rawText, builder: (column) => column);
 
   GeneratedColumn<String> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -2994,8 +2863,6 @@ class $$TransactionsTableTableTableManager
                 Value<String> kind = const Value.absent(),
                 Value<bool> isIof = const Value.absent(),
                 Value<int> splitCount = const Value.absent(),
-                Value<String?> city = const Value.absent(),
-                Value<String?> rawText = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsTableCompanion(
@@ -3009,8 +2876,6 @@ class $$TransactionsTableTableTableManager
                 kind: kind,
                 isIof: isIof,
                 splitCount: splitCount,
-                city: city,
-                rawText: rawText,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -3026,8 +2891,6 @@ class $$TransactionsTableTableTableManager
                 required String kind,
                 required bool isIof,
                 required int splitCount,
-                Value<String?> city = const Value.absent(),
-                Value<String?> rawText = const Value.absent(),
                 required String createdAt,
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsTableCompanion.insert(
@@ -3041,8 +2904,6 @@ class $$TransactionsTableTableTableManager
                 kind: kind,
                 isIof: isIof,
                 splitCount: splitCount,
-                city: city,
-                rawText: rawText,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -3085,6 +2946,7 @@ typedef $$CategoryRulesTableTableCreateCompanionBuilder =
       Value<int> id,
       required String keyword,
       required String categoryId,
+      Value<String?> categoryName,
       required int priority,
     });
 typedef $$CategoryRulesTableTableUpdateCompanionBuilder =
@@ -3092,6 +2954,7 @@ typedef $$CategoryRulesTableTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> keyword,
       Value<String> categoryId,
+      Value<String?> categoryName,
       Value<int> priority,
     });
 
@@ -3116,6 +2979,11 @@ class $$CategoryRulesTableTableFilterComposer
 
   ColumnFilters<String> get categoryId => $composableBuilder(
     column: $table.categoryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoryName => $composableBuilder(
+    column: $table.categoryName,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3149,6 +3017,11 @@ class $$CategoryRulesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get categoryName => $composableBuilder(
+    column: $table.categoryName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get priority => $composableBuilder(
     column: $table.priority,
     builder: (column) => ColumnOrderings(column),
@@ -3172,6 +3045,11 @@ class $$CategoryRulesTableTableAnnotationComposer
 
   GeneratedColumn<String> get categoryId => $composableBuilder(
     column: $table.categoryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get categoryName => $composableBuilder(
+    column: $table.categoryName,
     builder: (column) => column,
   );
 
@@ -3222,11 +3100,13 @@ class $$CategoryRulesTableTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> keyword = const Value.absent(),
                 Value<String> categoryId = const Value.absent(),
+                Value<String?> categoryName = const Value.absent(),
                 Value<int> priority = const Value.absent(),
               }) => CategoryRulesTableCompanion(
                 id: id,
                 keyword: keyword,
                 categoryId: categoryId,
+                categoryName: categoryName,
                 priority: priority,
               ),
           createCompanionCallback:
@@ -3234,11 +3114,13 @@ class $$CategoryRulesTableTableTableManager
                 Value<int> id = const Value.absent(),
                 required String keyword,
                 required String categoryId,
+                Value<String?> categoryName = const Value.absent(),
                 required int priority,
               }) => CategoryRulesTableCompanion.insert(
                 id: id,
                 keyword: keyword,
                 categoryId: categoryId,
+                categoryName: categoryName,
                 priority: priority,
               ),
           withReferenceMapper: (p0) => p0

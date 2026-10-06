@@ -1,18 +1,18 @@
 import 'dart:io';
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:centavoo/widgets/logo.dart';
-import 'package:centavoo/theme.dart';
+import 'package:centavoo/core/theme.dart';
 
 const _brandBackground = Color(0xFF1A1815);
 const _brandCream = Color(0xFFFFF3E0);
 
 Future<void> _loadFonts() async {
-  final loader = FontLoader('Unbounded')
-    ..addFont(rootBundle.load('assets/fonts/Unbounded-Variable.ttf'));
+  final loader = FontLoader('Unbounded')..addFont(rootBundle.load('assets/fonts/Unbounded-Variable.ttf'));
   await loader.load();
 }
 
@@ -27,7 +27,9 @@ Future<void> _capture(WidgetTester tester, Widget child, Size viewSize, String p
     MaterialApp(
       home: Material(
         color: Colors.transparent,
-        child: Center(child: RepaintBoundary(key: key, child: child)),
+        child: Center(
+          child: RepaintBoundary(key: key, child: child),
+        ),
       ),
     ),
   );
@@ -42,12 +44,7 @@ Future<void> _capture(WidgetTester tester, Widget child, Size viewSize, String p
 
 void main() {
   testWidgets('logo mark, transparent, filling ~74% of a 1024 canvas (app icon foreground)', (tester) async {
-    await _capture(
-      tester,
-      const Logo(size: 760),
-      const Size(1024, 1024),
-      'assets/icon/icon_foreground.png',
-    );
+    await _capture(tester, const Logo(size: 760), const Size(1024, 1024), 'assets/icon/icon_foreground.png');
   });
 
   testWidgets('logo mark on the brand background (flat/legacy/iOS icon)', (tester) async {
@@ -65,14 +62,12 @@ void main() {
     );
   });
 
-  testWidgets('logo mark matching the official Android 12+ splash icon spec (2/3 safe circle, scaled up 5/3x for high-DPI)', (tester) async {
-    await _capture(
-      tester,
-      const Logo(size: 1280),
-      const Size(1920, 1920),
-      'assets/icon/icon_android12.png',
-    );
-  });
+  testWidgets(
+    'logo mark matching the official Android 12+ splash icon spec (2/3 safe circle, scaled up 5/3x for high-DPI)',
+    (tester) async {
+      await _capture(tester, const Logo(size: 1280), const Size(1920, 1920), 'assets/icon/icon_android12.png');
+    },
+  );
 
   testWidgets('logo + wordmark, transparent (splash screen branding)', (tester) async {
     await _loadFonts();
@@ -85,7 +80,11 @@ void main() {
           const SizedBox(height: 32),
           Text(
             'CENTAVOO',
-            style: unboundedStyle(weight: FontWeight.w700, letterSpacing: 3, color: _brandCream).copyWith(fontSize: 40, height: 1.3),
+            style: unboundedStyle(
+              weight: FontWeight.w700,
+              letterSpacing: 3,
+              color: _brandCream,
+            ).copyWith(fontSize: 40, height: 1.3),
           ),
           const SizedBox(height: 12),
         ],

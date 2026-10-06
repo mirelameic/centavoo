@@ -1,11 +1,11 @@
 {
-    "name": "centavoo",
-    "short_name": "centavoo",
+    "name": "Centavoo",
+    "short_name": "Centavoo",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#1A1815",
+    "theme_color": "#E8590C",
+    "description": "App to record and analyze travel expenses per trip.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

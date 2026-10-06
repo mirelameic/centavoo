@@ -10,10 +10,7 @@ GoRouter buildRouter() {
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),
         routes: [
-          GoRoute(
-            path: '/',
-            builder: (context, state) => const TripsScreen(),
-          ),
+          GoRoute(path: '/', builder: (context, state) => const TripsScreen()),
           GoRoute(
             path: '/trip/:id',
             builder: (context, state) => TripScreen(tripId: state.pathParameters['id']!),

@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:centavoo/category_icons.dart';
-import 'package:centavoo/format.dart';
+import 'package:centavoo/widgets/category_icons.dart';
+import 'package:centavoo/logic/format.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:centavoo/models/category.dart';
 import 'package:centavoo/models/transaction.dart';
-import 'package:centavoo/stats/stats.dart';
-import 'package:centavoo/theme.dart';
-
-const _tealColor = Color(0xFF12B886);
+import 'package:centavoo/logic/stats.dart';
+import 'package:centavoo/core/theme.dart';
 
 class TxRow extends StatelessWidget {
   final Transaction tx;
@@ -57,19 +55,21 @@ class TxRow extends StatelessWidget {
             color: selecting
                 ? null
                 : isRefund
-                    ? _tealColor.withValues(alpha: 0.12)
-                    : cat != null
-                        ? hexColor(cat!.color).withValues(alpha: 0x26 / 255)
-                        : hintColor.withValues(alpha: 0.08),
+                ? refundColor.withValues(alpha: 0.12)
+                : cat != null
+                ? hexColor(cat!.color).withValues(alpha: 0x26 / 255)
+                : hintColor.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(8),
           ),
           child: selecting
-              ? IgnorePointer(child: Checkbox(value: selected, onChanged: (_) {}))
+              ? IgnorePointer(
+                  child: Checkbox(value: selected, onChanged: (_) {}),
+                )
               : isRefund
-                  ? const Icon(Icons.u_turn_left, size: 17, color: _tealColor)
-                  : cat != null
-                      ? Icon(categoryIcon(cat!.icon) ?? Icons.category_outlined, size: 17, color: hexColor(cat!.color))
-                      : Text('—', style: TextStyle(color: hintColor)),
+              ? const Icon(Icons.u_turn_left, size: 17, color: refundColor)
+              : cat != null
+              ? Icon(categoryIcon(cat!.icon) ?? Icons.category_outlined, size: 17, color: hexColor(cat!.color))
+              : Text('—', style: TextStyle(color: hintColor)),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -82,7 +82,10 @@ class TxRow extends StatelessWidget {
                   children: [
                     TextSpan(text: tx.description),
                     if (tx.splitCount > 1)
-                      TextSpan(text: ' (÷${tx.splitCount})', style: TextStyle(fontWeight: FontWeight.normal, color: hintColor, fontSize: 12)),
+                      TextSpan(
+                        text: ' (÷${tx.splitCount})',
+                        style: TextStyle(fontWeight: FontWeight.normal, color: hintColor, fontSize: 12),
+                      ),
                   ],
                 ),
                 style: const TextStyle(fontWeight: FontWeight.w600),
@@ -99,7 +102,7 @@ class TxRow extends StatelessWidget {
                       if (isIof)
                         _metaBadge(context, 'IOF', hintColor)
                       else if (isRefund)
-                        _metaBadge(context, l10n.typeRefund, _tealColor)
+                        _metaBadge(context, l10n.typeRefund, refundColor)
                       else
                         Text(cat?.name ?? '—', style: TextStyle(fontSize: 12, color: hintColor)),
                       if (cityName != null) ...[
@@ -128,10 +131,13 @@ class TxRow extends StatelessWidget {
           children: [
             Text(
               money(amount, currency: currency),
-              style: TextStyle(fontWeight: FontWeight.w600, color: amount < 0 ? _tealColor : null),
+              style: TextStyle(fontWeight: FontWeight.w600, color: amount < 0 ? refundColor : null),
             ),
             if (tx.splitCount > 1)
-              Text('${l10n.tableFull} ${money(tx.amount, currency: currency)}', style: TextStyle(fontSize: 12, color: hintColor)),
+              Text(
+                '${l10n.tableFull} ${money(tx.amount, currency: currency)}',
+                style: TextStyle(fontSize: 12, color: hintColor),
+              ),
           ],
         ),
         if (!selecting && (onEdit != null || onDelete != null))
@@ -143,10 +149,8 @@ class TxRow extends StatelessWidget {
               if (value == 'delete') onDelete?.call();
             },
             itemBuilder: (context) => [
-              if (onEdit != null)
-                PopupMenuItem(value: 'edit', child: Text(l10n.commonEdit)),
-              if (onDelete != null)
-                PopupMenuItem(value: 'delete', child: Text(l10n.txDeleteOne)),
+              if (onEdit != null) PopupMenuItem(value: 'edit', child: Text(l10n.commonEdit)),
+              if (onDelete != null) PopupMenuItem(value: 'delete', child: Text(l10n.txDeleteOne)),
             ],
           ),
       ],
@@ -170,6 +174,9 @@ Widget _metaBadge(BuildContext context, String label, Color color) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
     decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(4)),
-    child: Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color)),
+    child: Text(
+      label,
+      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color),
+    ),
   );
 }

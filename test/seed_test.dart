@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,6 +28,10 @@ void main() {
     expect(trips, hasLength(1));
     final transactions = await db.select(db.transactionsTable).get();
     expect(transactions, hasLength(217));
+    final rules = await db.select(db.categoryRulesTable).get();
+    expect(rules, hasLength(68));
+    expect(rules.every((r) => r.categoryName != null && r.categoryName!.isNotEmpty), isTrue);
+    expect(rules.firstWhere((r) => r.keyword == 'uber').categoryName, 'Transporte');
   });
 
   test('does not reseed on a second call at the same version', () async {
@@ -44,6 +49,7 @@ void main() {
       raw['version'] = (raw['version'] as int) + 1;
       return jsonEncode(raw);
     }
+
     final seededAgain = await ensureSeeded(db, loadJson: loadBumpedVersion);
     expect(seededAgain, true);
   });

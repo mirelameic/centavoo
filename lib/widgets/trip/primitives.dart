@@ -1,9 +1,9 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:centavoo/category_icons.dart';
-import 'package:centavoo/format.dart';
+import 'package:centavoo/widgets/category_icons.dart';
+import 'package:centavoo/logic/format.dart';
 import 'package:centavoo/models/category.dart';
-import 'package:centavoo/theme.dart';
+import 'package:centavoo/core/theme.dart';
 
 class LegendRow {
   final String key;
@@ -16,7 +16,11 @@ class LegendRow {
 }
 
 Widget categoryDot(Color color) {
-  return Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle));
+  return Container(
+    width: 10,
+    height: 10,
+    decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+  );
 }
 
 const hiddenAxis = AxisTitles(sideTitles: SideTitles(showTitles: false));
@@ -61,7 +65,9 @@ DropdownMenuItem<String> categoryDropdownItem(
       children: [
         Icon(categoryIcon(category.icon) ?? Icons.category_outlined, size: iconSize, color: hexColor(category.color)),
         SizedBox(width: spacing),
-        Text(category.name, style: textStyle),
+        Flexible(
+          child: Text(category.name, style: textStyle, overflow: TextOverflow.ellipsis),
+        ),
       ],
     ),
   );
@@ -83,10 +89,7 @@ Widget categoryChip(BuildContext context, {required Color color, required String
     children: [
       categoryDot(color),
       const SizedBox(width: 6),
-      if (iconData != null) ...[
-        Icon(iconData, size: 14, color: Theme.of(context).hintColor),
-        const SizedBox(width: 6),
-      ],
+      if (iconData != null) ...[Icon(iconData, size: 14, color: Theme.of(context).hintColor), const SizedBox(width: 6)],
       Text(name, style: const TextStyle(fontSize: 14)),
     ],
   );
@@ -173,7 +176,11 @@ Widget donutChart(
             ],
           ),
         ),
-        Text(centerLabel, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        Text(
+          centerLabel,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
       ],
     ),
   );
@@ -188,7 +195,9 @@ Widget summaryRow(
   final hintColor = Theme.of(context).hintColor;
   return Container(
     padding: const EdgeInsets.symmetric(vertical: 12),
-    decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor))),
+    decoration: BoxDecoration(
+      border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
+    ),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -197,11 +206,17 @@ Widget summaryRow(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              DefaultTextStyle.merge(style: const TextStyle(fontWeight: FontWeight.w600), child: leading),
+              DefaultTextStyle.merge(
+                style: const TextStyle(fontWeight: FontWeight.w600),
+                child: leading,
+              ),
               for (final line in metaLines)
                 Padding(
                   padding: const EdgeInsets.only(top: 2),
-                  child: DefaultTextStyle.merge(style: TextStyle(fontSize: 12, color: hintColor), child: line),
+                  child: DefaultTextStyle.merge(
+                    style: TextStyle(fontSize: 12, color: hintColor),
+                    child: line,
+                  ),
                 ),
             ],
           ),
@@ -224,7 +239,9 @@ Widget legendList(BuildContext context, {required String currency, required List
             padding: const EdgeInsets.symmetric(vertical: 3),
             child: Row(
               children: [
-                Expanded(child: categoryChip(context, color: r.color, name: r.label, icon: r.icon)),
+                Expanded(
+                  child: categoryChip(context, color: r.color, name: r.label, icon: r.icon),
+                ),
                 const SizedBox(width: 12),
                 Text(
                   money(r.amount, currency: currency),

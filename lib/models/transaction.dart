@@ -14,7 +14,6 @@ class Transaction {
   final String kind;
   final bool isIof;
   final int splitCount;
-  final String createdAt;
 
   Transaction({
     required this.id,
@@ -27,6 +26,5 @@ class Transaction {
     required this.kind,
     required this.isIof,
     required this.splitCount,
-    required this.createdAt,
   });
 }

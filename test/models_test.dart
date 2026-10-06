@@ -15,7 +15,6 @@ void main() {
       currency: 'BRL',
       cities: {'2026-01-01': 'Tokyo'},
       cityList: ['Tokyo'],
-      createdAt: '2026-01-01T00:00:00Z',
     );
     expect(trip.id, 't1');
     expect(trip.cities, {'2026-01-01': 'Tokyo'});
@@ -23,7 +22,7 @@ void main() {
   });
 
   test('Trip.cities defaults to an empty map', () {
-    final trip = Trip(id: 't1', name: 'Japan', currency: 'BRL', createdAt: '2026-01-01T00:00:00Z');
+    final trip = Trip(id: 't1', name: 'Japan', currency: 'BRL');
     expect(trip.cities, <String, String>{});
   });
 
@@ -45,7 +44,6 @@ void main() {
       kind: kindExpense,
       isIof: false,
       splitCount: 1,
-      createdAt: '2026-01-01T00:00:00Z',
     );
     expect(tx.period, periodDuring);
     expect(tx.kind, kindExpense);

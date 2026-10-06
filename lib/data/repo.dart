@@ -1,7 +1,8 @@
 import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:centavoo/data/database.dart';
-import 'package:centavoo/models/transaction.dart' show periodBefore, periodDuring;
+import 'package:centavoo/logic/format.dart';
 
 class DefaultCategory {
   final String name;
@@ -33,20 +34,24 @@ Future<String> createTrip(
   String currency = 'BRL',
 }) async {
   final id = _newId('trip');
-  final existingOrders = await (db.selectOnly(db.tripsTable)..addColumns([db.tripsTable.sortOrder]))
-      .map((row) => row.read(db.tripsTable.sortOrder)!)
-      .get();
+  final existingOrders = await (db.selectOnly(
+    db.tripsTable,
+  )..addColumns([db.tripsTable.sortOrder])).map((row) => row.read(db.tripsTable.sortOrder)!).get();
   final minOrder = existingOrders.isEmpty ? 0 : existingOrders.reduce((a, b) => a < b ? a : b) - 1;
-  await db.into(db.tripsTable).insert(TripsTableCompanion.insert(
-        id: id,
-        name: name,
-        destination: Value(destination),
-        startDate: Value(startDate),
-        endDate: Value(endDate),
-        currency: currency,
-        createdAt: DateTime.now().toIso8601String(),
-        sortOrder: Value(minOrder),
-      ));
+  await db
+      .into(db.tripsTable)
+      .insert(
+        TripsTableCompanion.insert(
+          id: id,
+          name: name,
+          destination: Value(destination),
+          startDate: Value(startDate),
+          endDate: Value(endDate),
+          currency: currency,
+          createdAt: DateTime.now().toIso8601String(),
+          sortOrder: Value(minOrder),
+        ),
+      );
   await db.batch((batch) {
     batch.insertAll(db.categoriesTable, [
       for (var i = 0; i < defaultCategories.length; i++)
@@ -75,23 +80,17 @@ Future<void> _swapTripOrder(AppDatabase db, String tripId, int direction) async 
   final current = trips[index];
   final target = trips[targetIndex];
   await db.transaction(() async {
-    await (db.update(db.tripsTable)..where((t) => t.id.equals(current.id)))
-        .write(TripsTableCompanion(sortOrder: Value(target.sortOrder)));
-    await (db.update(db.tripsTable)..where((t) => t.id.equals(target.id)))
-        .write(TripsTableCompanion(sortOrder: Value(current.sortOrder)));
+    await (db.update(
+      db.tripsTable,
+    )..where((t) => t.id.equals(current.id))).write(TripsTableCompanion(sortOrder: Value(target.sortOrder)));
+    await (db.update(
+      db.tripsTable,
+    )..where((t) => t.id.equals(target.id))).write(TripsTableCompanion(sortOrder: Value(current.sortOrder)));
   });
 }
 
 Future<void> deleteTrip(AppDatabase db, String id) async {
   await db.transaction(() async {
-    final catIds = await (db.selectOnly(db.categoriesTable)
-          ..addColumns([db.categoriesTable.id])
-          ..where(db.categoriesTable.tripId.equals(id)))
-        .map((row) => row.read(db.categoriesTable.id)!)
-        .get();
-    if (catIds.isNotEmpty) {
-      await (db.delete(db.categoryRulesTable)..where((r) => r.categoryId.isIn(catIds))).go();
-    }
     await (db.delete(db.transactionsTable)..where((t) => t.tripId.equals(id))).go();
     await (db.delete(db.categoriesTable)..where((c) => c.tripId.equals(id))).go();
     await (db.delete(db.tripsTable)..where((t) => t.id.equals(id))).go();
@@ -110,8 +109,9 @@ Future<void> setTripCityRange(AppDatabase db, String tripId, List<String> days, 
       cities.remove(d);
     }
   }
-  await (db.update(db.tripsTable)..where((t) => t.id.equals(tripId)))
-      .write(TripsTableCompanion(citiesJson: Value(jsonEncode(cities))));
+  await (db.update(
+    db.tripsTable,
+  )..where((t) => t.id.equals(tripId))).write(TripsTableCompanion(citiesJson: Value(jsonEncode(cities))));
 }
 
 Future<void> updateTripDetails(
@@ -121,6 +121,7 @@ Future<void> updateTripDetails(
   String? destination,
   String? startDate,
   String? endDate,
+  String? currency,
 }) async {
   await (db.update(db.tripsTable)..where((t) => t.id.equals(tripId))).write(
     TripsTableCompanion(
@@ -128,6 +129,7 @@ Future<void> updateTripDetails(
       destination: Value(destination),
       startDate: Value(startDate),
       endDate: Value(endDate),
+      currency: currency == null ? const Value.absent() : Value(currency),
     ),
   );
 }
@@ -137,15 +139,16 @@ Future<void> updateTransaction(AppDatabase db, String id, TransactionsTableCompa
 }
 
 Future<void> updateTripCityList(AppDatabase db, String tripId, List<String> cityList) async {
-  await (db.update(db.tripsTable)..where((t) => t.id.equals(tripId)))
-      .write(TripsTableCompanion(cityListJson: Value(jsonEncode(cityList))));
+  await (db.update(
+    db.tripsTable,
+  )..where((t) => t.id.equals(tripId))).write(TripsTableCompanion(cityListJson: Value(jsonEncode(cityList))));
 }
 
 Future<String> addTransaction(AppDatabase db, TransactionsTableCompanion data) async {
   final id = _newId('tx');
-  await db.into(db.transactionsTable).insert(
-        data.copyWith(id: Value(id), createdAt: Value(DateTime.now().toIso8601String())),
-      );
+  await db
+      .into(db.transactionsTable)
+      .insert(data.copyWith(id: Value(id), createdAt: Value(DateTime.now().toIso8601String())));
   return id;
 }
 
@@ -154,8 +157,7 @@ Future<List<String>> bulkAddTransactions(AppDatabase db, List<TransactionsTableC
   final ids = [for (var i = 0; i < rows.length; i++) _newId('tx_$i')];
   await db.batch((batch) {
     batch.insertAll(db.transactionsTable, [
-      for (var i = 0; i < rows.length; i++)
-        rows[i].copyWith(id: Value(ids[i]), createdAt: Value(createdAt)),
+      for (var i = 0; i < rows.length; i++) rows[i].copyWith(id: Value(ids[i]), createdAt: Value(createdAt)),
     ]);
   });
   return ids;
@@ -169,20 +171,16 @@ Future<void> deleteTransactions(AppDatabase db, List<String> ids) async {
   await (db.delete(db.transactionsTable)..where((t) => t.id.isIn(ids))).go();
 }
 
-String? _periodForDate(String? date, String startDate) {
-  if (date == null) return null;
-  return date.compareTo(startDate) < 0 ? periodBefore : periodDuring;
-}
-
 Future<void> reassignTransactionPeriods(AppDatabase db, String tripId, String? startDate) async {
   if (startDate == null) return;
   final rows = await (db.select(db.transactionsTable)..where((t) => t.tripId.equals(tripId))).get();
   await db.transaction(() async {
     for (final row in rows) {
-      final period = _periodForDate(row.date, startDate);
+      final period = periodForDate(row.date, startDate);
       if (period != null && period != row.period) {
-        await (db.update(db.transactionsTable)..where((t) => t.id.equals(row.id)))
-            .write(TransactionsTableCompanion(period: Value(period)));
+        await (db.update(
+          db.transactionsTable,
+        )..where((t) => t.id.equals(row.id))).write(TransactionsTableCompanion(period: Value(period)));
       }
     }
   });
@@ -199,26 +197,37 @@ Future<String> addCategory(
   final id = _newId('cat');
   final existing = await (db.select(db.categoriesTable)..where((c) => c.tripId.equals(tripId))).get();
   final maxOrder = existing.fold<int>(-1, (m, c) => c.sortOrder > m ? c.sortOrder : m);
-  await db.into(db.categoriesTable).insert(CategoriesTableCompanion.insert(
-        id: id,
-        tripId: tripId,
-        name: name,
-        color: color,
-        icon: Value(icon),
-        sortOrder: sortOrder ?? maxOrder + 1,
-      ));
+  await db
+      .into(db.categoriesTable)
+      .insert(
+        CategoriesTableCompanion.insert(
+          id: id,
+          tripId: tripId,
+          name: name,
+          color: color,
+          icon: Value(icon),
+          sortOrder: sortOrder ?? maxOrder + 1,
+        ),
+      );
   return id;
 }
 
 Future<void> updateCategory(AppDatabase db, String id, CategoriesTableCompanion patch) async {
-  await (db.update(db.categoriesTable)..where((c) => c.id.equals(id))).write(patch);
+  await db.transaction(() async {
+    await (db.update(db.categoriesTable)..where((c) => c.id.equals(id))).write(patch);
+    if (patch.name.present) {
+      await (db.update(db.categoryRulesTable)..where((r) => r.categoryId.equals(id))).write(
+        CategoryRulesTableCompanion(categoryName: Value(patch.name.value)),
+      );
+    }
+  });
 }
 
 Future<void> deleteCategory(AppDatabase db, String id) async {
   await db.transaction(() async {
-    await (db.update(db.transactionsTable)..where((t) => t.categoryId.equals(id)))
-        .write(const TransactionsTableCompanion(categoryId: Value(null)));
-    await (db.delete(db.categoryRulesTable)..where((r) => r.categoryId.equals(id))).go();
+    await (db.update(
+      db.transactionsTable,
+    )..where((t) => t.categoryId.equals(id))).write(const TransactionsTableCompanion(categoryId: Value(null)));
     await (db.delete(db.categoriesTable)..where((c) => c.id.equals(id))).go();
   });
 }

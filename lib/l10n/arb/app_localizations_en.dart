@@ -13,9 +13,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Centavoo';
 
   @override
-  String get loading => 'Preparing your data…';
-
-  @override
   String get error => 'Failed to load data.';
 
   @override
@@ -55,6 +52,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get formDates => 'Dates';
 
   @override
+  String get formCurrency => 'Currency';
+
+  @override
   String get formDatesPlaceholder => 'start – end';
 
   @override
@@ -82,6 +82,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get kpiRefunds => 'Refunds';
 
   @override
+  String get kpiIofRefunds => 'IOF refunds';
+
+  @override
   String get kpiBefore => 'Before';
 
   @override
@@ -91,6 +94,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get kpiAvgPerDay => 'Avg/day';
 
   @override
+  String get statsNoCategory => 'No category';
+
+  @override
+  String get statsIofRefund => 'IOF refund';
+
+  @override
   String get tabSummary => 'Summary';
 
   @override
@@ -98,12 +107,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tabTransactions => 'Transactions';
-
-  @override
-  String get chartBefore => 'Before';
-
-  @override
-  String get chartDuring => 'During';
 
   @override
   String get chartNoDated => 'No dated expenses in this period.';
@@ -148,12 +151,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cityUnassignedN => 'day(s) without a city';
 
   @override
-  String get cityRemoveBlockConfirm =>
-      'Remove this period? Those days will be left without a city.';
+  String get cityRemoveBlockConfirm => 'Remove this period? Those days will be left without a city.';
 
   @override
-  String get cityRemoveUsedWarning =>
-      'Removing it will also clear those days. Continue?';
+  String get cityRemoveUsedWarning => 'Removing it will also clear those days. Continue?';
 
   @override
   String get txDeleteSelected => 'Delete selected';
@@ -172,27 +173,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get txFilterDatePlaceholder => 'any date';
-
-  @override
-  String get txDateModeDay => 'Day';
-
-  @override
-  String get txDateModeRange => 'Range';
-
-  @override
-  String get txFilterCategory => 'Category';
-
-  @override
-  String get txFilterCategoryPlaceholder => 'all categories';
-
-  @override
-  String get txFilterCity => 'City';
-
-  @override
-  String get txFilterCityPlaceholder => 'all cities';
-
-  @override
-  String get txFilterPeriod => 'Period';
 
   @override
   String get txPeriodAll => 'All';
@@ -309,8 +289,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get catEmpty => 'No categories.';
 
   @override
-  String get catDeleteConfirm =>
-      'Delete category? Its transactions will be left uncategorized.';
+  String get catDeleteConfirm => 'Delete category? Its transactions will be left uncategorized.';
 
   @override
   String get backupExportedOk => 'Backup exported.';
@@ -374,25 +353,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cityFilter => 'Filter by category';
 
   @override
-  String get cityFilterPlaceholder => 'all categories';
-
-  @override
   String get secSplit => 'Shared vs your share';
 
   @override
-  String get colDays => 'Days';
-
-  @override
-  String get colTotal => 'Total';
-
-  @override
   String get colAvgDay => 'Avg/day';
-
-  @override
-  String get colTopCat => 'Top category';
-
-  @override
-  String get colCount => 'Count';
 
   @override
   String get colEntry => 'transaction';
@@ -432,8 +396,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txImportPasteLabel => 'Paste your data here';
 
   @override
-  String get txImportPastePlaceholder =>
-      '03/12/2026\tUber\t45.90\n03/13/2026\tBakery\t12.00';
+  String get txImportPastePlaceholder => '03/12/2026\tUber\t45.90\n03/13/2026\tBakery\t12.00';
 
   @override
   String get txImportUploadButton => 'Or choose a file (.csv)';
@@ -457,8 +420,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txImportContinue => 'Continue';
 
   @override
-  String get txImportNoRows =>
-      'Couldn\'t find any data rows. Check the pasted text or the file.';
+  String get txImportNoRows => 'Couldn\'t find any data rows. Check the pasted text or the file.';
 
   @override
   String get txImportBack => 'Back';
@@ -484,6 +446,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txImportRowOk => 'ok';
 
   @override
+  String get txImportRowDuplicate => 'already imported';
+
+  @override
   String get txImportErrAmount => 'invalid amount';
 
   @override
@@ -497,6 +462,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get txImportRowsSkipped => 'with issues (will not be imported)';
+
+  @override
+  String get txImportRowsDuplicate => 'already imported (unchecked)';
 
   @override
   String get txImportConfirmButton => 'Import';

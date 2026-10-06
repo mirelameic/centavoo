@@ -1,6 +1,5 @@
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
-import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:centavoo/data/database.dart';
@@ -9,6 +8,8 @@ import 'package:centavoo/models/category.dart';
 import 'package:centavoo/models/transaction.dart';
 import 'package:centavoo/screens/trip/transactions_tab.dart';
 import 'package:centavoo/widgets/trip/tx_row.dart';
+
+import 'helpers.dart';
 
 Transaction tx({
   required String id,
@@ -29,7 +30,6 @@ Transaction tx({
     kind: kindExpense,
     isIof: false,
     splitCount: 1,
-    createdAt: '2026-01-01T00:00:00Z',
   );
 }
 
@@ -44,18 +44,19 @@ void main() {
 
   testWidgets('shows the results count and total for the given transactions', (tester) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
-    final txs = [
-      tx(id: '1', description: 'Jantar', amount: 100),
-      tx(id: '2', description: 'Hotel', amount: 200),
-    ];
+    final txs = [tx(id: '1', description: 'Jantar', amount: 100), tx(id: '2', description: 'Hotel', amount: 200)];
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, 
-      home: Scaffold(
-        body: CustomScrollView(slivers: [
-          TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
-        ]),
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
+            ],
+          ),
+        ),
       ),
-    ));
+    );
 
     expect(find.text('2 resultado(s) · R\$ 300,00'), findsOneWidget);
     expect(find.text('Jantar'), findsOneWidget);
@@ -65,17 +66,19 @@ void main() {
 
   testWidgets('only builds the visible rows out of a large transaction list (virtualized)', (tester) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
-    final txs = [
-      for (var i = 0; i < 300; i++) tx(id: '$i', description: 'Item $i', amount: 10),
-    ];
+    final txs = [for (var i = 0; i < 300; i++) tx(id: '$i', description: 'Item $i', amount: 10)];
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(
-        body: CustomScrollView(slivers: [
-          TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
-        ]),
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
+            ],
+          ),
+        ),
       ),
-    ));
+    );
 
     final builtRows = find.byType(TxRow).evaluate().length;
     expect(builtRows, greaterThan(0));
@@ -91,13 +94,17 @@ void main() {
     ];
     final cities = {'2026-05-01': 'Lisboa', '2026-05-02': 'Porto'};
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(
-        body: CustomScrollView(slivers: [
-          TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: cities, currency: 'BRL'),
-        ]),
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: cities, currency: 'BRL'),
+            ],
+          ),
+        ),
       ),
-    ));
+    );
 
     await tester.tap(find.widgetWithText(FilterChip, 'Lisboa'));
     await tester.pump();
@@ -114,18 +121,19 @@ void main() {
       tx(id: '2', description: 'TxDurante', amount: 100, period: periodDuring),
     ];
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(
-        body: CustomScrollView(slivers: [
-          TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
-        ]),
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
+            ],
+          ),
+        ),
       ),
-    ));
+    );
 
-    await tester.tap(find.descendant(
-      of: find.byType(SegmentedButton<String?>),
-      matching: find.text('Antes'),
-    ));
+    await tester.tap(find.descendant(of: find.byType(SegmentedButton<String?>), matching: find.text('Antes')));
     await tester.pump();
 
     expect(find.text('TxAntes'), findsOneWidget);
@@ -135,18 +143,19 @@ void main() {
 
   testWidgets('clear filters button resets the search and shows every transaction again', (tester) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
-    final txs = [
-      tx(id: '1', description: 'Jantar', amount: 100),
-      tx(id: '2', description: 'Hotel', amount: 200),
-    ];
+    final txs = [tx(id: '1', description: 'Jantar', amount: 100), tx(id: '2', description: 'Hotel', amount: 200)];
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(
-        body: CustomScrollView(slivers: [
-          TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
-        ]),
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
+            ],
+          ),
+        ),
       ),
-    ));
+    );
 
     await tester.enterText(find.byType(TextField), 'jan');
     await tester.pump();
@@ -167,15 +176,19 @@ void main() {
       tx(id: '2', description: 'Caro', amount: 500, date: '2026-05-02'),
     ];
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(
-        body: CustomScrollView(slivers: [
-          TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
-        ]),
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
+            ],
+          ),
+        ),
       ),
-    ));
+    );
 
-    await tester.tap(find.byType(DropdownButton<String?>));
+    await tester.tap(find.text('Padrão'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Valor'));
     await tester.pumpAndSettle();
@@ -195,18 +208,19 @@ void main() {
 
   testWidgets('selecting all rows and clearing the selection', (tester) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
-    final txs = [
-      tx(id: '1', description: 'Jantar', amount: 100),
-      tx(id: '2', description: 'Hotel', amount: 200),
-    ];
+    final txs = [tx(id: '1', description: 'Jantar', amount: 100), tx(id: '2', description: 'Hotel', amount: 200)];
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(
-        body: CustomScrollView(slivers: [
-          TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
-        ]),
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
+            ],
+          ),
+        ),
       ),
-    ));
+    );
 
     await tester.tap(find.text('Selecionar'));
     await tester.pump();
@@ -224,18 +238,19 @@ void main() {
 
   testWidgets('tapping a selected row again deselects it', (tester) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
-    final txs = [
-      tx(id: '1', description: 'Jantar', amount: 100),
-      tx(id: '2', description: 'Hotel', amount: 200),
-    ];
+    final txs = [tx(id: '1', description: 'Jantar', amount: 100), tx(id: '2', description: 'Hotel', amount: 200)];
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(
-        body: CustomScrollView(slivers: [
-          TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
-        ]),
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
+            ],
+          ),
+        ),
       ),
-    ));
+    );
 
     await tester.tap(find.text('Selecionar'));
     await tester.pump();
@@ -251,18 +266,19 @@ void main() {
 
   testWidgets('typing in the search box filters by description', (tester) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
-    final txs = [
-      tx(id: '1', description: 'Jantar', amount: 100),
-      tx(id: '2', description: 'Hotel', amount: 200),
-    ];
+    final txs = [tx(id: '1', description: 'Jantar', amount: 100), tx(id: '2', description: 'Hotel', amount: 200)];
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, 
-      home: Scaffold(
-        body: CustomScrollView(slivers: [
-          TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
-        ]),
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
+            ],
+          ),
+        ),
       ),
-    ));
+    );
 
     await tester.enterText(find.byType(TextField), 'jan');
     await tester.pump();
@@ -281,20 +297,24 @@ void main() {
       tx(id: '2', description: 'Hotel', amount: 200, categoryId: 'c2'),
     ];
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, 
-      home: Scaffold(
-        body: CustomScrollView(slivers: [
-          TransactionsTab(
-            db: db,
-            txs: txs,
-            catById: {for (final c in cats) c.id: c},
-            cats: cats,
-            cities: const {},
-            currency: 'BRL',
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              TransactionsTab(
+                db: db,
+                txs: txs,
+                catById: {for (final c in cats) c.id: c},
+                cats: cats,
+                cities: const {},
+                currency: 'BRL',
+              ),
+            ],
           ),
-        ]),
+        ),
       ),
-    ));
+    );
 
     await tester.tap(find.widgetWithText(FilterChip, 'Comida'));
     await tester.pump();
@@ -307,26 +327,47 @@ void main() {
   testWidgets('selecting rows and bulk-deleting removes them from the database', (tester) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     final tripId = await createTrip(db, name: 'Japan');
-    final id1 = await addTransaction(db, TransactionsTableCompanion.insert(
-      id: '', tripId: tripId, period: 'DURING', description: 'Jantar', amount: 100,
-      kind: 'EXPENSE', isIof: false, splitCount: 1, createdAt: '',
-    ));
-    final id2 = await addTransaction(db, TransactionsTableCompanion.insert(
-      id: '', tripId: tripId, period: 'DURING', description: 'Hotel', amount: 200,
-      kind: 'EXPENSE', isIof: false, splitCount: 1, createdAt: '',
-    ));
-    final txs = [
-      tx(id: id1, description: 'Jantar', amount: 100),
-      tx(id: id2, description: 'Hotel', amount: 200),
-    ];
-
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, 
-      home: Scaffold(
-        body: CustomScrollView(slivers: [
-          TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
-        ]),
+    final id1 = await addTransaction(
+      db,
+      TransactionsTableCompanion.insert(
+        id: '',
+        tripId: tripId,
+        period: 'DURING',
+        description: 'Jantar',
+        amount: 100,
+        kind: 'EXPENSE',
+        isIof: false,
+        splitCount: 1,
+        createdAt: '',
       ),
-    ));
+    );
+    final id2 = await addTransaction(
+      db,
+      TransactionsTableCompanion.insert(
+        id: '',
+        tripId: tripId,
+        period: 'DURING',
+        description: 'Hotel',
+        amount: 200,
+        kind: 'EXPENSE',
+        isIof: false,
+        splitCount: 1,
+        createdAt: '',
+      ),
+    );
+    final txs = [tx(id: id1, description: 'Jantar', amount: 100), tx(id: id2, description: 'Hotel', amount: 200)];
+
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
+            ],
+          ),
+        ),
+      ),
+    );
 
     await tester.tap(find.text('Selecionar'));
     await tester.pump();
@@ -349,19 +390,33 @@ void main() {
   testWidgets('deleting a single row via its menu removes it after confirmation', (tester) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     final tripId = await createTrip(db, name: 'Japan');
-    final id1 = await addTransaction(db, TransactionsTableCompanion.insert(
-      id: '', tripId: tripId, period: 'DURING', description: 'Jantar', amount: 100,
-      kind: 'EXPENSE', isIof: false, splitCount: 1, createdAt: '',
-    ));
+    final id1 = await addTransaction(
+      db,
+      TransactionsTableCompanion.insert(
+        id: '',
+        tripId: tripId,
+        period: 'DURING',
+        description: 'Jantar',
+        amount: 100,
+        kind: 'EXPENSE',
+        isIof: false,
+        splitCount: 1,
+        createdAt: '',
+      ),
+    );
     final txs = [tx(id: id1, description: 'Jantar', amount: 100)];
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, 
-      home: Scaffold(
-        body: CustomScrollView(slivers: [
-          TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
-        ]),
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              TransactionsTab(db: db, txs: txs, catById: const {}, cats: const [], cities: const {}, currency: 'BRL'),
+            ],
+          ),
+        ),
       ),
-    ));
+    );
 
     await tester.tap(find.byIcon(Icons.more_vert));
     await tester.pumpAndSettle();

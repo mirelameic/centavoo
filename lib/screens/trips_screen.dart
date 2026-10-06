@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:centavoo/confirm.dart';
+import 'package:centavoo/widgets/confirm.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/mappers.dart';
 import 'package:centavoo/data/repo.dart';
-import 'package:centavoo/format.dart';
+import 'package:centavoo/logic/format.dart';
+import 'package:centavoo/widgets/date_pickers.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
-import 'package:centavoo/stats/stats.dart';
-import 'package:centavoo/theme.dart';
+import 'package:centavoo/logic/stats.dart';
+import 'package:centavoo/core/theme.dart';
+import 'package:centavoo/widgets/currency_dropdown.dart';
 import 'package:centavoo/widgets/trip/trip_edit_form.dart';
 
 const _containerMaxWidth = 1140.0;
@@ -151,7 +153,10 @@ class _TripsScreenState extends State<TripsScreen> {
   }
 
   void _openNewTripDialog(BuildContext context, AppDatabase db) {
-    showDialog(context: context, builder: (_) => _NewTripDialog(db: db));
+    showDialog(
+      context: context,
+      builder: (_) => _NewTripDialog(db: db),
+    );
   }
 
   void _showTripActions(
@@ -173,7 +178,10 @@ class _TripsScreenState extends State<TripsScreen> {
               title: Text(l10n.commonEdit),
               onTap: () {
                 Navigator.of(sheetContext).pop();
-                showDialog(context: context, builder: (_) => TripEditForm(db: db, trip: tripFromRow(trip)));
+                showDialog(
+                  context: context,
+                  builder: (_) => TripEditForm(db: db, trip: tripFromRow(trip)),
+                );
               },
             ),
             ListTile(
@@ -252,7 +260,7 @@ class _TripCard extends StatelessWidget {
               ],
               const SizedBox(height: 4),
               Text(
-                '${fmtDate(trip.startDate)} – ${fmtDate(trip.endDate)}',
+                fmtDateRange(trip.startDate, trip.endDate),
                 style: TextStyle(fontSize: 13, color: Theme.of(context).hintColor),
               ),
               const SizedBox(height: 12),
@@ -274,7 +282,10 @@ class _TripCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text(money(net, currency: trip.currency), style: const TextStyle(fontWeight: FontWeight.w700)),
+                  Text(
+                    money(net, currency: trip.currency),
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
                 ],
               ),
             ],
@@ -296,22 +307,26 @@ class _NewTripDialog extends StatefulWidget {
 class _NewTripDialogState extends State<_NewTripDialog> {
   final _nameController = TextEditingController();
   final _destinationController = TextEditingController();
+  final _rangeController = TextEditingController();
   DateTimeRange? _range;
+  String _currency = 'BRL';
 
   @override
   void dispose() {
     _nameController.dispose();
     _destinationController.dispose();
+    _rangeController.dispose();
     super.dispose();
   }
 
   Future<void> _pickRange() async {
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-    );
-    if (picked != null) setState(() => _range = picked);
+    final picked = await pickDateRange(context, initial: _range);
+    if (picked != null) {
+      setState(() {
+        _range = picked;
+        _rangeController.text = fmtPickedRange(picked);
+      });
+    }
   }
 
   Future<void> _create() async {
@@ -323,6 +338,7 @@ class _NewTripDialogState extends State<_NewTripDialog> {
       destination: _destinationController.text.trim().isEmpty ? null : _destinationController.text.trim(),
       startDate: _range == null ? null : isoDate(_range!.start),
       endDate: _range == null ? null : isoDate(_range!.end),
+      currency: _currency,
     );
     if (mounted) Navigator.of(context).pop();
   }
@@ -352,20 +368,21 @@ class _NewTripDialogState extends State<_NewTripDialog> {
             TextField(
               readOnly: true,
               onTap: _pickRange,
-              controller: TextEditingController(
-                text: _range == null ? '' : '${fmtDate(isoDate(_range!.start))} – ${fmtDate(isoDate(_range!.end))}',
-              ),
+              controller: _rangeController,
               decoration: InputDecoration(labelText: l10n.formDates, hintText: l10n.formDatesPlaceholder),
+            ),
+            const SizedBox(height: 12),
+            currencyDropdown(
+              label: l10n.formCurrency,
+              value: _currency,
+              onChanged: (v) => setState(() => _currency = v),
             ),
           ],
         ),
       ),
       actions: [
         TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.commonCancel)),
-        ElevatedButton(
-          onPressed: _nameController.text.trim().isEmpty ? null : _create,
-          child: Text(l10n.commonCreate),
-        ),
+        ElevatedButton(onPressed: _nameController.text.trim().isEmpty ? null : _create, child: Text(l10n.commonCreate)),
       ],
     );
   }

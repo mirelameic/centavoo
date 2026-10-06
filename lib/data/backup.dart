@@ -9,12 +9,7 @@ class ImportResult {
   final int transactions;
   final int rules;
 
-  const ImportResult({
-    required this.trips,
-    required this.categories,
-    required this.transactions,
-    required this.rules,
-  });
+  const ImportResult({required this.trips, required this.categories, required this.transactions, required this.rules});
 }
 
 Future<String> exportBackupJson(AppDatabase db) async {
@@ -74,6 +69,7 @@ Future<ImportResult> importBackupJson(AppDatabase db, String jsonStr) async {
     }
     if (rules.isNotEmpty) {
       await db.batch((b) => b.insertAll(db.categoryRulesTable, rules, mode: InsertMode.insertOrReplace));
+      await db.backfillRuleCategoryNames();
     }
   });
 

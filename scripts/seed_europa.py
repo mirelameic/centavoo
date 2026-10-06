@@ -35,19 +35,17 @@ TRIP_ID = "trip_europa_2025"  # internal id (kept stable for upsert); display na
 YEAR = 2026
 NOW = datetime.now().isoformat(timespec="seconds")
 
-# --- categories (id, name, color, emoji) --------------------------------------
-# Colors for Transporte..Outros are the same ones Mirela used in the spreadsheet.
 CATEGORIES = [
-    ("cat_hospedagem", "Hospedagem", "#0CA678", "🏨"),
-    ("cat_passagem", "Passagem", "#4263EB", "✈️"),
-    ("cat_transporte", "Transporte", "#FF9900", "🚕"),
-    ("cat_alimentacao", "Alimentação", "#9900FF", "🍽️"),
-    ("cat_compras", "Compras", "#4A86E8", "🛍️"),
-    ("cat_brindes", "Brindes", "#00B5C7", "🎁"),  # her cyan (00FFFF) darkened for contrast
-    ("cat_turismo", "Turismo", "#E6B800", "🎟️"),  # her yellow (FFFF00) darkened
-    ("cat_genericos", "Genéricos de viagem", "#FF0000", "🧳"),
-    ("cat_cannabis", "Cannabis", "#00C000", "🌿"),  # her green (00FF00) darkened
-    ("cat_outros", "Outros", "#FF00FF", "🔖"),
+    ("cat_hospedagem", "Hospedagem", "#0E8C6B", "bed"),
+    ("cat_passagem", "Passagem", "#B8860B", "plane"),
+    ("cat_transporte", "Transporte", "#C2540D", "car"),
+    ("cat_alimentacao", "Alimentação", "#C1352E", "food"),
+    ("cat_compras", "Compras", "#B23368", "shopping"),
+    ("cat_brindes", "Brindes", "#7D1F44", "gift"),
+    ("cat_turismo", "Turismo", "#8A7220", "ticket"),
+    ("cat_genericos", "Genéricos de viagem", "#7A4A2A", "luggage"),
+    ("cat_cannabis", "Cannabis", "#3D8B4C", "leaf"),
+    ("cat_outros", "Outros", "#5C5650", "bookmark"),
 ]
 
 # Font color (ARGB in the spreadsheet) -> category id, for the `during` sheet.
@@ -79,7 +77,7 @@ def add_tx(period, date, description, amount, category_id, kind, is_iof, split_c
             "description": str(description).strip(),
             "amount": round(float(amount), 2),  # signed: expense +, refund -
             "categoryId": category_id,
-            "kind": kind,                       # EXPENSE | REFUND | IOF_REFUND
+            "kind": kind,
             "isIof": is_iof,
             "splitCount": int(split_count),     # 1 = no split; full amount stays in `amount`
             "city": city,                       # where the transaction happened (null for BEFORE)
@@ -124,7 +122,7 @@ def main():
         if val is None or not label:
             continue
         if val < 0:
-            add_tx("BEFORE", None, label, val, "cat_outros", "REFUND", False, 1, None, label)
+            add_tx("BEFORE", None, label, val, None, "REFUND", False, 1, None, label)
         else:
             add_tx("BEFORE", None, label, val, "cat_genericos", "EXPENSE", False, 1, None, label)
 
@@ -179,7 +177,7 @@ def main():
 
             if str(label).strip().lower().startswith("iof"):
                 # IOF refund line (negative value, no color)
-                add_tx("DURING", date, label, val, None, "IOF_REFUND", True, 1, city, label)
+                add_tx("DURING", date, label, val, None, "REFUND", True, 1, city, label)
             else:
                 rgb = font_rgb(cell)
                 cat = FONT_TO_CAT.get(rgb)
@@ -251,8 +249,9 @@ def main():
         "cities": cities,
         "createdAt": NOW,
     }
+    previous_version = json.loads(OUT.read_text(encoding="utf-8"))["version"] if OUT.exists() else 0
     payload = {
-        "version": 4,
+        "version": previous_version + 1,
         "generatedFrom": "gastos-europa.xlsx",
         "categories": [
             {"id": i, "tripId": TRIP_ID, "name": n, "color": c, "icon": e, "sortOrder": idx}

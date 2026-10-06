@@ -1,32 +1,32 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:centavoo/models/category.dart';
 import 'package:centavoo/models/transaction.dart';
-import 'package:centavoo/stats/stats.dart';
+import 'package:centavoo/logic/stats.dart';
 
 Category categoryFromJson(Map<String, dynamic> j) => Category(
-      id: j['id'],
-      tripId: j['tripId'],
-      name: j['name'],
-      color: j['color'],
-      icon: j['icon'],
-      sortOrder: j['sortOrder'],
-    );
+  id: j['id'],
+  tripId: j['tripId'],
+  name: j['name'],
+  color: j['color'],
+  icon: j['icon'],
+  sortOrder: j['sortOrder'],
+);
 
 Transaction transactionFromJson(Map<String, dynamic> j) => Transaction(
-      id: j['id'],
-      tripId: j['tripId'],
-      period: j['period'],
-      date: j['date'],
-      description: j['description'],
-      amount: (j['amount'] as num).toDouble(),
-      categoryId: j['categoryId'],
-      kind: j['kind'],
-      isIof: j['isIof'],
-      splitCount: j['splitCount'],
-      createdAt: j['createdAt'],
-    );
+  id: j['id'],
+  tripId: j['tripId'],
+  period: j['period'],
+  date: j['date'],
+  description: j['description'],
+  amount: (j['amount'] as num).toDouble(),
+  categoryId: j['categoryId'],
+  kind: j['kind'],
+  isIof: j['isIof'],
+  splitCount: j['splitCount'],
+);
 
 void main() {
   final europa = jsonDecode(File('assets/europa.json').readAsStringSync()) as Map<String, dynamic>;
@@ -38,7 +38,7 @@ void main() {
   final transactions = (europa['transactions'] as List).map((t) => transactionFromJson(t)).toList();
 
   test('computeStats on the real Europa trip matches the TypeScript golden output', () {
-    final s = computeStats(transactions, categories, cities);
+    final s = computeStats(transactions, categories);
     final g = golden['stats'] as Map<String, dynamic>;
     expect(s.gross, g['gross']);
     expect(s.refunds, g['refunds']);
@@ -46,7 +46,6 @@ void main() {
     expect(s.before, g['before']);
     expect(s.during, g['during']);
     expect(s.iofRefund, g['iofRefund']);
-    expect(s.days, g['days']);
     expect(s.avgPerDay, g['avgPerDay']);
     expect(s.byCategory.length, (g['byCategory'] as List).length);
     for (var i = 0; i < s.byCategory.length; i++) {
@@ -59,13 +58,6 @@ void main() {
       final gc = (g['cumulativeByDay'] as List)[i] as Map<String, dynamic>;
       expect(s.cumulativeByDay[i].date, gc['date']);
       expect(s.cumulativeByDay[i].total, gc['total']);
-    }
-    expect(s.byCity.length, (g['byCity'] as List).length);
-    for (var i = 0; i < s.byCity.length; i++) {
-      final gc = (g['byCity'] as List)[i] as Map<String, dynamic>;
-      expect(s.byCity[i].city, gc['city']);
-      expect(s.byCity[i].amount, gc['amount']);
-      expect(s.byCity[i].color, gc['color']);
     }
     expect(s.split.integral, g['split']['integral']);
     expect(s.split.share, g['split']['share']);
@@ -81,6 +73,15 @@ void main() {
       expect(result.byCity[i].city, gc['city']);
       expect(result.byCity[i].amount, gc['amount']);
       expect(result.byCity[i].color, gc['color']);
+    }
+    expect(result.cityTable.length, (g['cityTable'] as List).length);
+    for (var i = 0; i < result.cityTable.length; i++) {
+      final gc = (g['cityTable'] as List)[i] as Map<String, dynamic>;
+      expect(result.cityTable[i].city, gc['city']);
+      expect(result.cityTable[i].days, gc['days']);
+      expect(result.cityTable[i].total, gc['total']);
+      expect(result.cityTable[i].avgPerDay, gc['avgPerDay']);
+      expect(result.cityTable[i].topCategory, gc['topCategory']);
     }
   });
 

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:centavoo/confirm.dart';
+import 'package:centavoo/widgets/confirm.dart';
+
+import 'helpers.dart';
 
 Future<void> pump(WidgetTester tester, VoidCallback onConfirm) async {
-  await tester.pumpWidget(MaterialApp(
-    locale: const Locale('pt', 'BR'),
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    home: Builder(
-      builder: (context) => ElevatedButton(
-        onPressed: () => confirmDelete(context, 'Excluir isso?', onConfirm),
-        child: const Text('open'),
+  await tester.pumpWidget(
+    ptApp(
+      home: Builder(
+        builder: (context) => ElevatedButton(
+          onPressed: () => confirmDelete(context, 'Excluir isso?', onConfirm),
+          child: const Text('open'),
+        ),
       ),
     ),
-  ));
+  );
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
 }

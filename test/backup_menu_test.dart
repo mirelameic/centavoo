@@ -5,17 +5,18 @@ import 'package:cross_file/cross_file.dart';
 import 'package:drift/native.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:provider/provider.dart';
 import 'package:centavoo/data/backup.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/repo.dart';
-import 'package:centavoo/theme.dart';
-import 'package:centavoo/theme_controller.dart';
-import 'package:centavoo/locale_controller.dart';
+import 'package:centavoo/core/theme.dart';
+import 'package:centavoo/core/theme_controller.dart';
+import 'package:centavoo/core/locale_controller.dart';
 import 'package:centavoo/widgets/app_shell.dart';
+
+import 'helpers.dart';
 
 base class _FakePlatformFile extends PlatformFile {
   final Uint8List _bytes;
@@ -94,10 +95,7 @@ Future<AppDatabase> pump(WidgetTester tester) async {
           ChangeNotifierProvider<ThemeController>(create: (_) => ThemeController()),
           ChangeNotifierProvider<LocaleController>(create: (_) => LocaleController()),
         ],
-        child: MaterialApp(
-          locale: const Locale('pt', 'BR'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
+        child: ptApp(
           theme: buildLightTheme(),
           home: const AppShell(child: SizedBox.shrink()),
         ),

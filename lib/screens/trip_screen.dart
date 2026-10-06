@@ -1,12 +1,10 @@
-import 'dart:ui';
-
 import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/mappers.dart';
-import 'package:centavoo/format.dart';
+import 'package:centavoo/logic/format.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:centavoo/models/category.dart';
 import 'package:centavoo/models/category_rule.dart';
@@ -18,47 +16,13 @@ import 'package:centavoo/screens/trip/ranking_tab.dart';
 import 'package:centavoo/screens/trip/summary_tab.dart';
 import 'package:centavoo/screens/trip/time_tab.dart';
 import 'package:centavoo/screens/trip/transactions_tab.dart';
-import 'package:centavoo/widgets/trip/import_transactions.dart';
 import 'package:centavoo/widgets/trip/transaction_form.dart';
-import 'package:centavoo/widgets/trip/trip_edit_form.dart';
-import 'package:centavoo/stats/stats.dart';
-import 'package:centavoo/theme.dart';
+import 'package:centavoo/widgets/trip/kpi_grid.dart';
+import 'package:centavoo/widgets/trip/trip_header.dart';
+import 'package:centavoo/widgets/trip/trip_tab_bar.dart';
+import 'package:centavoo/logic/stats.dart';
 
 const _mobileBreakpoint = 480.0;
-
-class _TabItem {
-  final String value;
-  final IconData icon;
-  const _TabItem(this.value, this.icon);
-}
-
-const _tabItems = [
-  _TabItem('summary', Icons.pie_chart_outline),
-  _TabItem('top', Icons.bar_chart_outlined),
-  _TabItem('time', Icons.calendar_month_outlined),
-  _TabItem('cities', Icons.location_on_outlined),
-  _TabItem('cats', Icons.category_outlined),
-  _TabItem('tx', Icons.receipt_long_outlined),
-];
-
-String _tabLabel(AppLocalizations l10n, String value) {
-  switch (value) {
-    case 'summary':
-      return l10n.tabSummary;
-    case 'top':
-      return l10n.tabTop;
-    case 'time':
-      return l10n.tabTime;
-    case 'cities':
-      return l10n.tabCities;
-    case 'cats':
-      return l10n.tabCats;
-    case 'tx':
-      return l10n.tabTransactions;
-    default:
-      return value;
-  }
-}
 
 class TripScreen extends StatefulWidget {
   final String tripId;
@@ -89,17 +53,13 @@ class _TripScreenState extends State<TripScreen> {
 
   void _initStreams() {
     final db = context.read<AppDatabase>();
-    _tripStream = (db.select(
-      db.tripsTable,
-    )..where((t) => t.id.equals(widget.tripId))).watchSingleOrNull();
+    _tripStream = (db.select(db.tripsTable)..where((t) => t.id.equals(widget.tripId))).watchSingleOrNull();
     _categoriesStream =
         (db.select(db.categoriesTable)
               ..where((c) => c.tripId.equals(widget.tripId))
               ..orderBy([(c) => OrderingTerm.asc(c.sortOrder)]))
             .watch();
-    _transactionsStream = (db.select(
-      db.transactionsTable,
-    )..where((t) => t.tripId.equals(widget.tripId))).watch();
+    _transactionsStream = (db.select(db.transactionsTable)..where((t) => t.tripId.equals(widget.tripId))).watch();
     _rulesStream = db.select(db.categoryRulesTable).watch();
   }
 
@@ -120,10 +80,7 @@ class _TripScreenState extends State<TripScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(l10n.tripNotFound),
-                TextButton(
-                  onPressed: () => context.go('/'),
-                  child: Text(l10n.commonBack),
-                ),
+                TextButton(onPressed: () => context.go('/'), child: Text(l10n.commonBack)),
               ],
             ),
           );
@@ -132,24 +89,27 @@ class _TripScreenState extends State<TripScreen> {
         return StreamBuilder<List<CategoryRow>>(
           stream: _categoriesStream,
           builder: (context, catSnap) {
-            final cats = (catSnap.data ?? const <CategoryRow>[])
-                .map(categoryFromRow)
-                .toList();
+            final cats = (catSnap.data ?? const <CategoryRow>[]).map(categoryFromRow).toList();
             return StreamBuilder<List<TransactionRow>>(
               stream: _transactionsStream,
               builder: (context, txSnap) {
-                final txs = (txSnap.data ?? const <TransactionRow>[])
-                    .map(transactionFromRow)
-                    .toList();
-                final stats = computeStats(txs, cats, trip.cities);
+                final txs = (txSnap.data ?? const <TransactionRow>[]).map(transactionFromRow).toList();
+                final l10n = AppLocalizations.of(context)!;
+                final stats = computeStats(
+                  txs,
+                  cats,
+                  tripDays: trip.startDate != null && trip.endDate != null
+                      ? dateRange(trip.startDate!, trip.endDate!).length
+                      : null,
+                  noCategoryLabel: l10n.statsNoCategory,
+                  iofLabel: l10n.statsIofRefund,
+                );
                 final hasSplit = txs.any((tx) => tx.splitCount > 1);
                 final catById = {for (final c in cats) c.id: c};
                 return StreamBuilder<List<CategoryRuleRow>>(
                   stream: _rulesStream,
                   builder: (context, ruleSnap) {
-                    final rules = (ruleSnap.data ?? const <CategoryRuleRow>[])
-                        .map(categoryRuleFromRow)
-                        .toList();
+                    final rules = (ruleSnap.data ?? const <CategoryRuleRow>[]).map(categoryRuleFromRow).toList();
                     return _TripBody(
                       trip: trip,
                       stats: stats,
@@ -191,10 +151,9 @@ class _TripBody extends StatefulWidget {
 }
 
 class _TripBodyState extends State<_TripBody> {
-  String? _activeTab;
+  TripTab? _activeTab;
 
-  void _openTab(String value) =>
-      setState(() => _activeTab = _activeTab == value ? null : value);
+  void _openTab(TripTab value) => setState(() => _activeTab = _activeTab == value ? null : value);
   void _closeTab() => setState(() => _activeTab = null);
 
   @override
@@ -236,13 +195,9 @@ class _TripBodyState extends State<_TripBody> {
                               ),
                             )
                           : InkWell(
-                              onTap: () => context.canPop()
-                                  ? context.pop()
-                                  : context.go('/'),
+                              onTap: () => context.canPop() ? context.pop() : context.go('/'),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -259,40 +214,20 @@ class _TripBodyState extends State<_TripBody> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            _TripHeader(
-                              trip: trip,
-                              categories: catById.values.toList(),
-                              rules: rules,
-                            ),
+                            TripHeader(trip: trip, categories: catById.values.toList(), rules: rules, txs: txs),
                             const SizedBox(height: 16),
-                            _KpiGrid(stats: stats, currency: trip.currency),
+                            KpiGrid(stats: stats, currency: trip.currency),
                             const SizedBox(height: 16),
                           ],
                         ),
                       ),
                     if (!isMobile)
                       SliverToBoxAdapter(
-                        child: _DesktopTabsRow(
-                          activeTab: _activeTab,
-                          onTap: _openTab,
-                        ),
+                        child: TripTabsRow(activeTab: _activeTab, onTap: _openTab),
                       ),
-                    if (tabOpen)
-                      _tabContentSliver(
-                        context,
-                        stats,
-                        trip,
-                        hasSplit,
-                        txs,
-                        catById,
-                        rules,
-                      ),
+                    if (tabOpen) _tabContentSliver(context, stats, trip, hasSplit, txs, catById, rules),
                     SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: isMobile
-                            ? 76 + MediaQuery.of(context).padding.bottom
-                            : 0,
-                      ),
+                      child: SizedBox(height: isMobile ? 76 + MediaQuery.of(context).padding.bottom : 0),
                     ),
                   ],
                 ),
@@ -302,10 +237,7 @@ class _TripBodyState extends State<_TripBody> {
                   left: 16,
                   right: 16,
                   bottom: 16 + MediaQuery.of(context).padding.bottom,
-                  child: _MobileBottomNav(
-                    activeTab: _activeTab,
-                    onTap: _openTab,
-                  ),
+                  child: TripBottomNav(activeTab: _activeTab, onTap: _openTab),
                 ),
             ],
           );
@@ -323,16 +255,8 @@ class _TripBodyState extends State<_TripBody> {
     Map<String, Category> catById,
     List<CategoryRule> rules,
   ) {
-    final content = _tabContent(
-      context,
-      stats,
-      trip,
-      hasSplit,
-      txs,
-      catById,
-      rules,
-    );
-    return _activeTab == 'tx' ? content : SliverToBoxAdapter(child: content);
+    final content = _tabContent(context, stats, trip, hasSplit, txs, catById, rules);
+    return _activeTab == TripTab.tx ? content : SliverToBoxAdapter(child: content);
   }
 
   Widget _tabContent(
@@ -347,22 +271,13 @@ class _TripBodyState extends State<_TripBody> {
     switch (_activeTab) {
       case null:
         return const SizedBox.shrink();
-      case 'summary':
-        return SummaryTab(
-          stats: stats,
-          currency: trip.currency,
-          hasSplit: hasSplit,
-        );
-      case 'top':
-        return RankingTab(
-          txs: txs,
-          catById: catById,
-          cities: trip.cities,
-          currency: trip.currency,
-        );
-      case 'time':
+      case TripTab.summary:
+        return SummaryTab(stats: stats, currency: trip.currency, hasSplit: hasSplit);
+      case TripTab.top:
+        return RankingTab(txs: txs, catById: catById, cities: trip.cities, currency: trip.currency);
+      case TripTab.time:
         return TimeTab(stats: stats, currency: trip.currency);
-      case 'cities':
+      case TripTab.cities:
         return CitiesTab(
           db: context.read<AppDatabase>(),
           tripId: trip.id,
@@ -374,9 +289,9 @@ class _TripBodyState extends State<_TripBody> {
           endDate: trip.endDate,
           currency: trip.currency,
         );
-      case 'cats':
+      case TripTab.cats:
         return CategoriesTab(stats: stats, currency: trip.currency);
-      case 'tx':
+      case TripTab.tx:
         return TransactionsTab(
           db: context.read<AppDatabase>(),
           txs: txs,
@@ -396,353 +311,6 @@ class _TripBodyState extends State<_TripBody> {
             ),
           ),
         );
-      default:
-        return _TabPlaceholder(
-          label: _tabLabel(AppLocalizations.of(context)!, _activeTab!),
-        );
     }
-  }
-}
-
-class _TripHeader extends StatelessWidget {
-  final model.Trip trip;
-  final List<Category> categories;
-  final List<CategoryRule> rules;
-  const _TripHeader({
-    required this.trip,
-    required this.categories,
-    required this.rules,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final hintColor = Theme.of(context).hintColor;
-    final l10n = AppLocalizations.of(context)!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Flexible(
-              child: Text(
-                trip.name,
-                style: unboundedStyle(weight: FontWeight.w500)
-                    .copyWith(fontSize: 26, height: 1.35),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            IconButton(
-              onPressed: () => showDialog(
-                context: context,
-                builder: (_) =>
-                    TripEditForm(db: context.read<AppDatabase>(), trip: trip),
-              ),
-              icon: const Icon(Icons.edit_outlined, size: 18),
-              tooltip: 'edit-trip',
-              visualDensity: VisualDensity.compact,
-            ),
-          ],
-        ),
-        if (trip.destination != null)
-          Text(trip.destination!, style: TextStyle(color: hintColor)),
-        Text(
-          '${fmtDate(trip.startDate)} – ${fmtDate(trip.endDate)}',
-          style: TextStyle(color: hintColor, fontSize: 14),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            OutlinedButton.icon(
-              onPressed: () => context.push('/trip/${trip.id}/categories'),
-              icon: const Icon(Icons.category_outlined, size: 18),
-              label: Text(l10n.menuCategories),
-            ),
-            OutlinedButton.icon(
-              onPressed: () => showDialog(
-                context: context,
-                builder: (_) => ImportTransactions(
-                  db: context.read<AppDatabase>(),
-                  trip: trip,
-                  categories: categories,
-                  rules: rules,
-                ),
-              ),
-              icon: const Icon(Icons.file_upload_outlined, size: 18),
-              label: Text(l10n.txImportButton),
-            ),
-            ElevatedButton.icon(
-              onPressed: () => showDialog(
-                context: context,
-                builder: (_) => TransactionForm(
-                  db: context.read<AppDatabase>(),
-                  trip: trip,
-                  categories: categories,
-                  rules: rules,
-                ),
-              ),
-              icon: const Icon(Icons.add, size: 18),
-              label: Text(l10n.txNew),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _KpiGrid extends StatelessWidget {
-  final TripStats stats;
-  final String currency;
-  const _KpiGrid({required this.stats, required this.currency});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final items = [
-      (l10n.kpiNet.toUpperCase(), money(stats.net, currency: currency), null),
-      (
-        l10n.kpiGross.toUpperCase(),
-        money(stats.gross, currency: currency),
-        null,
-      ),
-      (
-        l10n.kpiRefunds.toUpperCase(),
-        money(stats.refunds, currency: currency),
-        const Color(0xFF12B886),
-      ),
-      (
-        l10n.kpiBefore.toUpperCase(),
-        money(stats.before, currency: currency),
-        null,
-      ),
-      (
-        l10n.kpiDuring.toUpperCase(),
-        money(stats.during, currency: currency),
-        null,
-      ),
-      (
-        l10n.kpiAvgPerDay.toUpperCase(),
-        money(stats.avgPerDay, currency: currency),
-        null,
-      ),
-    ];
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 768 ? 3 : 1;
-        final gap = 8.0;
-        final cardWidth =
-            (constraints.maxWidth - gap * (columns - 1)) / columns;
-        return Wrap(
-          spacing: gap,
-          runSpacing: gap,
-          children: [
-            for (final (label, value, color) in items)
-              SizedBox(
-                width: cardWidth,
-                child: _KpiCard(label: label, value: value, color: color),
-              ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _KpiCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color? color;
-  const _KpiCard({required this.label, required this.value, this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return highlightCard(
-      context,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).hintColor,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: color,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-Widget _glassBar({required BuildContext context, required Widget child}) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  final tint = (isDark ? darkSurfaces[7] : Colors.white).withValues(
-    alpha: isDark ? 0.6 : 0.8,
-  );
-  final bar = ClipRRect(
-    borderRadius: BorderRadius.circular(28),
-    child: BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-      child: Container(
-        decoration: BoxDecoration(
-          color: tint,
-          borderRadius: BorderRadius.circular(28),
-          border: isDark ? null : Border.all(color: lightDivider),
-        ),
-        child: child,
-      ),
-    ),
-  );
-  if (isDark) return bar;
-  return DecoratedBox(
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(28),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.1),
-          blurRadius: 16,
-          offset: const Offset(0, 4),
-        ),
-      ],
-    ),
-    child: bar,
-  );
-}
-
-class _DesktopTabsRow extends StatelessWidget {
-  final String? activeTab;
-  final ValueChanged<String> onTap;
-  const _DesktopTabsRow({required this.activeTab, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Center(
-        child: _glassBar(
-          context: context,
-          child: Padding(
-            padding: const EdgeInsets.all(6),
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 6,
-              runSpacing: 6,
-              children: [
-                for (final item in _tabItems)
-                  ChoiceChip(
-                    label: Text(_tabLabel(l10n, item.value)),
-                    avatar: Icon(item.icon, size: 18),
-                    selected: activeTab == item.value,
-                    onSelected: (_) => onTap(item.value),
-                    shape: const StadiumBorder(),
-                    showCheckmark: false,
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MobileBottomNav extends StatelessWidget {
-  final String? activeTab;
-  final ValueChanged<String> onTap;
-  const _MobileBottomNav({required this.activeTab, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final hintColor = Theme.of(context).hintColor;
-    final l10n = AppLocalizations.of(context)!;
-    return _glassBar(
-      context: context,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-        child: Row(
-          children: [
-            for (final item in _tabItems)
-              Expanded(
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
-                  onTap: () => onTap(item.value),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8,
-                      horizontal: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: activeTab == item.value
-                          ? primary.withValues(alpha: 0.15)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          item.icon,
-                          size: 20,
-                          color: activeTab == item.value ? primary : hintColor,
-                        ),
-                        const SizedBox(height: 2),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            _tabLabel(l10n, item.value),
-                            maxLines: 1,
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: activeTab == item.value
-                                  ? primary
-                                  : hintColor,
-                              fontWeight: activeTab == item.value
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _TabPlaceholder extends StatelessWidget {
-  final String label;
-  const _TabPlaceholder({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(label, style: TextStyle(color: Theme.of(context).hintColor)),
-    );
   }
 }

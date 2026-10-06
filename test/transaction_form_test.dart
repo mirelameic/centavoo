@@ -1,6 +1,5 @@
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
-import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:centavoo/data/database.dart';
@@ -9,6 +8,8 @@ import 'package:centavoo/data/repo.dart';
 import 'package:centavoo/models/category_rule.dart';
 import 'package:centavoo/models/transaction.dart';
 import 'package:centavoo/widgets/trip/transaction_form.dart';
+
+import 'helpers.dart';
 
 Future<void> openForm(
   WidgetTester tester,
@@ -20,23 +21,25 @@ Future<void> openForm(
   final tripRow = await (db.select(db.tripsTable)..where((t) => t.id.equals(tripId))).getSingle();
   final catRows = await (db.select(db.categoriesTable)..where((c) => c.tripId.equals(tripId))).get();
 
-  await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, 
-    home: Builder(
-      builder: (context) => ElevatedButton(
-        onPressed: () => showDialog(
-          context: context,
-          builder: (_) => TransactionForm(
-            db: db,
-            trip: tripFromRow(tripRow),
-            categories: catRows.map(categoryFromRow).toList(),
-            rules: rules,
-            editing: editing,
+  await tester.pumpWidget(
+    ptApp(
+      home: Builder(
+        builder: (context) => ElevatedButton(
+          onPressed: () => showDialog(
+            context: context,
+            builder: (_) => TransactionForm(
+              db: db,
+              trip: tripFromRow(tripRow),
+              categories: catRows.map(categoryFromRow).toList(),
+              rules: rules,
+              editing: editing,
+            ),
           ),
+          child: const Text('open'),
         ),
-        child: const Text('open'),
       ),
     ),
-  ));
+  );
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
 }
@@ -198,10 +201,20 @@ void main() {
   testWidgets('editing an existing transaction pre-fills the fields and updates it on save', (tester) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     final tripId = await createTrip(db, name: 'Japan');
-    final id = await addTransaction(db, TransactionsTableCompanion.insert(
-      id: '', tripId: tripId, period: 'DURING', description: 'Almoço', amount: 30,
-      kind: 'EXPENSE', isIof: false, splitCount: 1, createdAt: '',
-    ));
+    final id = await addTransaction(
+      db,
+      TransactionsTableCompanion.insert(
+        id: '',
+        tripId: tripId,
+        period: 'DURING',
+        description: 'Almoço',
+        amount: 30,
+        kind: 'EXPENSE',
+        isIof: false,
+        splitCount: 1,
+        createdAt: '',
+      ),
+    );
     final row = await (db.select(db.transactionsTable)..where((t) => t.id.equals(id))).getSingle();
 
     await openForm(tester, db, tripId: tripId, editing: transactionFromRow(row));
@@ -217,6 +230,51 @@ void main() {
 
     final updated = await (db.select(db.transactionsTable)..where((t) => t.id.equals(id))).getSingle();
     expect(updated.description, 'Jantar');
+    await db.close();
+  });
+
+  testWidgets('the amount field is prefixed with the trip currency symbol', (tester) async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    final tripId = await createTrip(db, name: 'Paris', currency: 'EUR');
+    await openForm(tester, db, tripId: tripId);
+
+    expect(find.text('€ '), findsOneWidget);
+    await db.close();
+  });
+
+  testWidgets('a rule from another trip suggests the same-named category of this trip', (tester) async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    final tripId = await createTrip(db, name: 'Japan');
+    final rules = [
+      CategoryRule(keyword: 'jantar', categoryId: 'cat_alimentacao', categoryName: 'Alimentação', priority: 1),
+    ];
+    await openForm(tester, db, tripId: tripId, rules: rules);
+
+    await tester.enterText(find.widgetWithText(TextField, 'Descrição'), 'Jantar em Shibuya');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, 'Valor'), '80');
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Salvar'));
+    await tester.pumpAndSettle();
+
+    final tx = await (db.select(db.transactionsTable)..where((t) => t.tripId.equals(tripId))).getSingle();
+    final cat = await (db.select(db.categoriesTable)..where((c) => c.id.equals(tx.categoryId!))).getSingle();
+    expect(cat.name, 'Alimentação');
+    expect(cat.tripId, tripId);
+    await db.close();
+  });
+
+  testWidgets('the date picker opens for a trip that started before 2020', (tester) async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    final tripId = await createTrip(db, name: 'Mochilão', startDate: '2015-07-01', endDate: '2015-07-20');
+    await openForm(tester, db, tripId: tripId);
+
+    await tester.tap(find.widgetWithText(TextField, 'Data'));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(DatePickerDialog), findsOneWidget);
     await db.close();
   });
 }

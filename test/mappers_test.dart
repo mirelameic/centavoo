@@ -18,25 +18,29 @@ void main() {
   });
 
   test('tripFromRow decodes cityListJson into a list, defaulting to null when absent', () {
-    final withList = tripFromRow(TripRow(
-      id: 't1',
-      name: 'Japan',
-      currency: 'BRL',
-      citiesJson: '{}',
-      cityListJson: '["Tokyo","Kyoto"]',
-      createdAt: '2026-01-01T00:00:00Z',
-      sortOrder: 0,
-    ));
+    final withList = tripFromRow(
+      TripRow(
+        id: 't1',
+        name: 'Japan',
+        currency: 'BRL',
+        citiesJson: '{}',
+        cityListJson: '["Tokyo","Kyoto"]',
+        createdAt: '2026-01-01T00:00:00Z',
+        sortOrder: 0,
+      ),
+    );
     expect(withList.cityList, ['Tokyo', 'Kyoto']);
 
-    final withoutList = tripFromRow(TripRow(
-      id: 't1',
-      name: 'Japan',
-      currency: 'BRL',
-      citiesJson: '{}',
-      createdAt: '2026-01-01T00:00:00Z',
-      sortOrder: 0,
-    ));
+    final withoutList = tripFromRow(
+      TripRow(
+        id: 't1',
+        name: 'Japan',
+        currency: 'BRL',
+        citiesJson: '{}',
+        createdAt: '2026-01-01T00:00:00Z',
+        sortOrder: 0,
+      ),
+    );
     expect(withoutList.cityList, isNull);
   });
 
@@ -66,11 +70,12 @@ void main() {
   });
 
   test('categoryRuleFromRow copies every field', () {
-    final row = CategoryRuleRow(id: 5, keyword: 'uber', categoryId: 'c1', priority: 2);
+    final row = CategoryRuleRow(id: 5, keyword: 'uber', categoryId: 'c1', categoryName: 'Transporte', priority: 2);
     final rule = categoryRuleFromRow(row);
     expect(rule.id, 5);
     expect(rule.keyword, 'uber');
     expect(rule.categoryId, 'c1');
+    expect(rule.categoryName, 'Transporte');
     expect(rule.priority, 2);
   });
 }

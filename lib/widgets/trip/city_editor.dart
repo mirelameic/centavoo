@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:centavoo/confirm.dart';
+import 'package:centavoo/widgets/confirm.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/repo.dart';
-import 'package:centavoo/format.dart';
+import 'package:centavoo/logic/format.dart';
+import 'package:centavoo/widgets/date_pickers.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
-import 'package:centavoo/stats/stats.dart';
-import 'package:centavoo/theme.dart';
+import 'package:centavoo/logic/stats.dart';
+import 'package:centavoo/core/theme.dart';
 import 'package:centavoo/widgets/trip/primitives.dart';
 
 class CityEditor extends StatefulWidget {
@@ -64,12 +65,7 @@ class _CityEditorState extends State<CityEditor> {
   }
 
   Future<void> _pickRange() async {
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-      initialDateRange: _formRange,
-    );
+    final picked = await pickDateRange(context, initial: _formRange);
     if (picked != null) setState(() => _formRange = picked);
   }
 
@@ -215,11 +211,7 @@ class _CityEditorState extends State<CityEditor> {
                 onTap: _pickRange,
                 child: InputDecorator(
                   decoration: InputDecoration(labelText: l10n.cityBlockRangeLabel),
-                  child: Text(
-                    _formRange == null
-                        ? l10n.formDatesPlaceholder
-                        : '${fmtDate(isoDate(_formRange!.start))} – ${fmtDate(isoDate(_formRange!.end))}',
-                  ),
+                  child: Text(_formRange == null ? l10n.formDatesPlaceholder : fmtPickedRange(_formRange!)),
                 ),
               ),
             ),
@@ -250,7 +242,7 @@ class _CityEditorState extends State<CityEditor> {
                         children: [
                           Text(b.city, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                           Text(
-                            '${b.start == b.end ? fmtDate(b.start) : '${fmtDate(b.start)} – ${fmtDate(b.end)}'} · ${b.days.length} ${l10n.cityDaysN}',
+                            '${b.start == b.end ? fmtDate(b.start) : fmtDateRange(b.start, b.end)} · ${b.days.length} ${l10n.cityDaysN}',
                             style: TextStyle(fontSize: 12, color: hintColor),
                           ),
                         ],

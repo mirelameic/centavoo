@@ -62,8 +62,7 @@ import 'app_localizations_pt.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,8 +70,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -84,32 +82,21 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[
-    Locale('en'),
-    Locale('pt'),
-    Locale('pt', 'BR'),
-  ];
+  static const List<Locale> supportedLocales = <Locale>[Locale('en'), Locale('pt'), Locale('pt', 'BR')];
 
   /// No description provided for @appTitle.
   ///
   /// In pt_BR, this message translates to:
   /// **'Centavoo'**
   String get appTitle;
-
-  /// No description provided for @loading.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'Preparando seus dados…'**
-  String get loading;
 
   /// No description provided for @error.
   ///
@@ -189,6 +176,12 @@ abstract class AppLocalizations {
   /// **'Período'**
   String get formDates;
 
+  /// No description provided for @formCurrency.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Moeda'**
+  String get formCurrency;
+
   /// No description provided for @formDatesPlaceholder.
   ///
   /// In pt_BR, this message translates to:
@@ -243,6 +236,12 @@ abstract class AppLocalizations {
   /// **'Reembolsos'**
   String get kpiRefunds;
 
+  /// No description provided for @kpiIofRefunds.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Reembolsos de IOF'**
+  String get kpiIofRefunds;
+
   /// No description provided for @kpiBefore.
   ///
   /// In pt_BR, this message translates to:
@@ -261,6 +260,18 @@ abstract class AppLocalizations {
   /// **'Média/dia'**
   String get kpiAvgPerDay;
 
+  /// No description provided for @statsNoCategory.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Sem categoria'**
+  String get statsNoCategory;
+
+  /// No description provided for @statsIofRefund.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Reembolso de IOF'**
+  String get statsIofRefund;
+
   /// No description provided for @tabSummary.
   ///
   /// In pt_BR, this message translates to:
@@ -278,18 +289,6 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'Transações'**
   String get tabTransactions;
-
-  /// No description provided for @chartBefore.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'Antes'**
-  String get chartBefore;
-
-  /// No description provided for @chartDuring.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'Durante'**
-  String get chartDuring;
 
   /// No description provided for @chartNoDated.
   ///
@@ -422,48 +421,6 @@ abstract class AppLocalizations {
   /// In pt_BR, this message translates to:
   /// **'qualquer data'**
   String get txFilterDatePlaceholder;
-
-  /// No description provided for @txDateModeDay.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'Dia'**
-  String get txDateModeDay;
-
-  /// No description provided for @txDateModeRange.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'Período'**
-  String get txDateModeRange;
-
-  /// No description provided for @txFilterCategory.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'Categoria'**
-  String get txFilterCategory;
-
-  /// No description provided for @txFilterCategoryPlaceholder.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'todas as categorias'**
-  String get txFilterCategoryPlaceholder;
-
-  /// No description provided for @txFilterCity.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'Cidade'**
-  String get txFilterCity;
-
-  /// No description provided for @txFilterCityPlaceholder.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'todas as cidades'**
-  String get txFilterCityPlaceholder;
-
-  /// No description provided for @txFilterPeriod.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'Período'**
-  String get txFilterPeriod;
 
   /// No description provided for @txPeriodAll.
   ///
@@ -819,47 +776,17 @@ abstract class AppLocalizations {
   /// **'Filtrar por categoria'**
   String get cityFilter;
 
-  /// No description provided for @cityFilterPlaceholder.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'todas as categorias'**
-  String get cityFilterPlaceholder;
-
   /// No description provided for @secSplit.
   ///
   /// In pt_BR, this message translates to:
   /// **'Você dividiu × sua parte'**
   String get secSplit;
 
-  /// No description provided for @colDays.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'Dias'**
-  String get colDays;
-
-  /// No description provided for @colTotal.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'Total'**
-  String get colTotal;
-
   /// No description provided for @colAvgDay.
   ///
   /// In pt_BR, this message translates to:
   /// **'Média/dia'**
   String get colAvgDay;
-
-  /// No description provided for @colTopCat.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'Top categoria'**
-  String get colTopCat;
-
-  /// No description provided for @colCount.
-  ///
-  /// In pt_BR, this message translates to:
-  /// **'Nº'**
-  String get colCount;
 
   /// No description provided for @colEntry.
   ///
@@ -1029,6 +956,12 @@ abstract class AppLocalizations {
   /// **'ok'**
   String get txImportRowOk;
 
+  /// No description provided for @txImportRowDuplicate.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'já importada'**
+  String get txImportRowDuplicate;
+
   /// No description provided for @txImportErrAmount.
   ///
   /// In pt_BR, this message translates to:
@@ -1059,6 +992,12 @@ abstract class AppLocalizations {
   /// **'com problema (não serão importadas)'**
   String get txImportRowsSkipped;
 
+  /// No description provided for @txImportRowsDuplicate.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'já importadas (desmarcadas)'**
+  String get txImportRowsDuplicate;
+
   /// No description provided for @txImportConfirmButton.
   ///
   /// In pt_BR, this message translates to:
@@ -1078,8 +1017,7 @@ abstract class AppLocalizations {
   String get txImportError;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -1088,8 +1026,7 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'pt'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'pt'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;

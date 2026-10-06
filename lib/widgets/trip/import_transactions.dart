@@ -1,19 +1,17 @@
-import 'dart:convert';
-
 import 'package:drift/drift.dart' show Value;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:centavoo/categorize.dart';
+import 'package:centavoo/logic/categorize.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/repo.dart';
-import 'package:centavoo/format.dart';
+import 'package:centavoo/logic/format.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:centavoo/models/category.dart';
 import 'package:centavoo/models/category_rule.dart';
 import 'package:centavoo/models/transaction.dart';
 import 'package:centavoo/models/trip.dart' as model;
-import 'package:centavoo/parse_table.dart';
-import 'package:centavoo/theme.dart';
+import 'package:centavoo/logic/parse_table.dart';
+import 'package:centavoo/core/theme.dart';
 import 'package:centavoo/widgets/trip/primitives.dart';
 
 class ImportTransactions extends StatefulWidget {
@@ -21,6 +19,7 @@ class ImportTransactions extends StatefulWidget {
   final model.Trip trip;
   final List<Category> categories;
   final List<CategoryRule> rules;
+  final List<Transaction> existing;
 
   const ImportTransactions({
     super.key,
@@ -28,13 +27,18 @@ class ImportTransactions extends StatefulWidget {
     required this.trip,
     required this.categories,
     required this.rules,
+    this.existing = const [],
   });
 
   @override
   State<ImportTransactions> createState() => _ImportTransactionsState();
 }
 
+String _duplicateKey(String? date, String description, double amount) =>
+    '${date ?? ''}|${description.trim().toLowerCase()}|${amount.toStringAsFixed(2)}';
+
 class _ParsedRow {
+  final int rawIndex;
   final String? date;
   final String description;
   final double? amount;
@@ -43,8 +47,11 @@ class _ParsedRow {
   final bool isIof;
   final String period;
   final String? error;
+  final bool duplicate;
+  final bool included;
 
   _ParsedRow({
+    required this.rawIndex,
     required this.date,
     required this.description,
     required this.amount,
@@ -53,6 +60,8 @@ class _ParsedRow {
     required this.isIof,
     required this.period,
     required this.error,
+    required this.duplicate,
+    required this.included,
   });
 }
 
@@ -65,7 +74,7 @@ class _ImportTransactionsState extends State<ImportTransactions> {
   List<String> _roles = [];
   bool _hasHeader = false;
   bool _invertSign = false;
-  final Set<int> _excluded = {};
+  final Map<int, bool> _includeOverrides = {};
   final Map<int, String?> _categoryOverrides = {};
   final Map<int, bool> _iofOverrides = {};
   bool _importing = false;
@@ -81,7 +90,10 @@ class _ImportTransactionsState extends State<ImportTransactions> {
     if (file == null) return;
     try {
       final bytes = await file.readAsBytes();
-      setState(() => _rawTextController.text = utf8.decode(bytes));
+      setState(() {
+        _noRowsError = false;
+        _rawTextController.text = decodeTextBytes(bytes);
+      });
     } catch (_) {
       setState(() => _noRowsError = true);
     }
@@ -99,7 +111,7 @@ class _ImportTransactionsState extends State<ImportTransactions> {
       _rows = parsed;
       _roles = guessedRoles;
       _hasHeader = looksLikeHeaderRow(parsed, guessedRoles);
-      _excluded.clear();
+      _includeOverrides.clear();
       _categoryOverrides.clear();
       _iofOverrides.clear();
     });
@@ -107,24 +119,39 @@ class _ImportTransactionsState extends State<ImportTransactions> {
 
   void _handleBack() => setState(() => _rows = null);
 
+  int get _rowOffset => _hasHeader ? 1 : 0;
+
   List<List<String>> get _dataRows {
     final rows = _rows;
     if (rows == null) return const [];
-    return _hasHeader ? rows.skip(1).toList() : rows;
+    return rows.skip(_rowOffset).toList();
   }
+
+  Set<String> get _existingKeys => {for (final t in widget.existing) _duplicateKey(t.date, t.description, t.amount)};
 
   List<_ParsedRow> get _parsedRows {
     final l10n = AppLocalizations.of(context)!;
     final dateCol = _roles.indexOf(colDate);
     final descCol = _roles.indexOf(colDescription);
     final amountCol = _roles.indexOf(colAmount);
+    final existingKeys = _existingKeys;
+    final dataRows = _dataRows;
 
     return [
-      for (var i = 0; i < _dataRows.length; i++) _parseRow(l10n, _dataRows[i], i, dateCol, descCol, amountCol),
+      for (var i = 0; i < dataRows.length; i++)
+        _parseRow(l10n, dataRows[i], i + _rowOffset, dateCol, descCol, amountCol, existingKeys),
     ];
   }
 
-  _ParsedRow _parseRow(AppLocalizations l10n, List<String> cols, int i, int dateCol, int descCol, int amountCol) {
+  _ParsedRow _parseRow(
+    AppLocalizations l10n,
+    List<String> cols,
+    int i,
+    int dateCol,
+    int descCol,
+    int amountCol,
+    Set<String> existingKeys,
+  ) {
     final description = descCol >= 0 ? cols[descCol].trim() : '';
     final dateRaw = dateCol >= 0 ? cols[dateCol].trim() : '';
     final date = dateRaw.isNotEmpty ? parseDate(dateRaw) : null;
@@ -142,16 +169,19 @@ class _ImportTransactionsState extends State<ImportTransactions> {
 
     final kind = deriveKind(amount);
 
-    final suggested = error == null ? suggestCategory(description, widget.rules) : null;
     final categoryId = kind == kindRefund
         ? null
-        : (_categoryOverrides[i] ?? (suggested != null && widget.categories.any((c) => c.id == suggested) ? suggested : null));
+        : _categoryOverrides.containsKey(i)
+        ? _categoryOverrides[i]
+        : (error == null ? suggestCategory(description, widget.rules, widget.categories) : null);
 
     final isIof = _iofOverrides[i] ?? deriveIsIof(kind, description);
 
     final period = periodForDate(date, widget.trip.startDate) ?? periodDuring;
+    final duplicate = error == null && existingKeys.contains(_duplicateKey(date, description, amount!));
 
     return _ParsedRow(
+      rawIndex: i,
       date: date,
       description: description,
       amount: amount,
@@ -160,39 +190,35 @@ class _ImportTransactionsState extends State<ImportTransactions> {
       isIof: isIof,
       period: period,
       error: error,
+      duplicate: duplicate,
+      included: error == null && (_includeOverrides[i] ?? !duplicate),
     );
   }
 
   Future<void> _handleImport() async {
     final l10n = AppLocalizations.of(context)!;
     final parsed = _parsedRows;
-    final toInsert = [
-      for (var i = 0; i < parsed.length; i++)
-        if (parsed[i].error == null && !_excluded.contains(i)) parsed[i],
-    ];
+    final toInsert = parsed.where((r) => r.included).toList();
     if (toInsert.isEmpty) return;
 
     setState(() => _importing = true);
     try {
-      await bulkAddTransactions(
-        widget.db,
-        [
-          for (final r in toInsert)
-            TransactionsTableCompanion.insert(
-              id: '',
-              tripId: widget.trip.id,
-              period: r.period,
-              date: Value(r.date),
-              description: r.description,
-              amount: r.amount!,
-              categoryId: Value(r.categoryId),
-              kind: r.kind,
-              isIof: r.isIof,
-              splitCount: 1,
-              createdAt: '',
-            ),
-        ],
-      );
+      await bulkAddTransactions(widget.db, [
+        for (final r in toInsert)
+          TransactionsTableCompanion.insert(
+            id: '',
+            tripId: widget.trip.id,
+            period: r.period,
+            date: Value(r.date),
+            description: r.description,
+            amount: r.amount!,
+            categoryId: Value(r.categoryId),
+            kind: r.kind,
+            isIof: r.isIof,
+            splitCount: 1,
+            createdAt: '',
+          ),
+      ]);
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('${toInsert.length} ${l10n.txImportSuccessSuffix}')));
@@ -281,15 +307,14 @@ class _ImportTransactionsState extends State<ImportTransactions> {
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.1),
-                borderRadius: borderRadiusLg,
-              ),
+              decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.1), borderRadius: borderRadiusLg),
               child: Row(
                 children: [
                   const Icon(Icons.error_outline, size: 16, color: Colors.red),
                   const SizedBox(width: 8),
-                  Expanded(child: Text(l10n.txImportNoRows, style: const TextStyle(color: Colors.red))),
+                  Expanded(
+                    child: Text(l10n.txImportNoRows, style: const TextStyle(color: Colors.red)),
+                  ),
                 ],
               ),
             ),
@@ -302,8 +327,9 @@ class _ImportTransactionsState extends State<ImportTransactions> {
   Widget _previewStep(BuildContext context, AppLocalizations l10n) {
     final hintColor = Theme.of(context).hintColor;
     final parsedRows = _parsedRows;
-    final validCount = [for (var i = 0; i < parsedRows.length; i++) if (parsedRows[i].error == null && !_excluded.contains(i)) i].length;
+    final validCount = parsedRows.where((r) => r.included).length;
     final errorCount = parsedRows.where((r) => r.error != null).length;
+    final duplicateCount = parsedRows.where((r) => r.duplicate).length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -359,9 +385,9 @@ class _ImportTransactionsState extends State<ImportTransactions> {
                         DropdownMenuItem(value: colDescription, child: Text(l10n.tableDescription)),
                         DropdownMenuItem(value: colAmount, child: Text(l10n.tableAmount)),
                       ],
-                      onChanged: (v) => setState(() => _roles = [
-                        for (var j = 0; j < _roles.length; j++) j == i ? (v ?? colIgnore) : _roles[j],
-                      ]),
+                      onChanged: (v) => setState(
+                        () => _roles = [for (var j = 0; j < _roles.length; j++) j == i ? (v ?? colIgnore) : _roles[j]],
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -381,7 +407,7 @@ class _ImportTransactionsState extends State<ImportTransactions> {
           child: Scrollbar(
             child: ListView.builder(
               itemCount: parsedRows.length,
-              itemBuilder: (context, i) => _previewRow(context, l10n, parsedRows[i], i),
+              itemBuilder: (context, i) => _previewRow(context, l10n, parsedRows[i]),
             ),
           ),
         ),
@@ -390,7 +416,9 @@ class _ImportTransactionsState extends State<ImportTransactions> {
           children: [
             Expanded(
               child: Text(
-                '$validCount ${l10n.txImportRowsReady}${errorCount > 0 ? ' · $errorCount ${l10n.txImportRowsSkipped}' : ''}',
+                '$validCount ${l10n.txImportRowsReady}'
+                '${errorCount > 0 ? ' · $errorCount ${l10n.txImportRowsSkipped}' : ''}'
+                '${duplicateCount > 0 ? ' · $duplicateCount ${l10n.txImportRowsDuplicate}' : ''}',
                 style: TextStyle(fontSize: 13, color: hintColor),
               ),
             ),
@@ -408,39 +436,34 @@ class _ImportTransactionsState extends State<ImportTransactions> {
     );
   }
 
-  Widget _previewRow(BuildContext context, AppLocalizations l10n, _ParsedRow r, int i) {
+  Widget _previewRow(BuildContext context, AppLocalizations l10n, _ParsedRow r) {
     final hintColor = Theme.of(context).hintColor;
-    final excluded = _excluded.contains(i);
+    final i = r.rawIndex;
     return Opacity(
-      opacity: r.error != null || excluded ? 0.5 : 1,
+      opacity: r.included ? 1 : 0.5,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Checkbox(
-              value: !excluded,
-              onChanged: r.error != null
-                  ? null
-                  : (_) => setState(() {
-                      if (excluded) {
-                        _excluded.remove(i);
-                      } else {
-                        _excluded.add(i);
-                      }
-                    }),
+              value: r.included,
+              onChanged: r.error != null ? null : (v) => setState(() => _includeOverrides[i] = v ?? false),
             ),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(r.description.isEmpty ? '—' : r.description, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(
+                    r.description.isEmpty ? '—' : r.description,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   Wrap(
                     crossAxisAlignment: WrapCrossAlignment.center,
                     spacing: 5,
                     children: [
-                      Text(r.date ?? '—', style: TextStyle(fontSize: 12, color: hintColor)),
+                      Text(fmtDate(r.date), style: TextStyle(fontSize: 12, color: hintColor)),
                       Text('·', style: TextStyle(color: hintColor.withValues(alpha: 0.5))),
                       Text(
                         r.period == periodBefore ? l10n.periodBefore : l10n.periodDuring,
@@ -448,8 +471,11 @@ class _ImportTransactionsState extends State<ImportTransactions> {
                       ),
                       Text('·', style: TextStyle(color: hintColor.withValues(alpha: 0.5))),
                       Text(
-                        r.error ?? l10n.txImportRowOk,
-                        style: TextStyle(fontSize: 12, color: r.error != null ? Colors.red : _tealColor),
+                        r.error ?? (r.duplicate ? l10n.txImportRowDuplicate : l10n.txImportRowOk),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: r.error != null ? Colors.red : (r.duplicate ? hintColor : refundColor),
+                        ),
                       ),
                     ],
                   ),
@@ -463,12 +489,16 @@ class _ImportTransactionsState extends State<ImportTransactions> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                             decoration: BoxDecoration(
-                              color: (r.isIof ? hintColor : _tealColor).withValues(alpha: 0.15),
+                              color: (r.isIof ? hintColor : refundColor).withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               r.isIof ? 'IOF' : l10n.typeRefund,
-                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: r.isIof ? hintColor : _tealColor),
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: r.isIof ? hintColor : refundColor,
+                              ),
                             ),
                           ),
                           SizedBox(
@@ -499,7 +529,12 @@ class _ImportTransactionsState extends State<ImportTransactions> {
                           items: [
                             const DropdownMenuItem(value: null, child: Text('—')),
                             for (final c in widget.categories)
-                              categoryDropdownItem(c, iconSize: 14, spacing: 6, textStyle: const TextStyle(fontSize: 13)),
+                              categoryDropdownItem(
+                                c,
+                                iconSize: 14,
+                                spacing: 6,
+                                textStyle: const TextStyle(fontSize: 13),
+                              ),
                           ],
                           onChanged: r.error != null ? null : (v) => setState(() => _categoryOverrides[i] = v),
                         ),
@@ -510,7 +545,7 @@ class _ImportTransactionsState extends State<ImportTransactions> {
             ),
             const SizedBox(width: 8),
             Text(
-              r.amount != null ? r.amount!.toStringAsFixed(2) : '—',
+              r.amount != null ? money(r.amount!, currency: widget.trip.currency) : '—',
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ],
@@ -519,5 +554,3 @@ class _ImportTransactionsState extends State<ImportTransactions> {
     );
   }
 }
-
-const _tealColor = Color(0xFF12B886);

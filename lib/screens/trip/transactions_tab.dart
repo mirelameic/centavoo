@@ -1,39 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:centavoo/confirm.dart';
+import 'package:centavoo/widgets/confirm.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/repo.dart';
-import 'package:centavoo/format.dart';
+import 'package:centavoo/logic/format.dart';
+import 'package:centavoo/widgets/date_pickers.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:centavoo/models/category.dart';
 import 'package:centavoo/models/transaction.dart';
-import 'package:centavoo/stats/stats.dart';
+import 'package:centavoo/logic/stats.dart';
 import 'package:centavoo/widgets/trip/primitives.dart';
 import 'package:centavoo/widgets/trip/tx_row.dart';
 
-typedef _SortField = String;
+enum _SortField {
+  date,
+  category,
+  city,
+  period,
+  amount;
 
-const _sortFields = <_SortField>[
-  'date',
-  'category',
-  'city',
-  'period',
-  'amount',
-];
-
-String _sortLabel(AppLocalizations l10n, _SortField f) {
-  switch (f) {
-    case 'date':
-      return l10n.tableDate;
-    case 'category':
-      return l10n.tableCategory;
-    case 'city':
-      return l10n.tableCity;
-    case 'period':
-      return l10n.tablePeriod;
-    case 'amount':
-      return l10n.tableAmount;
-  }
-  return f;
+  String label(AppLocalizations l10n) => switch (this) {
+    _SortField.date => l10n.tableDate,
+    _SortField.category => l10n.tableCategory,
+    _SortField.city => l10n.tableCity,
+    _SortField.period => l10n.tablePeriod,
+    _SortField.amount => l10n.tableAmount,
+  };
 }
 
 class TransactionsTab extends StatefulWidget {
@@ -97,8 +88,7 @@ class _TransactionsTabState extends State<TransactionsTab> {
     });
   }
 
-  String _cityOf(Transaction tx) =>
-      (tx.date != null ? widget.cities[tx.date] : null) ?? '';
+  String _cityOf(Transaction tx) => (tx.date != null ? widget.cities[tx.date] : null) ?? '';
 
   List<Transaction> get _filtered {
     final query = _search.trim().toLowerCase();
@@ -107,13 +97,11 @@ class _TransactionsTabState extends State<TransactionsTab> {
         return false;
       }
       if (_periodFilter != null && tx.period != _periodFilter) return false;
-      if (_catFilter.isNotEmpty &&
-          !(tx.categoryId != null && _catFilter.contains(tx.categoryId))) {
+      if (_catFilter.isNotEmpty && !(tx.categoryId != null && _catFilter.contains(tx.categoryId))) {
         return false;
       }
       final city = _cityOf(tx);
-      if (_cityFilter.isNotEmpty &&
-          !(city.isNotEmpty && _cityFilter.contains(city))) {
+      if (_cityFilter.isNotEmpty && !(city.isNotEmpty && _cityFilter.contains(city))) {
         return false;
       }
       if (_dateFilter != null) {
@@ -127,20 +115,20 @@ class _TransactionsTabState extends State<TransactionsTab> {
       return true;
     }).toList();
 
-    final compare = <_SortField, int Function(Transaction, Transaction)>{
-      'date': (a, b) => (a.date ?? '').compareTo(b.date ?? ''),
-      'category': (a, b) => (widget.catById[a.categoryId]?.name ?? '')
-          .compareTo(widget.catById[b.categoryId]?.name ?? ''),
-      'city': (a, b) => _cityOf(a).compareTo(_cityOf(b)),
-      'period': (a, b) =>
-          a.period == b.period ? 0 : (a.period == periodBefore ? -1 : 1),
-      'amount': (a, b) => cost(a).compareTo(cost(b)),
+    int compare(_SortField field, Transaction a, Transaction b) => switch (field) {
+      _SortField.date => (a.date ?? '').compareTo(b.date ?? ''),
+      _SortField.category => (widget.catById[a.categoryId]?.name ?? '').compareTo(
+        widget.catById[b.categoryId]?.name ?? '',
+      ),
+      _SortField.city => _cityOf(a).compareTo(_cityOf(b)),
+      _SortField.period => a.period == b.period ? 0 : (a.period == periodBefore ? -1 : 1),
+      _SortField.amount => cost(a).compareTo(cost(b)),
     };
 
     list.sort((a, b) {
       if (_sortField != null) {
         final dir = _sortAsc ? 1 : -1;
-        final primary = compare[_sortField]!(a, b) * dir;
+        final primary = compare(_sortField!, a, b) * dir;
         if (primary != 0) return primary;
       }
       if (a.period != b.period) return a.period == periodBefore ? -1 : 1;
@@ -150,19 +138,12 @@ class _TransactionsTabState extends State<TransactionsTab> {
   }
 
   List<String> get _cityOptions {
-    final options = <String>{
-      ...?widget.cityList,
-      ...widget.cities.values,
-    }.where((c) => c.isNotEmpty).toList()..sort();
+    final options = <String>{...?widget.cityList, ...widget.cities.values}.where((c) => c.isNotEmpty).toList()..sort();
     return options;
   }
 
   Future<void> _pickDateFilter() async {
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-    );
+    final picked = await pickDateRange(context, initial: _dateFilter);
     if (picked != null) setState(() => _dateFilter = picked);
   }
 
@@ -251,7 +232,7 @@ class _TransactionsTabState extends State<TransactionsTab> {
                 label: Text(
                   _dateFilter == null
                       ? '${l10n.txFilterDate}: ${l10n.txFilterDatePlaceholder}'
-                      : '${l10n.txFilterDate}: ${fmtDate(isoDate(_dateFilter!.start))} – ${fmtDate(isoDate(_dateFilter!.end))}',
+                      : '${l10n.txFilterDate}: ${fmtPickedRange(_dateFilter!)}',
                 ),
                 onPressed: _pickDateFilter,
               ),
@@ -259,17 +240,13 @@ class _TransactionsTabState extends State<TransactionsTab> {
                 categoryFilterChip(
                   c,
                   selected: _catFilter.contains(c.id),
-                  onSelected: (v) => setState(
-                    () => v ? _catFilter.add(c.id) : _catFilter.remove(c.id),
-                  ),
+                  onSelected: (v) => setState(() => v ? _catFilter.add(c.id) : _catFilter.remove(c.id)),
                 ),
               for (final city in _cityOptions)
                 FilterChip(
                   label: Text(city),
                   selected: _cityFilter.contains(city),
-                  onSelected: (v) => setState(
-                    () => v ? _cityFilter.add(city) : _cityFilter.remove(city),
-                  ),
+                  onSelected: (v) => setState(() => v ? _cityFilter.add(city) : _cityFilter.remove(city)),
                 ),
             ],
           ),
@@ -294,15 +271,8 @@ class _TransactionsTabState extends State<TransactionsTab> {
                 '${filtered.length} ${l10n.txFilterResultsN} · ${money(total, currency: widget.currency)}',
                 style: TextStyle(fontSize: 13, color: hintColor),
               ),
-              if (_filtersActive)
-                TextButton(
-                  onPressed: _clearFilters,
-                  child: Text(l10n.txClearFilters),
-                ),
-              TextButton(
-                onPressed: _toggleSelectMode,
-                child: Text(_selectMode ? l10n.txCancelSelect : l10n.txSelect),
-              ),
+              if (_filtersActive) TextButton(onPressed: _clearFilters, child: Text(l10n.txClearFilters)),
+              TextButton(onPressed: _toggleSelectMode, child: Text(_selectMode ? l10n.txCancelSelect : l10n.txSelect)),
             ],
           ),
           Wrap(
@@ -310,17 +280,13 @@ class _TransactionsTabState extends State<TransactionsTab> {
             runSpacing: 4,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Text(
-                l10n.txSortBy,
-                style: TextStyle(fontSize: 13, color: hintColor),
-              ),
-              DropdownButton<String?>(
+              Text(l10n.txSortBy, style: TextStyle(fontSize: 13, color: hintColor)),
+              DropdownButton<_SortField?>(
                 value: _sortField,
                 hint: Text(l10n.txSortDefault),
                 items: [
                   DropdownMenuItem(value: null, child: Text(l10n.txSortDefault)),
-                  for (final f in _sortFields)
-                    DropdownMenuItem(value: f, child: Text(_sortLabel(l10n, f))),
+                  for (final f in _SortField.values) DropdownMenuItem(value: f, child: Text(f.label(l10n))),
                 ],
                 onChanged: (v) => setState(() {
                   _sortField = v;
@@ -328,14 +294,9 @@ class _TransactionsTabState extends State<TransactionsTab> {
                 }),
               ),
               IconButton(
-                icon: Icon(
-                  _sortAsc ? Icons.arrow_upward : Icons.arrow_downward,
-                  size: 16,
-                ),
+                icon: Icon(_sortAsc ? Icons.arrow_upward : Icons.arrow_downward, size: 16),
                 tooltip: 'toggle-sort-direction',
-                onPressed: _sortField == null
-                    ? null
-                    : () => setState(() => _sortAsc = !_sortAsc),
+                onPressed: _sortField == null ? null : () => setState(() => _sortAsc = !_sortAsc),
               ),
             ],
           ),
@@ -343,19 +304,14 @@ class _TransactionsTabState extends State<TransactionsTab> {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: Theme.of(context).dividerColor),
-                ),
+                border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
               ),
               child: Wrap(
                 spacing: 12,
                 runSpacing: 4,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  Text(
-                    '${_selected.length} ${l10n.txSelectedN}',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
+                  Text('${_selected.length} ${l10n.txSelectedN}', style: const TextStyle(fontWeight: FontWeight.w600)),
                   TextButton(
                     onPressed: () => setState(() {
                       if (_selected.length == filtered.length) {
@@ -366,11 +322,7 @@ class _TransactionsTabState extends State<TransactionsTab> {
                           ..addAll(filtered.map((tx) => tx.id));
                       }
                     }),
-                    child: Text(
-                      _selected.length == filtered.length
-                          ? l10n.txClearSelection
-                          : l10n.txSelectAll,
-                    ),
+                    child: Text(_selected.length == filtered.length ? l10n.txClearSelection : l10n.txSelectAll),
                   ),
                   TextButton.icon(
                     onPressed: _selected.isEmpty ? null : _bulkDelete,

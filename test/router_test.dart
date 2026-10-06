@@ -1,15 +1,15 @@
 import 'package:drift/native.dart';
-import 'package:flutter/material.dart';
-import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/repo.dart';
-import 'package:centavoo/theme.dart';
-import 'package:centavoo/theme_controller.dart';
-import 'package:centavoo/locale_controller.dart';
-import 'package:centavoo/router.dart';
+import 'package:centavoo/core/theme.dart';
+import 'package:centavoo/core/theme_controller.dart';
+import 'package:centavoo/core/locale_controller.dart';
+import 'package:centavoo/core/router.dart';
+
+import 'helpers.dart';
 
 Future<AppDatabase> pumpAt(WidgetTester tester, String location, {AppDatabase? db}) async {
   db ??= AppDatabase.forTesting(NativeDatabase.memory());
@@ -22,11 +22,7 @@ Future<AppDatabase> pumpAt(WidgetTester tester, String location, {AppDatabase? d
         ChangeNotifierProvider<ThemeController>(create: (_) => ThemeController()),
         ChangeNotifierProvider<LocaleController>(create: (_) => LocaleController()),
       ],
-      child: MaterialApp.router(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, 
-        routerConfig: router,
-        theme: buildLightTheme(),
-        darkTheme: buildDarkTheme(),
-      ),
+      child: ptRouterApp(routerConfig: router, theme: buildLightTheme(), darkTheme: buildDarkTheme()),
     ),
   );
   await tester.pumpAndSettle();

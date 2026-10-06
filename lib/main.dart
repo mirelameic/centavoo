@@ -7,8 +7,5 @@ import 'package:centavoo/data/database.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('pt_BR');
-  runApp(CentavooApp(
-    database: AppDatabase(),
-    loadSeedJson: () => rootBundle.loadString('assets/europa.json'),
-  ));
+  runApp(CentavooApp(database: AppDatabase(), loadSeedJson: () => rootBundle.loadString('assets/europa.json')));
 }

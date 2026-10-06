@@ -1,16 +1,29 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
-import 'package:centavoo/category_icons.dart';
+import 'package:centavoo/widgets/category_icons.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/repo.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:centavoo/models/category.dart';
-import 'package:centavoo/theme.dart';
+import 'package:centavoo/core/theme.dart';
 
 const _colorOptions = [
-  '#0E8C6B', '#3D8B4C', '#6B8A1E', '#8A7220', '#B8860B', '#C2540D',
-  '#C1352E', '#B23368', '#7D1F44', '#9C4221', '#7A4A2A', '#4F7942',
-  '#0F7A82', '#5C5650', '#3A3733', '#A8481F',
+  '#0E8C6B',
+  '#3D8B4C',
+  '#6B8A1E',
+  '#8A7220',
+  '#B8860B',
+  '#C2540D',
+  '#C1352E',
+  '#B23368',
+  '#7D1F44',
+  '#9C4221',
+  '#7A4A2A',
+  '#4F7942',
+  '#0F7A82',
+  '#5C5650',
+  '#3A3733',
+  '#A8481F',
 ];
 const _defaultColor = '#C2540D';
 
@@ -51,11 +64,7 @@ class _CategoryFormState extends State<CategoryForm> {
       await updateCategory(
         widget.db,
         widget.editing!.id,
-        CategoriesTableCompanion(
-          name: Value(name),
-          color: Value(_color),
-          icon: Value(_icon.isEmpty ? null : _icon),
-        ),
+        CategoriesTableCompanion(name: Value(name), color: Value(_color), icon: Value(_icon.isEmpty ? null : _icon)),
       );
     } else {
       await addCategory(
@@ -90,7 +99,10 @@ class _CategoryFormState extends State<CategoryForm> {
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 16),
-              Text(l10n.catColor, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: hintColor)),
+              Text(
+                l10n.catColor,
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: hintColor),
+              ),
               const SizedBox(height: 6),
               Wrap(
                 spacing: 8,
@@ -110,7 +122,10 @@ class _CategoryFormState extends State<CategoryForm> {
                 ],
               ),
               const SizedBox(height: 16),
-              Text(l10n.catIcon, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: hintColor)),
+              Text(
+                l10n.catIcon,
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: hintColor),
+              ),
               const SizedBox(height: 6),
               Wrap(
                 spacing: 6,
@@ -143,10 +158,7 @@ class _CategoryFormState extends State<CategoryForm> {
       ),
       actions: [
         TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.commonCancel)),
-        ElevatedButton(
-          onPressed: _nameController.text.trim().isEmpty ? null : _save,
-          child: Text(l10n.commonSave),
-        ),
+        ElevatedButton(onPressed: _nameController.text.trim().isEmpty ? null : _save, child: Text(l10n.commonSave)),
       ],
     );
   }

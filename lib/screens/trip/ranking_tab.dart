@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:centavoo/models/category.dart';
 import 'package:centavoo/models/transaction.dart';
-import 'package:centavoo/stats/stats.dart';
+import 'package:centavoo/logic/stats.dart';
 import 'package:centavoo/widgets/trip/primitives.dart';
 import 'package:centavoo/widgets/trip/tx_row.dart';
 
@@ -12,13 +12,7 @@ class RankingTab extends StatelessWidget {
   final Map<String, String> cities;
   final String currency;
 
-  const RankingTab({
-    super.key,
-    required this.txs,
-    required this.catById,
-    required this.cities,
-    required this.currency,
-  });
+  const RankingTab({super.key, required this.txs, required this.catById, required this.cities, required this.currency});
 
   List<Transaction> _topBy(String period) {
     final filtered = txs.where((tx) => tx.period == period && cost(tx) > 0).toList()

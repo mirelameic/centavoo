@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:centavoo/format.dart';
+import 'package:centavoo/logic/format.dart';
 import 'package:centavoo/models/transaction.dart' show periodBefore, periodDuring;
 
 void main() {
@@ -102,12 +102,7 @@ void main() {
 
   group('dateRange', () {
     test('returns every ISO date from start to end inclusive', () {
-      expect(dateRange('2026-05-17', '2026-05-20'), [
-        '2026-05-17',
-        '2026-05-18',
-        '2026-05-19',
-        '2026-05-20',
-      ]);
+      expect(dateRange('2026-05-17', '2026-05-20'), ['2026-05-17', '2026-05-18', '2026-05-19', '2026-05-20']);
     });
 
     test('returns a single day when start equals end', () {
@@ -115,12 +110,7 @@ void main() {
     });
 
     test('crosses a month boundary correctly', () {
-      expect(dateRange('2026-05-30', '2026-06-02'), [
-        '2026-05-30',
-        '2026-05-31',
-        '2026-06-01',
-        '2026-06-02',
-      ]);
+      expect(dateRange('2026-05-30', '2026-06-02'), ['2026-05-30', '2026-05-31', '2026-06-01', '2026-06-02']);
     });
   });
 
@@ -161,6 +151,33 @@ void main() {
       final cities = {'2026-05-17': 'Lisboa', '2026-05-19': 'Lisboa'};
       final blocks = groupCityBlocks(days, cities);
       expect(blocks.length, 2);
+    });
+  });
+
+  group('currencySymbol', () {
+    test('maps common currencies to their symbols', () {
+      expect(currencySymbol('BRL'), 'R\$');
+      expect(currencySymbol('USD'), 'US\$');
+      expect(currencySymbol('EUR'), '€');
+      expect(currencySymbol('GBP'), '£');
+    });
+    test('falls back to the ISO code', () => expect(currencySymbol('CHF'), 'CHF'));
+    test('money uses the mapped symbol for other currencies', () {
+      expect(money(1234.5, currency: 'EUR', locale: 'pt_BR'), '€ 1.234,50');
+      expect(money(-10, currency: 'USD', locale: 'en'), '-US\$ 10.00');
+      expect(money(3, currency: 'CHF', locale: 'en'), 'CHF 3.00');
+    });
+    test('every supported currency is a 3-letter code', () {
+      expect(supportedCurrencies.every((c) => RegExp(r'^[A-Z]{3}$').hasMatch(c)), isTrue);
+    });
+  });
+
+  group('fmtDateRange', () {
+    test('joins both ends with an en dash', () {
+      expect(fmtDateRange('2026-05-17', '2026-06-03', locale: 'pt_BR'), '17 de mai. – 03 de jun.');
+    });
+    test('shows a dash for a missing end', () {
+      expect(fmtDateRange(null, null, locale: 'pt_BR'), '— – —');
     });
   });
 }

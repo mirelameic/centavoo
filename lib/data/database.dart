@@ -6,30 +6,25 @@ part 'database.g.dart';
 
 @DriftDatabase(tables: [TripsTable, CategoriesTable, TransactionsTable, CategoryRulesTable])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase()
-      : super(driftDatabase(
-          name: 'centavoo',
-          web: DriftWebOptions(
-            sqlite3Wasm: Uri.parse('sqlite3.wasm'),
-            driftWorker: Uri.parse('drift_worker.js'),
-          ),
-        ));
+  AppDatabase([QueryExecutor? executor])
+    : super(
+        executor ??
+            driftDatabase(
+              name: 'centavoo',
+              web: DriftWebOptions(sqlite3Wasm: Uri.parse('sqlite3.wasm'), driftWorker: Uri.parse('drift_worker.js')),
+            ),
+      );
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 1;
 
-  @override
-  MigrationStrategy get migration => MigrationStrategy(
-        onUpgrade: (Migrator m, int from, int to) async {
-          if (from < 2) {
-            await m.addColumn(tripsTable, tripsTable.sortOrder);
-            final rows = await (select(tripsTable)..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).get();
-            for (var i = 0; i < rows.length; i++) {
-              await (update(tripsTable)..where((t) => t.id.equals(rows[i].id)))
-                  .write(TripsTableCompanion(sortOrder: Value(i)));
-            }
-          }
-        },
-      );
+  Future<void> backfillRuleCategoryNames() async {
+    await customUpdate(
+      'UPDATE category_rules_table SET category_name = '
+      '(SELECT name FROM categories_table WHERE categories_table.id = category_rules_table.category_id) '
+      'WHERE category_name IS NULL',
+      updates: {categoryRulesTable},
+    );
+  }
 }

@@ -1,18 +1,5 @@
 import 'package:flutter/material.dart';
 
-const orangeSwatch = [
-  Color(0xFFFFF4E6),
-  Color(0xFFFFE8CC),
-  Color(0xFFFFD8A8),
-  Color(0xFFFFC078),
-  Color(0xFFFFA94D),
-  Color(0xFFFF922B),
-  Color(0xFFFD7E14),
-  Color(0xFFF76707),
-  Color(0xFFE8590C),
-  Color(0xFFD9480F),
-];
-
 const primaryLight = Color(0xFFFD7E14);
 const primaryDark = Color(0xFFE8590C);
 
@@ -29,6 +16,8 @@ const darkSurfaces = [
   Color(0xFF131211),
 ];
 
+const refundColor = Color(0xFF12B886);
+
 const radiusLg = Radius.circular(16);
 const borderRadiusLg = BorderRadius.all(radiusLg);
 
@@ -37,11 +26,19 @@ Color hexColor(String hex) => Color(int.parse(hex.replaceFirst('#', 'FF'), radix
 double dialogWidth(BuildContext context, double max) =>
     (MediaQuery.of(context).size.width - 48).clamp(0, max).toDouble();
 
+Color glassTint(BuildContext context) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  return (isDark ? darkSurfaces[7] : Colors.white).withValues(alpha: isDark ? 0.6 : 0.8);
+}
+
 Widget highlightCard(BuildContext context, {required Widget child}) {
   if (Theme.of(context).brightness == Brightness.dark) return Card(child: child);
   return Card(
     color: lightHighlightTint,
-    shape: const RoundedRectangleBorder(borderRadius: borderRadiusLg, side: BorderSide(color: lightHighlightBorder)),
+    shape: const RoundedRectangleBorder(
+      borderRadius: borderRadiusLg,
+      side: BorderSide(color: lightHighlightBorder),
+    ),
     child: child,
   );
 }
@@ -82,7 +79,10 @@ ThemeData buildLightTheme() {
       color: Colors.white,
       elevation: 1,
       shadowColor: Colors.black.withValues(alpha: 0.12),
-      shape: RoundedRectangleBorder(borderRadius: borderRadiusLg, side: const BorderSide(color: lightDivider)),
+      shape: RoundedRectangleBorder(
+        borderRadius: borderRadiusLg,
+        side: const BorderSide(color: lightDivider),
+      ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,

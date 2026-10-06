@@ -3,9 +3,15 @@ import 'package:centavoo/models/transaction.dart' show periodBefore, periodDurin
 
 String appLocale = 'pt_BR';
 
+const supportedCurrencies = ['BRL', 'USD', 'EUR', 'GBP', 'ARS', 'CLP', 'JPY', 'CAD', 'AUD', 'CHF'];
+
+const _currencySymbols = {'BRL': 'R\$', 'USD': 'US\$', 'EUR': '€', 'GBP': '£', 'JPY': '¥'};
+
+String currencySymbol(String currency) => _currencySymbols[currency] ?? currency;
+
 String money(double n, {String currency = 'BRL', String? locale}) {
   final loc = locale ?? appLocale;
-  final symbol = currency == 'BRL' ? 'R\$' : currency;
+  final symbol = currencySymbol(currency);
   final isNegative = n < 0;
   final valueStr = NumberFormat.currency(locale: loc, symbol: '', decimalDigits: 2).format(n.abs()).trim();
   return '${isNegative ? '-' : ''}$symbol $valueStr';
@@ -33,6 +39,9 @@ String fmtDate(String? d, {String? locale}) {
   final pattern = loc.startsWith('en') ? 'MMM d' : "dd 'de' MMM";
   return DateFormat(pattern, loc).format(date);
 }
+
+String fmtDateRange(String? start, String? end, {String? locale}) =>
+    '${fmtDate(start, locale: locale)} – ${fmtDate(end, locale: locale)}';
 
 String? periodForDate(String? date, String? tripStartDate) {
   if (date == null || tripStartDate == null) return null;

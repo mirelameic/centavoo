@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:centavoo/models/category.dart';
 import 'package:centavoo/models/transaction.dart';
 import 'package:centavoo/screens/trip/ranking_tab.dart';
+
+import 'helpers.dart';
 
 Transaction tx({
   required String id,
@@ -26,7 +27,6 @@ Transaction tx({
     kind: kind,
     isIof: false,
     splitCount: splitCount,
-    createdAt: '2026-01-01T00:00:00Z',
   );
 }
 
@@ -36,9 +36,13 @@ Category cat(String id, String name, {String color = '#0E8C6B'}) {
 
 void main() {
   testWidgets('shows the empty state when there are no transactions', (tester) async {
-    await tester.pumpWidget(const MaterialApp(locale: Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, 
-      home: Scaffold(body: RankingTab(txs: [], catById: {}, cities: {}, currency: 'BRL')),
-    ));
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: RankingTab(txs: [], catById: {}, cities: {}, currency: 'BRL'),
+        ),
+      ),
+    );
     expect(find.text('Nenhuma transação ainda.'), findsOneWidget);
   });
 
@@ -51,9 +55,13 @@ void main() {
       tx(id: '4', period: periodDuring, description: 'Reembolso', amount: -50, kind: kindRefund),
     ];
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, 
-      home: Scaffold(body: RankingTab(txs: txs, catById: cats, cities: const {}, currency: 'BRL')),
-    ));
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: RankingTab(txs: txs, catById: cats, cities: const {}, currency: 'BRL'),
+        ),
+      ),
+    );
 
     expect(find.text('Maiores gastos · antes'), findsOneWidget);
     expect(find.text('Maiores gastos · durante'), findsOneWidget);

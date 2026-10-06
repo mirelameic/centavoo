@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:centavoo/format.dart';
+import 'package:centavoo/logic/format.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
-import 'package:centavoo/stats/stats.dart';
-import 'package:centavoo/theme.dart';
+import 'package:centavoo/logic/stats.dart';
+import 'package:centavoo/core/theme.dart';
 import 'package:centavoo/widgets/trip/primitives.dart';
 
 const _donutSize = 240.0;
@@ -67,7 +67,7 @@ class SummaryTab extends StatelessWidget {
                       child: _SplitCard(
                         label: l10n.splitSavings.toUpperCase(),
                         value: money(stats.split.savings, currency: currency),
-                        color: const Color(0xFF12B886),
+                        color: refundColor,
                       ),
                     ),
                   ],
@@ -99,7 +99,10 @@ class _SplitCard extends StatelessWidget {
           children: [
             Text(label, style: TextStyle(fontSize: 12, color: Theme.of(context).hintColor)),
             const SizedBox(height: 2),
-            Text(value, style: TextStyle(fontWeight: FontWeight.w700, color: color)),
+            Text(
+              value,
+              style: TextStyle(fontWeight: FontWeight.w700, color: color),
+            ),
           ],
         ),
       ),

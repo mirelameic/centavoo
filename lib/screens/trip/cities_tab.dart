@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:centavoo/data/database.dart';
-import 'package:centavoo/format.dart';
+import 'package:centavoo/logic/format.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:centavoo/models/category.dart';
 import 'package:centavoo/models/transaction.dart';
-import 'package:centavoo/stats/stats.dart';
-import 'package:centavoo/theme.dart';
+import 'package:centavoo/logic/stats.dart';
+import 'package:centavoo/core/theme.dart';
 import 'package:centavoo/widgets/trip/city_editor.dart';
 import 'package:centavoo/widgets/trip/primitives.dart';
 
@@ -52,6 +52,7 @@ class _CitiesTabState extends State<CitiesTab> {
       widget.cats,
       widget.cities,
       _selectedCatIds.isEmpty ? null : _selectedCatIds,
+      l10n.statsNoCategory,
     );
     final cityTotal = cityBd.byCity.fold<double>(0, (s, c) => s + c.amount);
 
@@ -104,14 +105,12 @@ class _CitiesTabState extends State<CitiesTab> {
                 context,
                 leading: Text(c.city),
                 metaLines: [
-                  Text('${c.days} ${l10n.cityDaysN} · ${l10n.colAvgDay}: ${money(c.avgPerDay, currency: widget.currency)}'),
+                  Text(
+                    '${c.days} ${l10n.cityDaysN} · ${l10n.colAvgDay}: ${money(c.avgPerDay, currency: widget.currency)}',
+                  ),
                   Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.arrow_upward, size: 12),
-                      const SizedBox(width: 4),
-                      Text(c.topCategory),
-                    ],
+                    children: [const Icon(Icons.arrow_upward, size: 12), const SizedBox(width: 4), Text(c.topCategory)],
                   ),
                 ],
                 amount: money(c.total, currency: widget.currency),

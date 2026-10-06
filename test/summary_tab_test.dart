@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:centavoo/models/category.dart';
 import 'package:centavoo/models/transaction.dart';
 import 'package:centavoo/screens/trip/summary_tab.dart';
-import 'package:centavoo/stats/stats.dart';
+import 'package:centavoo/logic/stats.dart';
+
+import 'helpers.dart';
 
 Transaction tx({
   String id = 'tx',
@@ -27,7 +28,6 @@ Transaction tx({
     kind: kindExpense,
     isIof: false,
     splitCount: splitCount,
-    createdAt: '2026-01-01T00:00:00Z',
   );
 }
 
@@ -41,9 +41,13 @@ void main() {
     final txs = [tx(id: '1', categoryId: 'c1', amount: 100)];
     final stats = computeStats(txs, cats);
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, 
-      home: Scaffold(body: SummaryTab(stats: stats, currency: 'BRL', hasSplit: false)),
-    ));
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: SummaryTab(stats: stats, currency: 'BRL', hasSplit: false),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Hospedagem'), findsOneWidget);
@@ -56,9 +60,13 @@ void main() {
     final txs = [tx(id: '1', categoryId: 'c1', amount: 100, splitCount: 2)];
     final stats = computeStats(txs, cats);
 
-    await tester.pumpWidget(MaterialApp(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, 
-      home: Scaffold(body: SummaryTab(stats: stats, currency: 'BRL', hasSplit: true)),
-    ));
+    await tester.pumpWidget(
+      ptApp(
+        home: Scaffold(
+          body: SummaryTab(stats: stats, currency: 'BRL', hasSplit: true),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Você dividiu × sua parte'), findsOneWidget);

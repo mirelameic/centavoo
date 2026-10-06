@@ -1,15 +1,16 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:centavoo/data/backup.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
-import 'package:centavoo/theme.dart';
-import 'package:centavoo/theme_controller.dart';
-import 'package:centavoo/locale_controller.dart';
+import 'package:centavoo/core/theme.dart';
+import 'package:centavoo/core/theme_controller.dart';
+import 'package:centavoo/core/locale_controller.dart';
 import 'package:centavoo/widgets/logo.dart';
 
 Future<void> _handleExport(BuildContext context) async {
@@ -58,7 +59,6 @@ class AppShell extends StatelessWidget {
     final localeController = context.watch<LocaleController>();
     final brightness = Theme.of(context).brightness;
     final isDark = brightness == Brightness.dark;
-    final barTint = (isDark ? darkSurfaces[7] : Colors.white).withValues(alpha: isDark ? 0.6 : 0.8);
 
     return Scaffold(
       appBar: PreferredSize(
@@ -71,7 +71,7 @@ class AppShell extends StatelessWidget {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
               child: AppBar(
-                backgroundColor: barTint,
+                backgroundColor: glassTint(context),
                 automaticallyImplyLeading: false,
                 titleSpacing: 16,
                 title: Row(

@@ -4,8 +4,16 @@ import 'package:centavoo/models/category.dart';
 double cost(Transaction t) => t.amount / (t.splitCount == 0 ? 1 : t.splitCount);
 
 const cityPalette = [
-  '#C2540D', '#0E8C6B', '#B8860B', '#B23368', '#7A4A2A',
-  '#3D8B4C', '#C1352E', '#6B8A1E', '#7D1F44', '#5C5650',
+  '#C2540D',
+  '#0E8C6B',
+  '#B8860B',
+  '#B23368',
+  '#7A4A2A',
+  '#3D8B4C',
+  '#C1352E',
+  '#6B8A1E',
+  '#7D1F44',
+  '#5C5650',
 ];
 
 String colorForCity(String name) {
@@ -92,16 +100,13 @@ class TripStats {
   final double before;
   final double during;
   final double iofRefund;
-  final int days;
   final double avgPerDay;
   final List<CatAgg> byCategory;
   final List<UsedCategory> usedCategories;
   final List<DayDatum> dayData;
   final List<CumulativePoint> cumulativeByDay;
   final List<BeforeDuringRow> beforeDuringData;
-  final List<CityAgg> byCity;
   final List<double> weekdayAmounts;
-  final List<CityRow> cityTable;
   final List<CategoryTableRow> categoryTable;
   final SplitSummary split;
 
@@ -112,16 +117,13 @@ class TripStats {
     required this.before,
     required this.during,
     required this.iofRefund,
-    required this.days,
     required this.avgPerDay,
     required this.byCategory,
     required this.usedCategories,
     required this.dayData,
     required this.cumulativeByDay,
     required this.beforeDuringData,
-    required this.byCity,
     required this.weekdayAmounts,
-    required this.cityTable,
     required this.categoryTable,
     required this.split,
   });
@@ -135,24 +137,25 @@ class _NameColor {
   const _NameColor(this.name, this.color);
 }
 
-const _noCat = _NameColor('No category', '#adb5bd');
-const _iofCat = _NameColor('IOF refund', '#868e96');
+const _noCatColor = '#adb5bd';
+const _iofColor = '#868e96';
 
-TripStats computeStats(List<Transaction> txs, List<Category> cats, [Map<String, String>? cities]) {
-  final cityMapArg = cities ?? {};
+TripStats computeStats(
+  List<Transaction> txs,
+  List<Category> cats, {
+  int? tripDays,
+  String noCategoryLabel = 'No category',
+  String iofLabel = 'IOF refund',
+}) {
   final catById = {for (final c in cats) c.id: c};
+  final noCat = _NameColor(noCategoryLabel, _noCatColor);
+  final iofCat = _NameColor(iofLabel, _iofColor);
   _NameColor catNameColorOf(Transaction t) {
-    if (t.isIof) return _iofCat;
-    if (t.categoryId == null) return _noCat;
+    if (t.isIof) return iofCat;
+    if (t.categoryId == null) return noCat;
     final c = catById[t.categoryId];
-    if (c == null) return _noCat;
+    if (c == null) return noCat;
     return _NameColor(c.name, c.color);
-  }
-
-  String? cityOf(Transaction t) {
-    if (t.date == null) return null;
-    final v = cityMapArg[t.date];
-    return (v == null || v.isEmpty) ? null : v;
   }
 
   double gross = 0, refunds = 0, before = 0, during = 0, iofRefund = 0;
@@ -162,11 +165,8 @@ TripStats computeStats(List<Transaction> txs, List<Category> cats, [Map<String, 
   final dailyDuring = <String, double>{};
   final dayMap = <String, Map<String, double>>{};
   final bdMap = <String, List<double>>{};
-  final cityMap = <String, double>{};
   final weekday = List<double>.filled(7, 0);
   final catCount = <String, int>{};
-  final cityDays = <String, Set<String>>{};
-  final cityCat = <String, Map<String, double>>{};
   double integralExp = 0;
 
   for (final t in txs) {
@@ -191,7 +191,8 @@ TripStats computeStats(List<Transaction> txs, List<Category> cats, [Map<String, 
 
     if (c > 0) {
       final key = t.categoryId ?? catNameColor.name;
-      final agg = byCat[key] ??
+      final agg =
+          byCat[key] ??
           CatAgg(id: t.categoryId, name: catNameColor.name, color: catNameColor.color, icon: categoryIcon);
       agg.amount += c;
       byCat[key] = agg;
@@ -213,16 +214,6 @@ TripStats computeStats(List<Transaction> txs, List<Category> cats, [Map<String, 
         bd[1] += c;
       }
       bdMap[catNameColor.name] = bd;
-
-      final cy = cityOf(t);
-      if (cy != null) {
-        cityMap[cy] = (cityMap[cy] ?? 0) + c;
-        if (t.date != null) {
-          (cityDays[cy] ??= {}).add(t.date!);
-        }
-        final cc = cityCat[cy] ??= {};
-        cc[catNameColor.name] = (cc[catNameColor.name] ?? 0) + c;
-      }
     }
   }
 
@@ -235,11 +226,12 @@ TripStats computeStats(List<Transaction> txs, List<Category> cats, [Map<String, 
     return DayDatum('${parts[2]}/${parts[1]}', e.value.map((k, v) => MapEntry(k, round(v))));
   }).toList();
 
-  final beforeDuringRows = bdMap.entries
-      .map((e) => BeforeDuringRow(e.key, round(e.value[0]), round(e.value[1])))
-      .where((r) => r.before != 0 || r.during != 0)
-      .toList()
-    ..sort((a, b) => (b.before + b.during).compareTo(a.before + a.during));
+  final beforeDuringRows =
+      bdMap.entries
+          .map((e) => BeforeDuringRow(e.key, round(e.value[0]), round(e.value[1])))
+          .where((r) => r.before != 0 || r.during != 0)
+          .toList()
+        ..sort((a, b) => (b.before + b.during).compareTo(a.before + a.during));
 
   double running = 0;
   final dailyEntries = dailyDuring.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
@@ -249,7 +241,6 @@ TripStats computeStats(List<Transaction> txs, List<Category> cats, [Map<String, 
     return CumulativePoint('${parts[2]}/${parts[1]}', round(running));
   }).toList();
 
-  final byCity = _paletteByCity(cityMap);
   final weekdayAmounts = weekday.map(round).toList();
 
   final totalCat = byCategory.fold<double>(0, (s, c) => s + c.amount);
@@ -267,11 +258,10 @@ TripStats computeStats(List<Transaction> txs, List<Category> cats, [Map<String, 
     );
   }).toList();
 
-  final cityTable = _buildCityTable(byCity, cityDays, cityCat);
-
   final split = SplitSummary(round(integralExp), round(gross), round(integralExp - gross));
 
   final nDays = days.length;
+  final avgDays = tripDays != null && tripDays > nDays ? tripDays : nDays;
   return TripStats(
     gross: round(gross),
     refunds: round(refunds),
@@ -279,16 +269,15 @@ TripStats computeStats(List<Transaction> txs, List<Category> cats, [Map<String, 
     before: round(before),
     during: round(during),
     iofRefund: round(iofRefund),
-    days: nDays,
-    avgPerDay: nDays > 0 ? round(during / nDays) : 0,
-    byCategory: byCategory.map((c) => CatAgg(id: c.id, name: c.name, color: c.color, icon: c.icon, amount: round(c.amount))).toList(),
+    avgPerDay: avgDays > 0 ? round(during / avgDays) : 0,
+    byCategory: byCategory
+        .map((c) => CatAgg(id: c.id, name: c.name, color: c.color, icon: c.icon, amount: round(c.amount)))
+        .toList(),
     usedCategories: usedCategories,
     dayData: dayData,
     cumulativeByDay: cumulativeByDay,
     beforeDuringData: beforeDuringRows,
-    byCity: byCity,
     weekdayAmounts: weekdayAmounts,
-    cityTable: cityTable,
     categoryTable: categoryTable,
     split: split,
   );
@@ -305,6 +294,7 @@ CityBreakdownResult cityBreakdown(
   List<Category> cats,
   Map<String, String> cities, [
   Set<String>? allowed,
+  String noCategoryLabel = '—',
 ]) {
   final catById = {for (final c in cats) c.id: c};
   final cityMap = <String, double>{};
@@ -319,7 +309,7 @@ CityBreakdownResult cityBreakdown(
     if (cy == null || cy.isEmpty) continue;
     cityMap[cy] = (cityMap[cy] ?? 0) + c;
     (cityDays[cy] ??= {}).add(t.date!);
-    final cn = (t.categoryId != null ? catById[t.categoryId]?.name : null) ?? '—';
+    final cn = (t.categoryId != null ? catById[t.categoryId]?.name : null) ?? noCategoryLabel;
     final cc = cityCat[cy] ??= {};
     cc[cn] = (cc[cn] ?? 0) + c;
   }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/models/trip.dart' as model;
 import 'package:centavoo/models/category.dart' as model;
@@ -15,7 +16,6 @@ model.Trip tripFromRow(TripRow row) {
     currency: row.currency,
     cities: Map<String, String>.from(jsonDecode(row.citiesJson) as Map),
     cityList: row.cityListJson == null ? null : List<String>.from(jsonDecode(row.cityListJson!) as List),
-    createdAt: row.createdAt,
   );
 }
 
@@ -42,7 +42,6 @@ model.Transaction transactionFromRow(TransactionRow row) {
     kind: row.kind,
     isIof: row.isIof,
     splitCount: row.splitCount,
-    createdAt: row.createdAt,
   );
 }
 
@@ -51,6 +50,7 @@ model.CategoryRule categoryRuleFromRow(CategoryRuleRow row) {
     id: row.id,
     keyword: row.keyword,
     categoryId: row.categoryId,
+    categoryName: row.categoryName,
     priority: row.priority,
   );
 }

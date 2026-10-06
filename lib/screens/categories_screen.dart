@@ -2,13 +2,13 @@ import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:centavoo/category_icons.dart';
-import 'package:centavoo/confirm.dart';
+import 'package:centavoo/widgets/category_icons.dart';
+import 'package:centavoo/widgets/confirm.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/mappers.dart';
 import 'package:centavoo/data/repo.dart';
 import 'package:centavoo/l10n/arb/app_localizations.dart';
-import 'package:centavoo/theme.dart';
+import 'package:centavoo/core/theme.dart';
 import 'package:centavoo/widgets/category_form.dart';
 
 class CategoriesScreen extends StatefulWidget {
@@ -37,10 +37,11 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
   void _initStream() {
     final db = context.read<AppDatabase>();
-    _categoriesStream = (db.select(db.categoriesTable)
-          ..where((c) => c.tripId.equals(widget.tripId))
-          ..orderBy([(c) => OrderingTerm.asc(c.sortOrder)]))
-        .watch();
+    _categoriesStream =
+        (db.select(db.categoriesTable)
+              ..where((c) => c.tripId.equals(widget.tripId))
+              ..orderBy([(c) => OrderingTerm.asc(c.sortOrder)]))
+            .watch();
   }
 
   @override
@@ -111,7 +112,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                             Container(
                               width: 18,
                               height: 18,
-                              decoration: BoxDecoration(color: hexColor(c.color), borderRadius: BorderRadius.circular(4)),
+                              decoration: BoxDecoration(
+                                color: hexColor(c.color),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
                             ),
                             const SizedBox(width: 12),
                             if (categoryIcon(c.icon) != null) ...[
@@ -131,11 +135,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                               icon: const Icon(Icons.delete_outline, size: 18),
                               tooltip: 'delete',
                               color: Colors.red,
-                              onPressed: () => confirmDelete(
-                                context,
-                                l10n.catDeleteConfirm,
-                                () => deleteCategory(db, c.id),
-                              ),
+                              onPressed: () =>
+                                  confirmDelete(context, l10n.catDeleteConfirm, () => deleteCategory(db, c.id)),
                             ),
                           ],
                         ),

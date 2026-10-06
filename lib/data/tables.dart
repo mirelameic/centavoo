@@ -8,7 +8,6 @@ class TripsTable extends Table {
   TextColumn get startDate => text().nullable()();
   TextColumn get endDate => text().nullable()();
   TextColumn get currency => text()();
-  TextColumn get notes => text().nullable()();
   TextColumn get citiesJson => text().withDefault(const Constant('{}'))();
   TextColumn get cityListJson => text().nullable()();
   TextColumn get createdAt => text()();
@@ -45,8 +44,6 @@ class TransactionsTable extends Table {
   TextColumn get kind => text()();
   BoolColumn get isIof => boolean()();
   IntColumn get splitCount => integer()();
-  TextColumn get city => text().nullable()();
-  TextColumn get rawText => text().nullable()();
   TextColumn get createdAt => text()();
 
   @override
@@ -58,5 +55,6 @@ class CategoryRulesTable extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get keyword => text()();
   TextColumn get categoryId => text()();
+  TextColumn get categoryName => text().nullable()();
   IntColumn get priority => integer()();
 }

@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
-import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -10,12 +9,14 @@ import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/repo.dart';
 import 'package:centavoo/screens/trips_screen.dart';
 
+import 'helpers.dart';
+
 Future<AppDatabase> pump(WidgetTester tester) async {
   final db = AppDatabase.forTesting(NativeDatabase.memory());
   await tester.pumpWidget(
     Provider<AppDatabase>.value(
       value: db,
-      child: const MaterialApp(locale: Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, home: TripsScreen()),
+      child: ptApp(home: TripsScreen()),
     ),
   );
   await tester.pumpAndSettle();
@@ -37,14 +38,33 @@ void main() {
 
   testWidgets('shows a trip card with name, destination, dates and net spend', (tester) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
-    final tripId = await createTrip(db, name: 'Japan', destination: 'Tokyo', startDate: '2026-05-17', endDate: '2026-06-03');
-    await addTransaction(db, TransactionsTableCompanion.insert(
-      id: '', tripId: tripId, period: 'DURING', description: 'Sushi', amount: 50,
-      kind: 'EXPENSE', isIof: false, splitCount: 1, createdAt: '',
-    ));
+    final tripId = await createTrip(
+      db,
+      name: 'Japan',
+      destination: 'Tokyo',
+      startDate: '2026-05-17',
+      endDate: '2026-06-03',
+    );
+    await addTransaction(
+      db,
+      TransactionsTableCompanion.insert(
+        id: '',
+        tripId: tripId,
+        period: 'DURING',
+        description: 'Sushi',
+        amount: 50,
+        kind: 'EXPENSE',
+        isIof: false,
+        splitCount: 1,
+        createdAt: '',
+      ),
+    );
 
     await tester.pumpWidget(
-      Provider<AppDatabase>.value(value: db, child: const MaterialApp(locale: Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, home: TripsScreen())),
+      Provider<AppDatabase>.value(
+        value: db,
+        child: ptApp(home: TripsScreen()),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -107,14 +127,17 @@ void main() {
       initialLocation: '/',
       routes: [
         GoRoute(path: '/', builder: (context, state) => const TripsScreen()),
-        GoRoute(path: '/trip/:id', builder: (context, state) => const Scaffold(body: Text('trip screen'))),
+        GoRoute(
+          path: '/trip/:id',
+          builder: (context, state) => const Scaffold(body: Text('trip screen')),
+        ),
       ],
     );
 
     await tester.pumpWidget(
       Provider<AppDatabase>.value(
         value: db,
-        child: MaterialApp.router(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, routerConfig: router),
+        child: ptRouterApp(routerConfig: router),
       ),
     );
     await tester.pumpAndSettle();
@@ -132,7 +155,10 @@ void main() {
     await createTrip(db, name: 'Japan');
 
     await tester.pumpWidget(
-      Provider<AppDatabase>.value(value: db, child: const MaterialApp(locale: Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, home: TripsScreen())),
+      Provider<AppDatabase>.value(
+        value: db,
+        child: ptApp(home: TripsScreen()),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -150,10 +176,12 @@ void main() {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     await createTrip(db, name: 'Trip 1');
     await createTrip(db, name: 'Trip 2');
-    // Displayed order is [Trip 2, Trip 1] (newest first).
 
     await tester.pumpWidget(
-      Provider<AppDatabase>.value(value: db, child: const MaterialApp(locale: Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, home: TripsScreen())),
+      Provider<AppDatabase>.value(
+        value: db,
+        child: ptApp(home: TripsScreen()),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -175,10 +203,12 @@ void main() {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     await createTrip(db, name: 'Trip 1');
     await createTrip(db, name: 'Trip 2');
-    // Displayed order is [Trip 2, Trip 1] (newest first).
 
     await tester.pumpWidget(
-      Provider<AppDatabase>.value(value: db, child: const MaterialApp(locale: Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, home: TripsScreen())),
+      Provider<AppDatabase>.value(
+        value: db,
+        child: ptApp(home: TripsScreen()),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -197,7 +227,10 @@ void main() {
     await createTrip(db, name: 'Japan');
 
     await tester.pumpWidget(
-      Provider<AppDatabase>.value(value: db, child: const MaterialApp(locale: Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, home: TripsScreen())),
+      Provider<AppDatabase>.value(
+        value: db,
+        child: ptApp(home: TripsScreen()),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -215,7 +248,10 @@ void main() {
     await createTrip(db, name: 'Japan');
 
     await tester.pumpWidget(
-      Provider<AppDatabase>.value(value: db, child: const MaterialApp(locale: Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, home: TripsScreen())),
+      Provider<AppDatabase>.value(
+        value: db,
+        child: ptApp(home: TripsScreen()),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -229,6 +265,39 @@ void main() {
     expect(find.text('Japan'), findsNothing);
     final trips = await db.select(db.tripsTable).get();
     expect(trips, isEmpty);
+    await db.close();
+  });
+
+  testWidgets('creating a trip with a chosen currency persists it', (tester) async {
+    final db = await pump(tester);
+
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, 'ex. Europa 2025'), 'Paris');
+    await tester.tap(find.text('BRL (R\$)'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('EUR (€)').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Criar'));
+    await tester.pumpAndSettle();
+
+    final trip = (await db.select(db.tripsTable).get()).single;
+    expect(trip.currency, 'EUR');
+    await db.close();
+  });
+
+  testWidgets('the new trip dialog fits on a phone-sized screen', (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final db = await pump(tester);
+
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Moeda'), findsOneWidget);
     await db.close();
   });
 }

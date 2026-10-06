@@ -12,10 +12,12 @@ void main() {
 
   testWidgets('shows a loading indicator, then the router content once seeding finishes', (tester) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
-    await tester.pumpWidget(CentavooApp(
-      database: db,
-      loadSeedJson: () async => '{"version":1,"categories":[],"rules":[],"trips":[],"transactions":[]}',
-    ));
+    await tester.pumpWidget(
+      CentavooApp(
+        database: db,
+        loadSeedJson: () async => '{"version":1,"categories":[],"rules":[],"trips":[],"transactions":[]}',
+      ),
+    );
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
@@ -29,10 +31,7 @@ void main() {
 
   testWidgets('shows an error message when seeding fails', (tester) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
-    await tester.pumpWidget(CentavooApp(
-      database: db,
-      loadSeedJson: () async => throw Exception('boom'),
-    ));
+    await tester.pumpWidget(CentavooApp(database: db, loadSeedJson: () async => throw Exception('boom')));
 
     await tester.pumpAndSettle();
 
@@ -44,10 +43,12 @@ void main() {
   testWidgets('loads a previously saved language preference on startup', (tester) async {
     SharedPreferences.setMockInitialValues({'locale': 'en'});
     final db = AppDatabase.forTesting(NativeDatabase.memory());
-    await tester.pumpWidget(CentavooApp(
-      database: db,
-      loadSeedJson: () async => '{"version":1,"categories":[],"rules":[],"trips":[],"transactions":[]}',
-    ));
+    await tester.pumpWidget(
+      CentavooApp(
+        database: db,
+        loadSeedJson: () async => '{"version":1,"categories":[],"rules":[],"trips":[],"transactions":[]}',
+      ),
+    );
 
     await tester.pumpAndSettle();
 
@@ -60,10 +61,12 @@ void main() {
   testWidgets('loads a previously saved theme mode on startup', (tester) async {
     SharedPreferences.setMockInitialValues({'themeMode': 'dark'});
     final db = AppDatabase.forTesting(NativeDatabase.memory());
-    await tester.pumpWidget(CentavooApp(
-      database: db,
-      loadSeedJson: () async => '{"version":1,"categories":[],"rules":[],"trips":[],"transactions":[]}',
-    ));
+    await tester.pumpWidget(
+      CentavooApp(
+        database: db,
+        loadSeedJson: () async => '{"version":1,"categories":[],"rules":[],"trips":[],"transactions":[]}',
+      ),
+    );
 
     await tester.pumpAndSettle();
 

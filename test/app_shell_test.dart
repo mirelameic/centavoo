@@ -3,9 +3,9 @@ import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:centavoo/theme.dart';
-import 'package:centavoo/theme_controller.dart';
-import 'package:centavoo/locale_controller.dart';
+import 'package:centavoo/core/theme.dart';
+import 'package:centavoo/core/theme_controller.dart';
+import 'package:centavoo/core/locale_controller.dart';
 import 'package:centavoo/widgets/app_shell.dart';
 
 Widget wrap(Widget child, {ThemeController? themeController}) {

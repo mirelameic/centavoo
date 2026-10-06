@@ -1,20 +1,24 @@
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
-import 'package:centavoo/l10n/arb/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:centavoo/data/database.dart';
 import 'package:centavoo/data/repo.dart';
 import 'package:centavoo/screens/categories_screen.dart';
-import 'package:centavoo/theme.dart';
+import 'package:centavoo/core/theme.dart';
+
+import 'helpers.dart';
 
 Future<AppDatabase> pump(WidgetTester tester, String tripId, {AppDatabase? db}) async {
   db ??= AppDatabase.forTesting(NativeDatabase.memory());
   final router = GoRouter(
     initialLocation: '/trip/$tripId/categories',
     routes: [
-      GoRoute(path: '/trip/:id', builder: (context, state) => const Scaffold(body: Text('trip screen'))),
+      GoRoute(
+        path: '/trip/:id',
+        builder: (context, state) => const Scaffold(body: Text('trip screen')),
+      ),
       GoRoute(
         path: '/trip/:id/categories',
         builder: (context, state) => Scaffold(body: CategoriesScreen(tripId: tripId)),
@@ -24,7 +28,7 @@ Future<AppDatabase> pump(WidgetTester tester, String tripId, {AppDatabase? db}) 
   await tester.pumpWidget(
     Provider<AppDatabase>.value(
       value: db,
-      child: MaterialApp.router(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, routerConfig: router),
+      child: ptRouterApp(routerConfig: router),
     ),
   );
   await tester.pumpAndSettle();
@@ -45,7 +49,10 @@ void main() {
     final router = GoRouter(
       initialLocation: '/trip/$tripId',
       routes: [
-        GoRoute(path: '/trip/:id', builder: (context, state) => const Scaffold(body: Text('trip screen'))),
+        GoRoute(
+          path: '/trip/:id',
+          builder: (context, state) => const Scaffold(body: Text('trip screen')),
+        ),
         GoRoute(
           path: '/trip/:id/categories',
           builder: (context, state) => Scaffold(body: CategoriesScreen(tripId: tripId)),
@@ -55,7 +62,7 @@ void main() {
     await tester.pumpWidget(
       Provider<AppDatabase>.value(
         value: db,
-        child: MaterialApp.router(locale: const Locale('pt', 'BR'), localizationsDelegates: AppLocalizations.localizationsDelegates, supportedLocales: AppLocalizations.supportedLocales, routerConfig: router),
+        child: ptRouterApp(routerConfig: router),
       ),
     );
     await tester.pumpAndSettle();
@@ -118,9 +125,14 @@ void main() {
 
     await tester.enterText(find.widgetWithText(TextField, 'Nome'), 'Praia');
 
-    await tester.tap(find.byWidgetPredicate(
-      (w) => w is Container && w.decoration is BoxDecoration && (w.decoration as BoxDecoration).color == hexColor('#0E8C6B'),
-    ));
+    await tester.tap(
+      find.byWidgetPredicate(
+        (w) =>
+            w is Container &&
+            w.decoration is BoxDecoration &&
+            (w.decoration as BoxDecoration).color == hexColor('#0E8C6B'),
+      ),
+    );
     await tester.pump();
 
     await tester.tap(find.byIcon(Icons.beach_access));
